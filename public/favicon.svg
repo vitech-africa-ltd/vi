@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#020408" />
+    </radialGradient>
+    
+    <!-- Outer Ring Gradient -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066ff" />
+      <stop offset="45%" stop-color="#00d2ff" />
+      <stop offset="55%" stop-color="#00e676" />
+      <stop offset="100%" stop-color="#00c853" />
+    </linearGradient>
+
+    <!-- Shield Gradients -->
+    <linearGradient id="shieldBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0052d4" />
+      <stop offset="50%" stop-color="#4364f7" />
+      <stop offset="100%" stop-color="#002266" />
+    </linearGradient>
+    
+    <linearGradient id="shieldGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00b04f" />
+      <stop offset="50%" stop-color="#00e676" />
+      <stop offset="100%" stop-color="#004d20" />
+    </linearGradient>
+
+    <!-- Metallic VI Gradient -->
+    <linearGradient id="metalSilver" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#e2e8f0" />
+      <stop offset="50%" stop-color="#94a3b8" />
+      <stop offset="75%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+
+    <!-- Glow Filters -->
+    <filter id="glowBlue" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Dark Circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" />
+
+  <!-- Outer Glowing Gradient Ring -->
+  <circle cx="256" cy="256" r="242" fill="none" stroke="url(#ringGrad)" stroke-width="6" />
+
+  <!-- SHIELD GROUP (Centered at X: 256, Y: 185) -->
+  <g transform="translate(0, -10)">
+    <!-- Shield Clip Paths -->
+    <clipPath id="leftShieldClip">
+      <path d="M 256 70 C 256 70 145 80 145 130 C 145 225 210 285 256 315 Z" />
+    </clipPath>
+    <clipPath id="rightShieldClip">
+      <path d="M 256 70 C 256 70 367 80 367 130 C 367 225 302 285 256 315 Z" />
+    </clipPath>
+
+    <!-- Shield Left Half (Blue) -->
+    <path d="M 256 70 C 256 70 145 80 145 130 C 145 225 210 285 256 315 Z" fill="url(#shieldBlue)" stroke="#00d2ff" stroke-width="3.5" />
+    
+    <!-- Shield Right Half (Green) -->
+    <path d="M 256 70 C 256 70 367 80 367 130 C 367 225 302 285 256 315 Z" fill="url(#shieldGreen)" stroke="#00e676" stroke-width="3.5" />
+
+    <!-- Center Divider Line -->
+    <line x1="256" y1="70" x2="256" y2="315" stroke="#0f172a" stroke-width="3" />
+
+    <!-- Left Circuit Traces (Blue side) -->
+    <g clip-path="url(#leftShieldClip)" stroke="#67e8f9" stroke-width="2.5" fill="none" opacity="0.85">
+      <path d="M 240 85 L 200 85 L 180 110 L 180 160" />
+      <circle cx="180" cy="160" r="3.5" fill="#67e8f9" />
+      <circle cx="240" cy="85" r="3" fill="#67e8f9" />
+
+      <path d="M 250 120 L 215 120 L 195 145 L 165 145 L 165 200" />
+      <circle cx="165" cy="200" r="3.5" fill="#67e8f9" />
+
+      <path d="M 245 160 L 220 185 L 180 185 L 175 220" />
+      <circle cx="175" cy="220" r="3.5" fill="#67e8f9" />
+
+      <path d="M 250 200 L 230 220 L 200 220 L 190 250" />
+      <circle cx="190" cy="250" r="3" fill="#67e8f9" />
+
+      <path d="M 250 240 L 235 255 L 215 255 L 210 280" />
+      <circle cx="210" cy="280" r="2.5" fill="#67e8f9" />
+    </g>
+
+    <!-- Right Circuit Traces & Gear (Green side) -->
+    <g clip-path="url(#rightShieldClip)">
+      <!-- Gear (Upper Right) -->
+      <g transform="translate(305, 120)" fill="none" stroke="#e2e8f0" stroke-width="4">
+        <circle cx="0" cy="0" r="26" fill="#0f172a" stroke="#cbd5e1" stroke-width="4" />
+        <circle cx="0" cy="0" r="10" fill="#e2e8f0" />
+        <!-- Cog teeth -->
+        <rect x="-4" y="-34" width="8" height="10" rx="1.5" fill="#e2e8f0" />
+        <rect x="-4" y="24" width="8" height="10" rx="1.5" fill="#e2e8f0" />
+        <rect x="-34" y="-4" width="10" height="8" rx="1.5" fill="#e2e8f0" />
+        <rect x="24" y="-4" width="10" height="8" rx="1.5" fill="#e2e8f0" />
+        <rect x="-24" y="-24" width="8" height="9" rx="1.5" transform="rotate(45)" fill="#e2e8f0" />
+        <rect x="-24" y="16" width="8" height="9" rx="1.5" transform="rotate(-45)" fill="#e2e8f0" />
+        <rect x="16" y="-24" width="8" height="9" rx="1.5" transform="rotate(-45)" fill="#e2e8f0" />
+        <rect x="16" y="16" width="8" height="9" rx="1.5" transform="rotate(45)" fill="#e2e8f0" />
+      </g>
+
+      <!-- Green Circuit Traces -->
+      <g stroke="#86efac" stroke-width="2.5" fill="none" opacity="0.85">
+        <path d="M 265 95 L 290 95 L 310 115" />
+        <circle cx="265" cy="95" r="3" fill="#86efac" />
+
+        <path d="M 260 145 L 285 145 L 320 180 L 345 180" />
+        <circle cx="345" cy="180" r="3.5" fill="#86efac" />
+
+        <path d="M 265 185 L 295 185 L 325 215 L 340 215" />
+        <circle cx="340" cy="215" r="3.5" fill="#86efac" />
+
+        <path d="M 260 225 L 280 245 L 315 245 L 320 265" />
+        <circle cx="320" cy="265" r="3" fill="#86efac" />
+
+        <path d="M 260 265 L 275 280 L 295 280" />
+        <circle cx="295" cy="280" r="2.5" fill="#86efac" />
+      </g>
+    </g>
+
+    <!-- 3D Metallic "VI" Monogram In Center -->
+    <g transform="translate(256, 190)">
+      <!-- V Letter -->
+      <path d="M -90 -65 L -45 55 L -20 55 L 2 -65 L -22 -65 L -33 15 L -68 -65 Z" 
+            fill="url(#metalSilver)" 
+            stroke="#0f172a" 
+            stroke-width="3"
+            filter="drop-shadow(2px 4px 6px rgba(0,0,0,0.8))" />
+      <!-- I Letter (with tech notches) -->
+      <path d="M 12 -65 L 42 -65 L 42 55 L 12 55 Z" 
+            fill="url(#metalSilver)" 
+            stroke="#0f172a" 
+            stroke-width="3"
+            filter="drop-shadow(2px 4px 6px rgba(0,0,0,0.8))" />
+    </g>
+  </g>
+
+  <!-- TEXT SECTION -->
+  <!-- "V&I TECH" -->
+  <g transform="translate(256, 360)">
+    <text text-anchor="middle" font-family="'Plus Jakarta Sans', 'Arial Black', sans-serif" font-weight="900" font-size="46" letter-spacing="3">
+      <tspan fill="#0084ff">V&amp;I </tspan>
+      <tspan fill="#f1f5f9">TECH</tspan>
+    </text>
+  </g>
+
+  <!-- "— AFRICA —" -->
+  <g transform="translate(256, 396)">
+    <!-- Left Accent Line -->
+    <line x1="-155" y1="-7" x2="-85" y2="-7" stroke="#00e676" stroke-width="3.5" stroke-linecap="round" />
+    <!-- Text -->
+    <text text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="800" font-size="24" fill="#00e676" letter-spacing="10">
+      AFRICA
+    </text>
+    <!-- Right Accent Line -->
+    <line x1="85" y1="-7" x2="155" y2="-7" stroke="#00e676" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+
+  <!-- "INNOVATE • DEVELOP • GROW" -->
+  <g transform="translate(256, 430)">
+    <text text-anchor="middle" font-family="'JetBrains Mono', 'Plus Jakarta Sans', monospace" font-weight="600" font-size="13" fill="#94a3b8" letter-spacing="4">
+      INNOVATE <tspan fill="#0084ff">•</tspan> DEVELOP <tspan fill="#00e676">•</tspan> GROW
+    </text>
+  </g>
+
+  <!-- BOTTOM CODE BRACKETS EMBLEM: =</>= -->
+  <g transform="translate(256, 462)" stroke="#0084ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Left wings -->
+    <line x1="-65" y1="0" x2="-45" y2="0" />
+    <line x1="-58" y1="-5" x2="-40" y2="-5" />
+    <!-- Left bracket < -->
+    <polyline points="-32,-8 -22,0 -32,8" />
+    <!-- Slash / -->
+    <line x1="-10" y1="9" x2="10" y2="-9" stroke="#00e676" stroke-width="3" />
+    <!-- Right bracket > -->
+    <polyline points="22,-8 32,0 22,8" />
+    <!-- Right wings -->
+    <line x1="45" y1="0" x2="65" y2="0" />
+    <line x1="40" y1="-5" x2="58" y2="-5" />
+  </g>
+</svg>

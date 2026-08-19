@@ -1,0 +1,147 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+    function existing() {
+      return resource.data;
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == "contact.vitechdev@gmail.com" ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation for Contact Inquiry
+    function isValidContactInquiry(data) {
+      return data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 150
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 30))
+        && (!('company' in data) || (data.company is string && data.company.size() <= 100))
+        && data.serviceNeeded is string && data.serviceNeeded.size() > 0 && data.serviceNeeded.size() <= 50
+        && data.projectDescription is string && data.projectDescription.size() > 0 && data.projectDescription.size() <= 3000
+        && (!('budgetRange' in data) || (data.budgetRange is string && data.budgetRange.size() <= 50))
+        && (!('timeline' in data) || (data.timeline is string && data.timeline.size() <= 50))
+        && (!('userId' in data) || (data.userId is string && data.userId.size() <= 128))
+        && (!('status' in data) || (data.status in ['new', 'in_review', 'quoted', 'archived']))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    // Validation for Project Estimate
+    function isValidProjectEstimate(data) {
+      return data.projectType is string && data.projectType.size() > 0 && data.projectType.size() <= 50
+        && data.estimatedBudget is string && data.estimatedBudget.size() > 0 && data.estimatedBudget.size() <= 50
+        && data.estimatedTimeline is string && data.estimatedTimeline.size() > 0 && data.estimatedTimeline.size() <= 50
+        && (!('features' in data) || (data.features is list && data.features.size() <= 30))
+        && (!('platforms' in data) || (data.platforms is list && data.platforms.size() <= 10))
+        && (!('sla' in data) || (data.sla is string && data.sla.size() <= 50))
+        && (!('userId' in data) || (data.userId is string && data.userId.size() <= 128))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    // Validation for Booking
+    function isValidBooking(data) {
+      return data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100
+        && data.email is string && data.email.size() > 0 && data.email.size() <= 150
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 30))
+        && data.topic is string && data.topic.size() > 0 && data.topic.size() <= 150
+        && data.date is string && data.date.size() > 0 && data.date.size() <= 20
+        && data.timeSlot is string && data.timeSlot.size() > 0 && data.timeSlot.size() <= 20
+        && (!('userId' in data) || (data.userId is string && data.userId.size() <= 128))
+        && (!('status' in data) || (data.status in ['scheduled', 'completed', 'cancelled']))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    // Validation for Newsletter Subscriber
+    function isValidSubscriber(data) {
+      return data.email is string && data.email.size() > 3 && data.email.size() <= 150
+        && (!('whitepaperRequested' in data) || (data.whitepaperRequested is string && data.whitepaperRequested.size() <= 150))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    // 1. Contact Inquiries Collection
+    match /contact_inquiries/{inquiryId} {
+      allow get: if isValidId(inquiryId) && (
+        isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid) ||
+        (isSignedIn() && resource.data.email == request.auth.token.email)
+      );
+      allow list: if isAdmin() || (
+        isSignedIn() && (
+          resource.data.userId == request.auth.uid ||
+          resource.data.email == request.auth.token.email
+        )
+      );
+      allow create: if isValidId(inquiryId) && isValidContactInquiry(incoming());
+      allow update: if isValidId(inquiryId) && isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid) && isValidContactInquiry(incoming());
+      allow delete: if isValidId(inquiryId) && isAdmin();
+    }
+
+    // 2. Project Estimates Collection
+    match /estimates/{estimateId} {
+      allow get: if isValidId(estimateId) && (
+        isAdmin() ||
+        !('userId' in resource.data) || 
+        (isSignedIn() && resource.data.userId == request.auth.uid)
+      );
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(estimateId) && isValidProjectEstimate(incoming());
+      allow update: if isValidId(estimateId) && isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid) && isValidProjectEstimate(incoming());
+      allow delete: if isValidId(estimateId) && isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+    }
+
+    // 3. Consultation Bookings Collection
+    match /bookings/{bookingId} {
+      allow get: if isValidId(bookingId) && (
+        isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid) ||
+        (isSignedIn() && resource.data.email == request.auth.token.email)
+      );
+      allow list: if isAdmin() || (
+        isSignedIn() && (
+          resource.data.userId == request.auth.uid ||
+          resource.data.email == request.auth.token.email
+        )
+      );
+      allow create: if isValidId(bookingId) && isValidBooking(incoming());
+      allow update: if isValidId(bookingId) && isSignedIn() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid ||
+        resource.data.email == request.auth.token.email
+      ) && isValidBooking(incoming());
+      allow delete: if isValidId(bookingId) && isAdmin();
+    }
+
+    // 4. Newsletter Subscribers Collection
+    match /newsletter_subscribers/{subscriberId} {
+      allow get: if isValidId(subscriberId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(subscriberId) && isValidSubscriber(incoming());
+      allow update, delete: if isValidId(subscriberId) && isAdmin();
+    }
+
+    // 5. Dynamic Site Content CMS Collection (Public Read, Admin Write)
+    match /site_content/{contentId} {
+      allow get, list: if isValidId(contentId);
+      allow create, update, delete: if isValidId(contentId) && (isAdmin() || request.auth != null);
+    }
+  }
+}

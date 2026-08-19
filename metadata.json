@@ -1,0 +1,7 @@
+{
+  "name": "VITECH AFRICA LTD",
+  "description": "Plateforme web professionnelle de VITECH AFRICA LTD, entreprise de haute technologie spécialisée en développement web/mobile, cloud, IA et cybersécurité, avec espace client sécurisé, estimateur de projet et cartographie panafricaine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

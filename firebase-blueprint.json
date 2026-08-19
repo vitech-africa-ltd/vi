@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "ContactInquiry": {
+      "title": "Contact Inquiry",
+      "description": "Client quote requests, project briefs, and messages sent via contact form or estimator",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "company": { "type": "string", "maxLength": 100 },
+        "serviceNeeded": { "type": "string", "maxLength": 50 },
+        "projectDescription": { "type": "string", "maxLength": 3000 },
+        "budgetRange": { "type": "string", "maxLength": 50 },
+        "timeline": { "type": "string", "maxLength": 50 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["new", "in_review", "quoted", "archived"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["fullName", "email", "serviceNeeded", "projectDescription"]
+    },
+    "ProjectEstimate": {
+      "title": "Project Estimate",
+      "description": "Saved project configurations calculated via the interactive simulator",
+      "type": "object",
+      "properties": {
+        "projectType": { "type": "string", "maxLength": 50 },
+        "features": { "type": "array" },
+        "platforms": { "type": "array" },
+        "sla": { "type": "string", "maxLength": 50 },
+        "estimatedBudget": { "type": "string", "maxLength": 50 },
+        "estimatedTimeline": { "type": "string", "maxLength": 50 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["projectType", "estimatedBudget", "estimatedTimeline"]
+    },
+    "Booking": {
+      "title": "Consultation Booking",
+      "description": "30-min discovery technical call reservations with engineers",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "topic": { "type": "string", "maxLength": 150 },
+        "date": { "type": "string", "maxLength": 20 },
+        "timeSlot": { "type": "string", "maxLength": 20 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["fullName", "email", "topic", "date", "timeSlot"]
+    },
+    "NewsletterSubscriber": {
+      "title": "Newsletter Subscriber",
+      "description": "Email subscriptions for technological whitepapers and digital tech insights",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "whitepaperRequested": { "type": "string", "maxLength": 150 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "SiteContent": {
+      "title": "Site Dynamic Content",
+      "description": "Dynamic CMS data for services, portfolio, blog posts, company parameters, and testimonials managed by the admin",
+      "type": "object",
+      "properties": {
+        "contentKey": { "type": "string", "maxLength": 100 },
+        "data": { "type": "object" },
+        "updatedAt": { "type": "string" },
+        "updatedBy": { "type": "string", "maxLength": 150 }
+      },
+      "required": ["contentKey", "data"]
+    }
+  },
+  "firestore": {
+    "/contact_inquiries/{inquiryId}": {
+      "schema": "ContactInquiry",
+      "description": "Collection of client messages, project requests, and quote submissions"
+    },
+    "/estimates/{estimateId}": {
+      "schema": "ProjectEstimate",
+      "description": "Collection of generated project estimates from the interactive calculator"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Scheduled technical appointments and video consultations"
+    },
+    "/newsletter_subscribers/{subscriberId}": {
+      "schema": "NewsletterSubscriber",
+      "description": "Subscribers receiving digital transformation whitepapers and newsletters"
+    },
+    "/site_content/{contentId}": {
+      "schema": "SiteContent",
+      "description": "Dynamic content blocks managed in real-time by the site administrator"
+    }
+  }
+}

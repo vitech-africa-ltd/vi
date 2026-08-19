@@ -1,0 +1,2159 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Shield, 
+  ShieldCheck, 
+  Lock, 
+  Unlock, 
+  LogIn, 
+  LogOut, 
+  UserCheck, 
+  Mail, 
+  Phone, 
+  MessageSquare, 
+  Calendar, 
+  FileText, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle, 
+  Search, 
+  Filter, 
+  Download, 
+  Eye, 
+  Trash2, 
+  RefreshCw, 
+  TrendingUp, 
+  Users, 
+  DollarSign, 
+  Activity, 
+  Globe, 
+  ExternalLink,
+  ChevronRight,
+  Send,
+  X,
+  Server,
+  Layers,
+  Sparkles,
+  KeyRound,
+  Check,
+  Building2,
+  Sliders,
+  Settings,
+  Plus,
+  Edit3,
+  Save,
+  RotateCcw,
+  MapPin,
+  Star,
+  BookOpen,
+  Briefcase,
+  Layers3,
+  Cpu,
+  Bot
+} from 'lucide-react';
+import { 
+  collection, 
+  onSnapshot, 
+  doc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  orderBy 
+} from 'firebase/firestore';
+import { db, auth } from '../lib/firebase';
+import { useAuth } from '../context/AuthContext';
+import { useSiteData } from '../context/SiteDataContext';
+import { useTranslation } from '../context/LanguageContext';
+import { VitechLogo } from './VitechLogo';
+import { AiPromptConfigTab } from './admin/AiPromptConfigTab';
+import { ServiceItem, CaseStudy, BlogPost, OfficeHub, Testimonial } from '../types';
+
+interface ContactInquiryDoc {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  country?: string;
+  serviceNeeded: string;
+  projectDescription: string;
+  budgetRange?: string;
+  timeline?: string;
+  status: 'new' | 'in_review' | 'quoted' | 'archived';
+  ndaRequired?: boolean;
+  createdAt: string;
+}
+
+interface ProjectEstimateDoc {
+  id: string;
+  projectType: string;
+  features?: string[];
+  platforms?: string[];
+  sla?: string;
+  estimatedBudget: string;
+  estimatedTimeline: string;
+  createdAt: string;
+}
+
+interface BookingDoc {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  topic: string;
+  date: string;
+  timeSlot: string;
+  hubLocation?: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
+  createdAt: string;
+}
+
+interface SubscriberDoc {
+  id: string;
+  email: string;
+  whitepaperRequested?: string;
+  createdAt: string;
+}
+
+type AdminTab = 
+  | 'dashboard' 
+  | 'ai-assistant'
+  | 'company'
+  | 'services' 
+  | 'portfolio' 
+  | 'blog' 
+  | 'hubs' 
+  | 'testimonials'
+  | 'inquiries' 
+  | 'bookings' 
+  | 'estimates' 
+  | 'subscribers' 
+  | 'security';
+
+export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const { user, signInWithGoogle, signOut, isAuthenticated } = useAuth();
+  const { 
+    companyInfo, 
+    updateCompanyInfo, 
+    services, 
+    addService, 
+    updateService, 
+    deleteService, 
+    caseStudies, 
+    addCaseStudy, 
+    updateCaseStudy, 
+    deleteCaseStudy,
+    blogPosts,
+    addBlogPost,
+    updateBlogPost,
+    deleteBlogPost,
+    techHubs,
+    addTechHub,
+    updateTechHub,
+    deleteTechHub,
+    testimonials,
+    addTestimonial,
+    updateTestimonial,
+    deleteTestimonial,
+    resetAllToFactoryDefaults,
+    isSaving,
+    saveStatus
+  } = useSiteData();
+
+  const { t } = useTranslation();
+
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [pinCode, setPinCode] = useState('');
+  const [isPinAuthenticated, setIsPinAuthenticated] = useState(false);
+  const [pinError, setPinError] = useState(false);
+
+  // Firestore real-time streams
+  const [inquiries, setInquiries] = useState<ContactInquiryDoc[]>([]);
+  const [bookings, setBookings] = useState<BookingDoc[]>([]);
+  const [estimates, setEstimates] = useState<ProjectEstimateDoc[]>([]);
+  const [subscribers, setSubscribers] = useState<SubscriberDoc[]>([]);
+  const [loadingStreams, setLoadingStreams] = useState(true);
+
+  // Search and filters
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Selected Item Modals / Edit Forms
+  const [selectedInquiry, setSelectedInquiry] = useState<ContactInquiryDoc | null>(null);
+  const [editingService, setEditingService] = useState<Partial<ServiceItem> | null>(null);
+  const [isNewService, setIsNewService] = useState(false);
+
+  const [editingCaseStudy, setEditingCaseStudy] = useState<Partial<CaseStudy> | null>(null);
+  const [isNewCaseStudy, setIsNewCaseStudy] = useState(false);
+
+  const [editingBlogPost, setEditingBlogPost] = useState<Partial<BlogPost> | null>(null);
+  const [isNewBlogPost, setIsNewBlogPost] = useState(false);
+
+  const [editingHub, setEditingHub] = useState<Partial<OfficeHub> | null>(null);
+  const [isNewHub, setIsNewHub] = useState(false);
+
+  const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
+  const [isNewTestimonial, setIsNewTestimonial] = useState(false);
+
+  // Company Info Edit Form State
+  const [companyForm, setCompanyForm] = useState(companyInfo);
+
+  useEffect(() => {
+    setCompanyForm(companyInfo);
+  }, [companyInfo]);
+
+  // Master Director Admin Check
+  const isMasterAdmin = 
+    user?.email === 'contact.vitechdev@gmail.com' ||
+    user?.email === companyInfo.email || 
+    user?.email === companyInfo.director?.email ||
+    isPinAuthenticated;
+
+  // Real-time Firestore Listeners
+  useEffect(() => {
+    if (!isMasterAdmin) return;
+
+    setLoadingStreams(true);
+
+    const qInquiries = query(collection(db, 'contact_inquiries'), orderBy('createdAt', 'desc'));
+    const unsubInquiries = onSnapshot(qInquiries, (snapshot) => {
+      const items: ContactInquiryDoc[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() } as ContactInquiryDoc);
+      });
+      setInquiries(items);
+      setLoadingStreams(false);
+    }, (err) => {
+      console.warn('Inquiries stream error:', err);
+      setLoadingStreams(false);
+    });
+
+    const qBookings = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    const unsubBookings = onSnapshot(qBookings, (snapshot) => {
+      const items: BookingDoc[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() } as BookingDoc);
+      });
+      setBookings(items);
+    }, (err) => console.warn('Bookings stream error:', err));
+
+    const qEstimates = query(collection(db, 'estimates'), orderBy('createdAt', 'desc'));
+    const unsubEstimates = onSnapshot(qEstimates, (snapshot) => {
+      const items: ProjectEstimateDoc[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() } as ProjectEstimateDoc);
+      });
+      setEstimates(items);
+    }, (err) => console.warn('Estimates stream error:', err));
+
+    const qSubscribers = query(collection(db, 'newsletter_subscribers'), orderBy('createdAt', 'desc'));
+    const unsubSubscribers = onSnapshot(qSubscribers, (snapshot) => {
+      const items: SubscriberDoc[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() } as SubscriberDoc);
+      });
+      setSubscribers(items);
+    }, (err) => console.warn('Subscribers stream error:', err));
+
+    return () => {
+      unsubInquiries();
+      unsubBookings();
+      unsubEstimates();
+      unsubSubscribers();
+    };
+  }, [isMasterAdmin]);
+
+  const handlePinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Authorized director keys or PIN
+    if (pinCode.trim() === '2025' || pinCode.trim() === '2026' || pinCode.trim() === 'VITECH777') {
+      setIsPinAuthenticated(true);
+      setPinError(false);
+    } else {
+      setPinError(true);
+    }
+  };
+
+  const handleUpdateInquiryStatus = async (inquiryId: string, status: ContactInquiryDoc['status']) => {
+    try {
+      await updateDoc(doc(db, 'contact_inquiries', inquiryId), { status });
+      if (selectedInquiry && selectedInquiry.id === inquiryId) {
+        setSelectedInquiry({ ...selectedInquiry, status });
+      }
+    } catch (err) {
+      console.error('Error updating inquiry status:', err);
+    }
+  };
+
+  const handleDeleteInquiry = async (inquiryId: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette demande ?')) return;
+    try {
+      await deleteDoc(doc(db, 'contact_inquiries', inquiryId));
+      if (selectedInquiry?.id === inquiryId) setSelectedInquiry(null);
+    } catch (err) {
+      console.error('Error deleting inquiry:', err);
+    }
+  };
+
+  const handleUpdateBookingStatus = async (bookingId: string, status: BookingDoc['status']) => {
+    try {
+      await updateDoc(doc(db, 'bookings', bookingId), { status });
+    } catch (err) {
+      console.error('Error updating booking status:', err);
+    }
+  };
+
+  const exportSubscribersCSV = () => {
+    const csvContent = [
+      ['Email', 'Livre Blanc Demandé', 'Date Inscription'],
+      ...subscribers.map((s) => [s.email, s.whitepaperRequested || 'Newsletter', s.createdAt || '']),
+    ]
+      .map((e) => e.join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `vitech_subscribers_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // If not authenticated as Admin, show login & PIN challenge
+  if (!isMasterAdmin) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
+          
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-amber-500 to-emerald-500" />
+          
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-800 hover:bg-slate-700"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-2">
+              <Shield className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-black tracking-tight text-white">
+              Portail Direction Générale (CMS A-Z)
+            </h2>
+            <p className="text-xs text-slate-400">
+              Accès strictement réservé à la Direction de <strong>V&I TECH AFRICA LTD</strong> ({companyInfo.email})
+            </p>
+          </div>
+
+          {/* Method 1: Google Auth with Director Account */}
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => signInWithGoogle()}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all cursor-pointer"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Authentification Google Direction</span>
+            </button>
+            {user && (
+              <p className="text-xs text-center text-amber-400 font-mono">
+                Compte actuel : {user.email} (Non-administrateur)
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-slate-800" />
+            <span className="text-[10px] uppercase font-bold text-slate-500">ou Clé de Sécurité Directeur</span>
+            <div className="flex-1 h-px bg-slate-800" />
+          </div>
+
+          {/* Method 2: Director Security PIN */}
+          <form onSubmit={handlePinSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Code PIN Administrateur
+              </label>
+              <div className="relative">
+                <KeyRound className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
+                <input
+                  type="password"
+                  value={pinCode}
+                  onChange={(e) => {
+                    setPinCode(e.target.value);
+                    setPinError(false);
+                  }}
+                  placeholder="Code Direction (ex: 2026)"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm font-mono tracking-widest focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              {pinError && (
+                <p className="text-xs text-rose-400 mt-2 font-medium flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" /> Code PIN invalide. Accès refusé.
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
+            >
+              Déverrouiller le Portail Direction
+            </button>
+          </form>
+
+          <div className="pt-2 text-center">
+            <p className="text-[11px] text-slate-500">
+              Audit de sécurité actif • Toutes les modifications sont historisées.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // --- Main Full-Featured Admin Interface ---
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+      
+      {/* Top Header Bar */}
+      <header className="bg-slate-900 border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black tracking-wider uppercase text-white">
+                V&I TECH AFRICA • Administration Globale (CMS A-Z)
+              </span>
+              <span className="text-[10px] font-mono bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-bold">
+                EN DIRECT
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Connecté en tant que Direction : <strong className="text-slate-200">{user?.email || 'contact.vitechdev@gmail.com'}</strong>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {saveStatus && (
+            <div className="text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-3 py-1.5 rounded-lg flex items-center gap-2 animate-pulse">
+              <Check className="w-3.5 h-3.5" />
+              <span>{saveStatus}</span>
+            </div>
+          )}
+
+          <button
+            onClick={resetAllToFactoryDefaults}
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-950/50 hover:bg-rose-900/80 text-rose-300 border border-rose-800 text-xs font-bold transition-all cursor-pointer"
+            title="Réinitialiser les données d'usine en cas de besoin"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Réinitialiser Données</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer"
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-400" />
+            <span>Retour au Site Public</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="flex-1 flex flex-col md:flex-row">
+        
+        {/* Navigation Sidebar */}
+        <aside className="w-full md:w-64 bg-slate-900/70 border-r border-slate-800 p-3 space-y-6 shrink-0">
+          
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-3 mb-2">
+              Vue Globale &amp; CRM
+            </p>
+            <div className="space-y-1">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'dashboard'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Activity className="w-4 h-4" />
+                  <span>Tableau de Bord</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('inquiries')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'inquiries'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Demandes &amp; Devis CRM</span>
+                </div>
+                {inquiries.filter((i) => i.status === 'new').length > 0 && (
+                  <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold">
+                    {inquiries.filter((i) => i.status === 'new').length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab('bookings')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'bookings'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Calendar className="w-4 h-4" />
+                  <span>Rendez-vous (30 min)</span>
+                </div>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  {bookings.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('estimates')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'estimates'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <DollarSign className="w-4 h-4" />
+                  <span>Simulations Budgétaires</span>
+                </div>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  {estimates.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('subscribers')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'subscribers'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Mail className="w-4 h-4" />
+                  <span>Abonnés Newsletter</span>
+                </div>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  {subscribers.length}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* CMS: Gestion de Contenu de A à Z */}
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 px-3 mb-2 flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              <span>Gestion Contenu Site (A à Z)</span>
+            </p>
+            <div className="space-y-1">
+              <button
+                onClick={() => setActiveTab('ai-assistant')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'ai-assistant'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                    : 'text-blue-300 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Bot className="w-4 h-4 text-blue-400" />
+                  <span>Assistant IA &amp; Prompts</span>
+                </div>
+                <span className="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-1.5 py-0.5 rounded font-mono font-bold">
+                  Gemini 3.7
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('company')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'company'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Building2 className="w-4 h-4" />
+                  <span>Coordonnées &amp; Direction</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('services')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'services'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Layers3 className="w-4 h-4" />
+                  <span>Pôles de Services ({services.length})</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('portfolio')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'portfolio'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Briefcase className="w-4 h-4" />
+                  <span>Réalisations &amp; Portfolio ({caseStudies.length})</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('blog')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'blog'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <BookOpen className="w-4 h-4" />
+                  <span>Blog &amp; Livres Blancs ({blogPosts.length})</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('hubs')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'hubs'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <MapPin className="w-4 h-4" />
+                  <span>Hubs Technologiques ({techHubs.length})</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('testimonials')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'testimonials'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Star className="w-4 h-4" />
+                  <span>Avis Clients ({testimonials.length})</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* System & Security */}
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 px-3 mb-2">
+              Système
+            </p>
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'security'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Lock className="w-4 h-4" />
+                <span>Sécurité &amp; Infrastructure</span>
+              </div>
+            </button>
+          </div>
+
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 sm:p-8 overflow-y-auto max-h-[calc(100vh-60px)]">
+          
+          {/* TAB: AI ASSISTANT PROMPT & PERSONALITY CMS */}
+          {activeTab === 'ai-assistant' && (
+            <AiPromptConfigTab />
+          )}
+
+          {/* TAB: DASHBOARD */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Tableau de Bord de la Direction</h1>
+                  <p className="text-xs text-slate-400">
+                    Aperçu en temps réel des leads, consultations et données de la plateforme.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
+                    Dernière synchronisation : {new Date().toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Demandes de Projets</span>
+                    <MessageSquare className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div className="text-3xl font-black text-white">{inquiries.length}</div>
+                  <div className="text-[11px] text-emerald-400 font-medium">
+                    {inquiries.filter((i) => i.status === 'new').length} nouveau(x) lead(s) à traiter
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Rendez-vous 30 min</span>
+                    <Calendar className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div className="text-3xl font-black text-white">{bookings.length}</div>
+                  <div className="text-[11px] text-amber-300 font-medium">
+                    {bookings.filter((b) => b.status === 'scheduled').length} session(s) planifiée(s)
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Estimations Calculées</span>
+                    <DollarSign className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div className="text-3xl font-black text-white">{estimates.length}</div>
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    Simulations de devis générées
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-bold uppercase tracking-wider">Abonnés Newsletter</span>
+                    <Users className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div className="text-3xl font-black text-white">{subscribers.length}</div>
+                  <div className="text-[11px] text-purple-300 font-medium">
+                    Prospects qualifiés R&amp;D
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Assistant Quick Banner */}
+              <div className="bg-gradient-to-r from-blue-900/60 via-indigo-950/50 to-slate-900 border border-blue-800/60 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/30 shrink-0">
+                    <Bot className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Assistant IA &amp; Prompt Système Actif</span>
+                      <span className="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-800 font-mono font-bold">
+                        Gemini 3.7 Flash
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      Personnalisez les consignes d'accueil, le ton commercial, les règles de tarification et les directives de l'IA pour vos prospects.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('ai-assistant')}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shrink-0 cursor-pointer shadow-md"
+                >
+                  Gérer le Prompt IA →
+                </button>
+              </div>
+
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {/* Recent Inquiries List */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-blue-400" />
+                      <span>Dernières Demandes Clients</span>
+                    </h2>
+                    <button
+                      onClick={() => setActiveTab('inquiries')}
+                      className="text-xs text-blue-400 hover:text-blue-300 font-bold"
+                    >
+                      Voir tout ({inquiries.length})
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {inquiries.slice(0, 4).map((inquiry) => (
+                      <div
+                        key={inquiry.id}
+                        onClick={() => {
+                          setSelectedInquiry(inquiry);
+                          setActiveTab('inquiries');
+                        }}
+                        className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-blue-500/50 transition-all cursor-pointer flex items-center justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-white">{inquiry.fullName}</span>
+                            {inquiry.company && (
+                              <span className="text-[10px] text-slate-400">({inquiry.company})</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-slate-400 truncate max-w-xs">{inquiry.projectDescription}</p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          inquiry.status === 'new' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-slate-800 text-slate-400'
+                        }`}>
+                          {inquiry.status}
+                        </span>
+                      </div>
+                    ))}
+                    {inquiries.length === 0 && (
+                      <p className="text-xs text-slate-500 text-center py-4">Aucune demande reçue pour le moment.</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Director Information Summary */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-amber-400" />
+                      <span>Coordonnées Officielles de Contact</span>
+                    </h2>
+                    <button
+                      onClick={() => setActiveTab('company')}
+                      className="text-xs text-amber-400 hover:text-amber-300 font-bold"
+                    >
+                      Modifier
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex justify-between py-1.5 border-b border-slate-800">
+                      <span className="text-slate-400">Société :</span>
+                      <strong className="text-white">{companyInfo.fullName}</strong>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-slate-800">
+                      <span className="text-slate-400">Email Directeur :</span>
+                      <strong className="text-cyan-400">{companyInfo.email}</strong>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-slate-800">
+                      <span className="text-slate-400">Ligne Téléphonique :</span>
+                      <strong className="text-white">{companyInfo.phone}</strong>
+                    </div>
+                    <div className="flex justify-between py-1.5 border-b border-slate-800">
+                      <span className="text-slate-400">WhatsApp Officiel :</span>
+                      <strong className="text-emerald-400">{companyInfo.whatsapp}</strong>
+                    </div>
+                    <div className="flex justify-between py-1.5">
+                      <span className="text-slate-400">Siège Panafricain :</span>
+                      <strong className="text-slate-200">{companyInfo.headquarters}</strong>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AI ASSISTANT & RAG PROMPT CONFIG */}
+          {activeTab === 'ai-assistant' && (
+            <div className="space-y-6">
+              <AiPromptConfigTab />
+            </div>
+          )}
+
+          {/* TAB: COMPANY INFO & COORDINATES */}
+          {activeTab === 'company' && (
+            <div className="space-y-6 max-w-4xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion de l'Entreprise &amp; Coordonnées</h1>
+                  <p className="text-xs text-slate-400">
+                    Modifiez en temps réel les informations générales, téléphones, emails et réseaux de l'entreprise.
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    await updateCompanyInfo(companyForm);
+                  }}
+                  disabled={isSaving}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase transition-all shadow-lg cursor-pointer disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSaving ? 'Enregistrement...' : 'Enregistrer Modifications'}</span>
+                </button>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Nom de l'Entreprise</label>
+                    <input
+                      type="text"
+                      value={companyForm.name}
+                      onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Raison Sociale Complète</label>
+                    <input
+                      type="text"
+                      value={companyForm.fullName}
+                      onChange={(e) => setCompanyForm({ ...companyForm, fullName: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Email Officiel (Directeur)</label>
+                    <input
+                      type="email"
+                      value={companyForm.email}
+                      onChange={(e) => setCompanyForm({ ...companyForm, email: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Ligne Téléphonique (Format Affiché)</label>
+                    <input
+                      type="text"
+                      value={companyForm.phone}
+                      onChange={(e) => setCompanyForm({ ...companyForm, phone: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Téléphone Brut (Appels : +250...)</label>
+                    <input
+                      type="text"
+                      value={companyForm.phoneRaw}
+                      onChange={(e) => setCompanyForm({ ...companyForm, phoneRaw: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Numéro WhatsApp (Format Affiché)</label>
+                    <input
+                      type="text"
+                      value={companyForm.whatsapp}
+                      onChange={(e) => setCompanyForm({ ...companyForm, whatsapp: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Siège Panafricain</label>
+                    <input
+                      type="text"
+                      value={companyForm.headquarters}
+                      onChange={(e) => setCompanyForm({ ...companyForm, headquarters: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Slogan / Devise</label>
+                    <input
+                      type="text"
+                      value={companyForm.motto}
+                      onChange={(e) => setCompanyForm({ ...companyForm, motto: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">Description / Tagline</label>
+                  <textarea
+                    rows={3}
+                    value={companyForm.tagline}
+                    onChange={(e) => setCompanyForm({ ...companyForm, tagline: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs focus:border-amber-500 outline-none"
+                  />
+                </div>
+
+                <div className="pt-4 border-t border-slate-800 flex justify-end">
+                  <button
+                    onClick={async () => {
+                      await updateCompanyInfo(companyForm);
+                    }}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase transition-all shadow-lg cursor-pointer"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Sauvegarder les Coordonnées</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: SERVICES CMS */}
+          {activeTab === 'services' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Pôles d'Ingénierie &amp; Services</h1>
+                  <p className="text-xs text-slate-400">
+                    Ajoutez, modifiez ou supprimez les offres de services et leurs spécifications contractuelles.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingService({
+                      id: `service-${Date.now()}`,
+                      title: '',
+                      subtitle: '',
+                      description: '',
+                      category: 'web',
+                      startingPrice: '€2,500',
+                      timeline: '2 à 4 semaines',
+                      features: ['Architecture modulaire', 'Tests automatisés', 'Documentation API'],
+                      deliverables: ['Code source complet', 'Pipeline CI/CD', 'Support 30 jours'],
+                      technologies: ['React', 'TypeScript', 'Node.js', 'PostgreSQL']
+                    });
+                    setIsNewService(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ajouter un Service</span>
+                </button>
+              </div>
+
+              {/* Service Edit Modal / Inline Form */}
+              {editingService && (
+                <div className="bg-slate-900 border border-blue-500/40 rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase">
+                      {isNewService ? 'Créer un Nouveau Service' : `Modifier Service : ${editingService.title}`}
+                    </h3>
+                    <button
+                      onClick={() => setEditingService(null)}
+                      className="p-1 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Titre du Service</label>
+                      <input
+                        type="text"
+                        value={editingService.title || ''}
+                        onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Sous-titre / Catégorie</label>
+                      <input
+                        type="text"
+                        value={editingService.subtitle || ''}
+                        onChange={(e) => setEditingService({ ...editingService, subtitle: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Prix de Départ</label>
+                      <input
+                        type="text"
+                        value={editingService.startingPrice || ''}
+                        onChange={(e) => setEditingService({ ...editingService, startingPrice: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Délai Moyen</label>
+                      <input
+                        type="text"
+                        value={editingService.timeline || ''}
+                        onChange={(e) => setEditingService({ ...editingService, timeline: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Description Détaillée</label>
+                    <textarea
+                      rows={3}
+                      value={editingService.description || ''}
+                      onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Stack Technologique (séparée par des virgules)</label>
+                    <input
+                      type="text"
+                      value={editingService.technologies?.join(', ') || ''}
+                      onChange={(e) => setEditingService({ ...editingService, technologies: e.target.value.split(',').map((s) => s.trim()) })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      onClick={() => setEditingService(null)}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (isNewService) {
+                          await addService(editingService as ServiceItem);
+                        } else {
+                          await updateService(editingService as ServiceItem);
+                        }
+                        setEditingService(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Sauvegarder Service</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Services Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {services.map((service) => (
+                  <div key={service.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 relative group">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-blue-400 tracking-wider">
+                          {service.subtitle}
+                        </span>
+                        <h3 className="text-base font-black text-white">{service.title}</h3>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingService(service);
+                            setIsNewService(false);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white transition-all"
+                          title="Modifier"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Supprimer le service "${service.title}" ?`)) {
+                              deleteService(service.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white transition-all"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-400 line-clamp-2">{service.description}</p>
+
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800">
+                      <span className="text-emerald-400 font-bold">{service.startingPrice}</span>
+                      <span className="text-slate-400">{service.timeline}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {service.technologies?.slice(0, 4).map((tech, idx) => (
+                        <span key={idx} className="text-[9px] font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: PORTFOLIO / CASE STUDIES */}
+          {activeTab === 'portfolio' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Réalisations &amp; Études de Cas</h1>
+                  <p className="text-xs text-slate-400">
+                    Ajoutez et mettez à jour les projets d'envergure réalisés par V&I TECH AFRICA.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingCaseStudy({
+                      id: `project-${Date.now()}`,
+                      title: '',
+                      client: '',
+                      country: 'Rwanda',
+                      countryFlag: '🇷🇼',
+                      category: 'Fintech & Mobile Money',
+                      summary: '',
+                      impactMetric: '99.99% Uptime',
+                      technologies: ['React', 'Node.js', 'PostgreSQL'],
+                      deliverables: ['Plateforme Web', 'Application Mobile'],
+                      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=60'
+                    });
+                    setIsNewCaseStudy(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ajouter une Réalisation</span>
+                </button>
+              </div>
+
+              {/* Case Study Edit Modal */}
+              {editingCaseStudy && (
+                <div className="bg-slate-900 border border-blue-500/40 rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase">
+                      {isNewCaseStudy ? 'Ajouter un Projet Client' : `Modifier Projet : ${editingCaseStudy.title}`}
+                    </h3>
+                    <button
+                      onClick={() => setEditingCaseStudy(null)}
+                      className="p-1 text-slate-400 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Titre du Projet</label>
+                      <input
+                        type="text"
+                        value={editingCaseStudy.title || ''}
+                        onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, title: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Client / Organisation</label>
+                      <input
+                        type="text"
+                        value={editingCaseStudy.client || ''}
+                        onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, client: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Métrique d'Impact Clé</label>
+                      <input
+                        type="text"
+                        value={editingCaseStudy.impactMetric || ''}
+                        onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, impactMetric: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Résumé du Projet &amp; Défi Technique</label>
+                    <textarea
+                      rows={3}
+                      value={editingCaseStudy.summary || ''}
+                      onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, summary: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">URL Image d'Illustration</label>
+                      <input
+                        type="text"
+                        value={editingCaseStudy.image || ''}
+                        onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, image: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Technologies (séparées par virgules)</label>
+                      <input
+                        type="text"
+                        value={editingCaseStudy.technologies?.join(', ') || ''}
+                        onChange={(e) => setEditingCaseStudy({ ...editingCaseStudy, technologies: e.target.value.split(',').map((s) => s.trim()) })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      onClick={() => setEditingCaseStudy(null)}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (isNewCaseStudy) {
+                          await addCaseStudy(editingCaseStudy as CaseStudy);
+                        } else {
+                          await updateCaseStudy(editingCaseStudy as CaseStudy);
+                        }
+                        setEditingCaseStudy(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Sauvegarder Réalisation</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Portfolio Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {caseStudies.map((project) => (
+                  <div key={project.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden space-y-3">
+                    <div className="h-36 bg-slate-950 relative overflow-hidden">
+                      <img 
+                        src={project.image} 
+                        alt={project.title} 
+                        className="w-full h-full object-cover opacity-80"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-2 right-2 flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setEditingCaseStudy(project);
+                            setIsNewCaseStudy(false);
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-blue-600 text-white transition-all shadow-md"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Supprimer le projet "${project.title}" ?`)) {
+                              deleteCaseStudy(project.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-rose-600 text-white transition-all shadow-md"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-2 left-2">
+                        <span className="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                          {project.impactMetric}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 space-y-2">
+                      <h3 className="text-sm font-black text-white">{project.title}</h3>
+                      <p className="text-[11px] text-slate-400 line-clamp-2">{project.summary}</p>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                        <span>Client : {project.client}</span>
+                        <span>{project.countryFlag} {project.country}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: BLOG & WHITEPAPERS */}
+          {activeTab === 'blog' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion du Blog Technique &amp; Livres Blancs</h1>
+                  <p className="text-xs text-slate-400">
+                    Publiez des insights d'ingénierie, livres blancs et articles R&amp;D.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingBlogPost({
+                      id: `post-${Date.now()}`,
+                      title: '',
+                      category: 'Architecture Cloud',
+                      excerpt: '',
+                      author: 'Directeur Technique',
+                      authorRole: 'Lead Architect',
+                      date: new Date().toISOString().slice(0, 10),
+                      readTime: '5 min',
+                      slug: `article-${Date.now()}`,
+                      tags: ['Cloud', 'Scalabilité', 'Afrique']
+                    });
+                    setIsNewBlogPost(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Publier un Article</span>
+                </button>
+              </div>
+
+              {/* Edit Modal */}
+              {editingBlogPost && (
+                <div className="bg-slate-900 border border-blue-500/40 rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase">
+                      {isNewBlogPost ? 'Nouvel Article' : `Modifier : ${editingBlogPost.title}`}
+                    </h3>
+                    <button onClick={() => setEditingBlogPost(null)} className="p-1 text-slate-400 hover:text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Titre de l'Article</label>
+                      <input
+                        type="text"
+                        value={editingBlogPost.title || ''}
+                        onChange={(e) => setEditingBlogPost({ ...editingBlogPost, title: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Catégorie</label>
+                      <input
+                        type="text"
+                        value={editingBlogPost.category || ''}
+                        onChange={(e) => setEditingBlogPost({ ...editingBlogPost, category: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Auteur (Nom)</label>
+                      <input
+                        type="text"
+                        value={typeof editingBlogPost.author === 'object' ? editingBlogPost.author.name : (editingBlogPost.author || '')}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (typeof editingBlogPost.author === 'object') {
+                            setEditingBlogPost({ 
+                              ...editingBlogPost, 
+                              author: { ...editingBlogPost.author, name: val } 
+                            });
+                          } else {
+                            setEditingBlogPost({ ...editingBlogPost, author: val });
+                          }
+                        }}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                        placeholder="Ex: Ibrahima Diallo"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Rôle de l'Auteur</label>
+                      <input
+                        type="text"
+                        value={editingBlogPost.authorRole || (typeof editingBlogPost.author === 'object' ? editingBlogPost.author.role : '') || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (typeof editingBlogPost.author === 'object') {
+                            setEditingBlogPost({ 
+                              ...editingBlogPost, 
+                              authorRole: val,
+                              author: { ...editingBlogPost.author, role: val } 
+                            });
+                          } else {
+                            setEditingBlogPost({ ...editingBlogPost, authorRole: val });
+                          }
+                        }}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                        placeholder="Ex: Lead Software Architect"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Extrait / Synthèse</label>
+                    <textarea
+                      rows={3}
+                      value={editingBlogPost.excerpt || ''}
+                      onChange={(e) => setEditingBlogPost({ ...editingBlogPost, excerpt: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button onClick={() => setEditingBlogPost(null)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (isNewBlogPost) {
+                          await addBlogPost(editingBlogPost as BlogPost);
+                        } else {
+                          await updateBlogPost(editingBlogPost as BlogPost);
+                        }
+                        setEditingBlogPost(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Enregistrer Publication</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {blogPosts.map((post) => {
+                  const authorName = typeof post.author === 'object' && post.author ? post.author.name : (post.author || 'Équipe Vitech');
+                  return (
+                    <div key={post.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-blue-400 font-bold mb-1">
+                          <span>{post.category}</span>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => { setEditingBlogPost(post); setIsNewBlogPost(false); }} className="p-1 rounded bg-slate-800 hover:bg-blue-600 text-white">
+                              <Edit3 className="w-3 h-3" />
+                            </button>
+                            <button onClick={() => { if (window.confirm('Supprimer cet article ?')) deleteBlogPost(post.id); }} className="p-1 rounded bg-slate-800 hover:bg-rose-600 text-white">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <h3 className="text-sm font-black text-white">{post.title}</h3>
+                        <p className="text-xs text-slate-400 mt-2 line-clamp-3">{post.excerpt}</p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-800 text-[11px] text-slate-500 flex justify-between">
+                        <span>{authorName}</span>
+                        <span>{post.readTime}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: TECH HUBS CMS */}
+          {activeTab === 'hubs' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Hubs Panafricains &amp; Coordonnées GPS</h1>
+                  <p className="text-xs text-slate-400">
+                    Gérez les bureaux régionaux affichés sur la carte interactive Google Maps.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingHub({
+                      id: `hub-${Date.now()}`,
+                      city: 'Nairobi',
+                      country: 'Kenya',
+                      flag: '🇰🇪',
+                      role: 'East Africa Digital Node',
+                      leadEngineer: 'Chief Solution Architect',
+                      address: 'Westlands Commercial Tower, Nairobi',
+                      coordinates: { lat: -1.2921, lng: 36.8219 },
+                      engineersCount: 15
+                    });
+                    setIsNewHub(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ajouter un Hub</span>
+                </button>
+              </div>
+
+              {editingHub && (
+                <div className="bg-slate-900 border border-blue-500/40 rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase">
+                      {isNewHub ? 'Nouveau Hub Technologique' : `Modifier Hub : ${editingHub.city}`}
+                    </h3>
+                    <button onClick={() => setEditingHub(null)} className="p-1 text-slate-400 hover:text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Ville</label>
+                      <input
+                        type="text"
+                        value={editingHub.city || ''}
+                        onChange={(e) => setEditingHub({ ...editingHub, city: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Pays</label>
+                      <input
+                        type="text"
+                        value={editingHub.country || ''}
+                        onChange={(e) => setEditingHub({ ...editingHub, country: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Drapeau (Emoji)</label>
+                      <input
+                        type="text"
+                        value={editingHub.flag || ''}
+                        onChange={(e) => setEditingHub({ ...editingHub, flag: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Latitude GPS</label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={editingHub.coordinates?.lat || 0}
+                        onChange={(e) => setEditingHub({ ...editingHub, coordinates: { lat: parseFloat(e.target.value), lng: editingHub.coordinates?.lng || 0 } })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Longitude GPS</label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        value={editingHub.coordinates?.lng || 0}
+                        onChange={(e) => setEditingHub({ ...editingHub, coordinates: { lat: editingHub.coordinates?.lat || 0, lng: parseFloat(e.target.value) } })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button onClick={() => setEditingHub(null)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (isNewHub) {
+                          await addTechHub(editingHub as OfficeHub);
+                        } else {
+                          await updateTechHub(editingHub as OfficeHub);
+                        }
+                        setEditingHub(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Enregistrer Hub</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {techHubs.map((hub) => (
+                  <div key={hub.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{hub.flag}</span>
+                        <h3 className="text-sm font-black text-white">{hub.city}</h3>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { setEditingHub(hub); setIsNewHub(false); }} className="p-1 rounded bg-slate-800 hover:bg-blue-600 text-white">
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => { if (window.confirm(`Supprimer le hub ${hub.city} ?`)) deleteTechHub(hub.id); }} className="p-1 rounded bg-slate-800 hover:bg-rose-600 text-white">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-400">{hub.role}</p>
+                    <div className="text-[10px] font-mono text-cyan-400 pt-1">
+                      GPS: {hub.coordinates.lat.toFixed(4)}, {hub.coordinates.lng.toFixed(4)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: TESTIMONIALS */}
+          {activeTab === 'testimonials' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Témoignages &amp; Avis Clients</h1>
+                  <p className="text-xs text-slate-400">
+                    Modifiez ou ajoutez les recommandations de vos clients institutionnels.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingTestimonial({
+                      id: `test-${Date.now()}`,
+                      name: '',
+                      role: 'Chief Technology Officer',
+                      company: 'Entreprise Partenaire',
+                      country: 'Côte d’Ivoire',
+                      flag: '🇨🇮',
+                      rating: 5,
+                      content: 'Service d’ingénierie irréprochable et respect strict des délais.'
+                    });
+                    setIsNewTestimonial(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ajouter un Témoignage</span>
+                </button>
+              </div>
+
+              {editingTestimonial && (
+                <div className="bg-slate-900 border border-blue-500/40 rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="text-sm font-black text-white uppercase">
+                      {isNewTestimonial ? 'Nouveau Témoignage' : `Modifier : ${editingTestimonial.name}`}
+                    </h3>
+                    <button onClick={() => setEditingTestimonial(null)} className="p-1 text-slate-400 hover:text-white">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Nom du Client</label>
+                      <input
+                        type="text"
+                        value={editingTestimonial.name || ''}
+                        onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Rôle / Poste</label>
+                      <input
+                        type="text"
+                        value={editingTestimonial.role || ''}
+                        onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Entreprise</label>
+                      <input
+                        type="text"
+                        value={editingTestimonial.company || ''}
+                        onChange={(e) => setEditingTestimonial({ ...editingTestimonial, company: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Avis / Témoignage</label>
+                    <textarea
+                      rows={3}
+                      value={editingTestimonial.content || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, content: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button onClick={() => setEditingTestimonial(null)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (isNewTestimonial) {
+                          await addTestimonial(editingTestimonial as Testimonial);
+                        } else {
+                          await updateTestimonial(editingTestimonial as Testimonial);
+                        }
+                        setEditingTestimonial(null);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Enregistrer Avis</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {testimonials.map((test) => (
+                  <div key={test.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-amber-400">
+                        {Array.from({ length: test.rating || 5 }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { setEditingTestimonial(test); setIsNewTestimonial(false); }} className="p-1 rounded bg-slate-800 hover:bg-blue-600 text-white">
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => { if (window.confirm(`Supprimer l'avis de ${test.name} ?`)) deleteTestimonial(test.id); }} className="p-1 rounded bg-slate-800 hover:bg-rose-600 text-white">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-300 italic">"{test.content}"</p>
+                    <div className="text-[11px] pt-2 border-t border-slate-800">
+                      <strong className="text-white">{test.name}</strong>
+                      <div className="text-slate-400">{test.role} • {test.company}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: INQUIRIES & LEADS CRM */}
+          {activeTab === 'inquiries' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Demandes Clients &amp; Leads (CRM)</h1>
+                  <p className="text-xs text-slate-400">
+                    Visualisez, répondez et mettez à jour le statut des demandes de projet soumises sur le site.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-slate-500" />
+                    <input
+                      type="text"
+                      placeholder="Rechercher par nom, email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-8 pr-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Inquiries Table */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
+                        <th className="py-3 px-4">Client / Société</th>
+                        <th className="py-3 px-4">Service Requis</th>
+                        <th className="py-3 px-4">Budget / Délai</th>
+                        <th className="py-3 px-4">Statut</th>
+                        <th className="py-3 px-4">Date</th>
+                        <th className="py-3 px-4 text-right">Actions Directes</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {inquiries
+                        .filter((i) => {
+                          if (statusFilter !== 'all' && i.status !== statusFilter) return false;
+                          if (searchTerm) {
+                            const term = searchTerm.toLowerCase();
+                            return (
+                              i.fullName?.toLowerCase().includes(term) ||
+                              i.email?.toLowerCase().includes(term) ||
+                              i.company?.toLowerCase().includes(term)
+                            );
+                          }
+                          return true;
+                        })
+                        .map((inquiry) => (
+                          <tr
+                            key={inquiry.id}
+                            className="hover:bg-slate-800/40 transition-colors"
+                          >
+                            <td className="py-3 px-4">
+                              <div className="font-bold text-white">{inquiry.fullName}</div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <Mail className="w-3 h-3 text-blue-400" />
+                                <span>{inquiry.email}</span>
+                              </div>
+                              {inquiry.phone && (
+                                <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                                  <Phone className="w-3 h-3 text-emerald-400" />
+                                  <span>{inquiry.phone}</span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="font-semibold text-blue-300">{inquiry.serviceNeeded}</span>
+                              {inquiry.ndaRequired && (
+                                <span className="ml-2 inline-flex items-center text-[9px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-bold">
+                                  NDA
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="font-mono text-emerald-400">{inquiry.budgetRange || 'Non spécifié'}</div>
+                              <div className="text-[10px] text-slate-400">{inquiry.timeline || 'À convenir'}</div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <select
+                                value={inquiry.status}
+                                onChange={(e) => handleUpdateInquiryStatus(inquiry.id, e.target.value as any)}
+                                className={`text-[10px] font-bold px-2 py-1 rounded-lg border bg-slate-950 focus:outline-none cursor-pointer ${
+                                  inquiry.status === 'new'
+                                    ? 'text-rose-400 border-rose-500/50'
+                                    : inquiry.status === 'quoted'
+                                    ? 'text-emerald-400 border-emerald-500/50'
+                                    : 'text-blue-400 border-blue-500/50'
+                                }`}
+                              >
+                                <option value="new">Nouveau</option>
+                                <option value="in_review">En Analyse</option>
+                                <option value="quoted">Devis Transmis</option>
+                                <option value="archived">Archivé</option>
+                              </select>
+                            </td>
+                            <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                              {inquiry.createdAt?.slice(0, 10) || 'Aujourd’hui'}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <a
+                                  href={`mailto:${inquiry.email}?subject=Suite à votre demande de projet - V&I TECH AFRICA LTD&body=Bonjour ${inquiry.fullName},%0D%0A%0D%0ANous avons bien reçu votre demande concernant le service : ${inquiry.serviceNeeded}.%0D%0A%0D%0ACordialement,%0D%0ALa Direction V&I TECH AFRICA LTD`}
+                                  className="p-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white transition-all"
+                                  title="Répondre par Email"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                </a>
+                                {inquiry.phone && (
+                                  <a
+                                    href={`https://wa.me/${inquiry.phone.replace(/[^0-9]/g, '')}?text=Bonjour%20${encodeURIComponent(inquiry.fullName)},%20je%20suis%20le%20Directeur%20de%20V%26I%20TECH%20AFRICA%20LTD%20concernant%20votre%20projet.`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="p-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white transition-all"
+                                    title="Répondre sur WhatsApp"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
+                                <button
+                                  onClick={() => handleDeleteInquiry(inquiry.id)}
+                                  className="p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white transition-all"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: BOOKINGS */}
+          {activeTab === 'bookings' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Gestion des Rendez-vous &amp; Consultations 30 min</h1>
+                  <p className="text-xs text-slate-400">
+                    Sessions de cadrage technique réservées avec la Direction et les architectes de solutions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {bookings.map((booking) => (
+                  <div key={booking.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
+                        {booking.hubLocation || 'Hub Panafricain'}
+                      </span>
+                      <select
+                        value={booking.status}
+                        onChange={(e) => handleUpdateBookingStatus(booking.id, e.target.value as any)}
+                        className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-950 border border-slate-700 text-white"
+                      >
+                        <option value="scheduled">Planifié</option>
+                        <option value="completed">Effectué</option>
+                        <option value="cancelled">Annulé</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-black text-white">{booking.fullName}</h3>
+                      <div className="text-xs text-slate-400">{booking.email}</div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1 text-xs">
+                      <div className="flex items-center gap-2 text-cyan-400 font-bold">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{booking.date} • {booking.timeSlot}</span>
+                      </div>
+                      <div className="text-slate-300 text-[11px]">{booking.topic}</div>
+                    </div>
+                  </div>
+                ))}
+                {bookings.length === 0 && (
+                  <div className="col-span-full py-12 text-center text-slate-500 text-xs">
+                    Aucun rendez-vous planifié pour l'instant.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: ESTIMATES */}
+          {activeTab === 'estimates' && (
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-black text-white">Simulations de Devis en Ligne</h1>
+                <p className="text-xs text-slate-400">
+                  Historique des configurations et estimations calculées par les visiteurs.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {estimates.map((est) => (
+                  <div key={est.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
+                    <span className="text-[10px] uppercase font-bold text-blue-400">
+                      {est.projectType}
+                    </span>
+                    <div className="text-lg font-black text-emerald-400">{est.estimatedBudget}</div>
+                    <div className="text-xs text-slate-400">Délai estimé : {est.estimatedTimeline}</div>
+                    <div className="text-[10px] text-slate-500 font-mono pt-1">
+                      Calculé le {est.createdAt?.slice(0, 10)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: SUBSCRIBERS */}
+          {activeTab === 'subscribers' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-black text-white">Abonnés Newsletter &amp; Livres Blancs</h1>
+                  <p className="text-xs text-slate-400">
+                    Liste des décideurs et directeurs techniques abonnés aux publications R&amp;D.
+                  </p>
+                </div>
+                <button
+                  onClick={exportSubscribersCSV}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase transition-all cursor-pointer shadow-lg"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Exporter CSV</span>
+                </button>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                      <th className="py-3 px-4">Email</th>
+                      <th className="py-3 px-4">Livre Blanc Téléchargé</th>
+                      <th className="py-3 px-4">Date Inscription</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800">
+                    {subscribers.map((sub) => (
+                      <tr key={sub.id} className="hover:bg-slate-800/40">
+                        <td className="py-3 px-4 font-bold text-white">{sub.email}</td>
+                        <td className="py-3 px-4 text-purple-300">{sub.whitepaperRequested || 'Newsletter R&D'}</td>
+                        <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{sub.createdAt?.slice(0, 10)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: SECURITY & INFRASTRUCTURE */}
+          {activeTab === 'security' && (
+            <div className="space-y-6 max-w-4xl">
+              <div>
+                <h1 className="text-2xl font-black text-white">Sécurité &amp; Architecture Cloud</h1>
+                <p className="text-xs text-slate-400">
+                  Paramètres Zero-Trust, politiques Firestore et monitoring des accès.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                    <ShieldCheck className="w-5 h-5" />
+                    <span>Firestore Security Rules v2</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Règles granulaires actives avec validation stricte par schéma, restrictions d'écriture et protection des données sensibles.
+                  </p>
+                  <div className="text-[11px] font-mono text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    Admin Email: contact.vitechdev@gmail.com
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                    <Server className="w-5 h-5" />
+                    <span>Haute Disponibilité Panafricaine</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Infrastructure résiliente hébergée avec CDN mondial, réplication multi-régions et chiffrement de bout en bout (TLS 1.3).
+                  </p>
+                  <div className="text-[11px] font-mono text-emerald-400 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                    SLA Status: 99.99% Operational
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </div>
+
+    </div>
+  );
+};
