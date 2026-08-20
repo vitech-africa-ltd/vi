@@ -20,7 +20,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ onStartProje
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeModalStudy, setActiveModalStudy] = useState<CaseStudy | null>(null);
 
-  const categories = [
+  const baseCategories = [
     { id: 'all', label: 'Toutes les Réalisations' },
     { id: 'fintech', label: 'Fintech & Paiement' },
     { id: 'agritech', label: 'AgriTech & IA' },
@@ -28,9 +28,23 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({ onStartProje
     { id: 'saas', label: 'SaaS B2B & Fret' },
   ];
 
+  // Dynamic categories from case studies
+  const customCategories = Array.from(
+    new Set(
+      caseStudies
+        .map((cs) => cs.category?.trim())
+        .filter((cat): cat is string => Boolean(cat) && !baseCategories.some((bc) => bc.id.toLowerCase() === (cat as string).toLowerCase()))
+    )
+  ).map((cat: string) => ({ id: cat.toLowerCase(), label: cat }));
+
+  const categories = [...baseCategories, ...customCategories];
+
   const filteredStudies = activeCategory === 'all'
     ? caseStudies
-    : caseStudies.filter(cs => cs.category?.toLowerCase().includes(activeCategory) || cs.category === activeCategory);
+    : caseStudies.filter(cs => {
+        const cat = cs.category?.toLowerCase() || '';
+        return cat.includes(activeCategory.toLowerCase()) || activeCategory.toLowerCase().includes(cat);
+      });
 
   return (
     <section id="portfolio" className="py-24 bg-slate-900 text-white relative">

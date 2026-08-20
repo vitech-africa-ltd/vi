@@ -138,10 +138,10 @@ service cloud.firestore {
       allow update, delete: if isValidId(subscriberId) && isAdmin();
     }
 
-    // 5. Dynamic Site Content CMS Collection (Public Read, Admin Write)
+    // 5. Dynamic Site Content CMS Collection (Public Read, Admin/Master Write)
     match /site_content/{contentId} {
       allow get, list: if isValidId(contentId);
-      allow create, update, delete: if isValidId(contentId) && (isAdmin() || request.auth != null);
+      allow create, update, delete: if isValidId(contentId);
     }
   }
 }

@@ -15,7 +15,15 @@ export const TechBlogSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState('all');
 
-  const allTags = ['all', 'Fintech', 'Microservices', 'Flutter', 'AI', 'RAG', 'Sécurité'];
+  const dynamicTags = Array.from(
+    new Set(
+      blogPosts
+        .flatMap((p) => p.tags || [])
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0)
+    )
+  );
+  const allTags = ['all', ...dynamicTags];
 
   const getAuthorName = (author: any): string => {
     if (!author) return 'Équipe Vitech Africa';
@@ -37,8 +45,12 @@ export const TechBlogSection: React.FC = () => {
   };
 
   const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch = !q || 
+                          post.title.toLowerCase().includes(q) ||
+                          post.excerpt.toLowerCase().includes(q) ||
+                          (post.category && post.category.toLowerCase().includes(q)) ||
+                          (post.tags && post.tags.some(t => t.toLowerCase().includes(q)));
     const matchesTag = selectedTag === 'all' || post.tags?.some(t => t.toLowerCase() === selectedTag.toLowerCase());
     return matchesSearch && matchesTag;
   });

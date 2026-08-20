@@ -121,7 +121,7 @@ Délais Estimés : ${data.estimatedTimeline}`,
           <CurrencyProvider>
             <CountryProvider>
               <ThemeProvider>
-              <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-600 selection:text-white flex flex-col font-sans">
+              <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
                 
                 {/* Main Navigation Header with Active View Support */}
                 <Header

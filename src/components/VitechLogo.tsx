@@ -326,30 +326,32 @@ export const VitechLogo: React.FC<VitechLogoProps> = ({
 
   // Variant: Horizontal Header/Navbar Lockup
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 sm:gap-2.5 md:gap-3 shrink-0 ${className}`}>
       {/* Official Circular Shield Badge */}
-      <div className={`${currentSize.badge} relative flex-shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-        <ShieldSVG idPrefix={`horiz-${size}`} />
+      <div className="relative shrink-0 transition-transform duration-300 group-hover:scale-105">
+        <div className="h-7 w-7 min-[420px]:h-8 min-[420px]:w-8 sm:h-9 sm:w-9 md:h-10 md:w-10">
+          <ShieldSVG idPrefix={`horiz-${size}`} />
+        </div>
       </div>
 
       {/* Brand Typography */}
-      <div className="flex flex-col">
-        <div className="flex items-center gap-1.5 leading-none">
-          <span className={`font-black tracking-tight ${currentSize.textTitle} text-blue-600`}>
+      <div className="flex flex-col justify-center text-left select-none shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 leading-none whitespace-nowrap">
+          <span className="font-black tracking-tight text-xs min-[380px]:text-sm sm:text-base md:text-lg text-white">
             V&amp;I TECH
           </span>
-          <span className={`font-black tracking-tight ${currentSize.textTitle} text-emerald-500`}>
+          <span className="font-black tracking-tight text-xs min-[380px]:text-sm sm:text-base md:text-lg text-emerald-400">
             AFRICA
           </span>
-          <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-200 tracking-wider">
+          <span className="text-[8px] min-[380px]:text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30 tracking-wider shadow-sm">
             LTD
           </span>
         </div>
 
         {showTagline && (
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className={`font-mono font-bold text-slate-500 ${currentSize.textSub} tracking-wider uppercase`}>
-              INNOVATE • DEVELOP • GROW
+          <div className="hidden sm:flex items-center mt-1 leading-none whitespace-nowrap">
+            <span className="font-mono font-semibold text-slate-400 text-[9px] min-[480px]:text-[10px] md:text-[11px] tracking-widest uppercase">
+              INNOVATE <span className="text-blue-400">•</span> DEVELOP <span className="text-emerald-400">•</span> GROW
             </span>
           </div>
         )}

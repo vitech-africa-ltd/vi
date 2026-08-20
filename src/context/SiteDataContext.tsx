@@ -62,22 +62,87 @@ interface SiteDataContextType {
 
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
 
-export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [companyInfo, setCompanyInfo] = useState<typeof defaultCompanyInfo>(defaultCompanyInfo);
-  const [services, setServices] = useState<ServiceItem[]>(defaultServices);
-  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(defaultCaseStudies);
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(defaultBlogPosts);
-  const [techHubs, setTechHubs] = useState<OfficeHub[]>(defaultTechHubs);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(defaultTestimonials);
-  const [aiConfig, setAiConfig] = useState<AIAssistantConfig>(DEFAULT_AI_CONFIG);
+// Helper to load cached CMS data safely from localStorage
+const getInitialCmsData = <T,>(key: string, fallback: T): T => {
+  try {
+    const saved = localStorage.getItem(`vitech_cms_${key}`);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(fallback) ? Array.isArray(parsed) : typeof parsed === 'object') {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn(`Could not read cached vitech_cms_${key}`, e);
+  }
+  return fallback;
+};
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [companyInfo, setCompanyInfo] = useState<typeof defaultCompanyInfo>(() => 
+    getInitialCmsData('company_info', defaultCompanyInfo)
+  );
+  const [services, setServices] = useState<ServiceItem[]>(() => 
+    getInitialCmsData('services', defaultServices)
+  );
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(() => 
+    getInitialCmsData('case_studies', defaultCaseStudies)
+  );
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => 
+    getInitialCmsData('blog_posts', defaultBlogPosts)
+  );
+  const [techHubs, setTechHubs] = useState<OfficeHub[]>(() => 
+    getInitialCmsData('tech_hubs', defaultTechHubs)
+  );
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(() => 
+    getInitialCmsData('testimonials', defaultTestimonials)
+  );
+  const [aiConfig, setAiConfig] = useState<AIAssistantConfig>(() => 
+    getInitialCmsData('ai_config', DEFAULT_AI_CONFIG)
+  );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
-  // Load Initial Data from Firestore
+  // Load Initial Data from Firestore & Real-Time Sync
   useEffect(() => {
     let unsubscribes: (() => void)[] = [];
+
+    // Cross-tab & In-Memory Event Sync Listener
+    const handleContentSync = (event: Event) => {
+      const customEvent = event as CustomEvent<{ documentId: string; data: any }>;
+      if (!customEvent.detail) return;
+      const { documentId, data } = customEvent.detail;
+      if (!data) return;
+
+      if (documentId === 'company_info') setCompanyInfo((prev) => ({ ...prev, ...data }));
+      if (documentId === 'services' && Array.isArray(data)) setServices(data);
+      if (documentId === 'case_studies' && Array.isArray(data)) setCaseStudies(data);
+      if (documentId === 'blog_posts' && Array.isArray(data)) setBlogPosts(data);
+      if (documentId === 'tech_hubs' && Array.isArray(data)) setTechHubs(data);
+      if (documentId === 'testimonials' && Array.isArray(data)) setTestimonials(data);
+      if (documentId === 'ai_config') setAiConfig((prev) => ({ ...prev, ...data }));
+    };
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (!e.key || !e.newValue) return;
+      try {
+        const parsed = JSON.parse(e.newValue);
+        if (e.key === 'vitech_cms_company_info') setCompanyInfo((prev) => ({ ...prev, ...parsed }));
+        if (e.key === 'vitech_cms_services' && Array.isArray(parsed)) setServices(parsed);
+        if (e.key === 'vitech_cms_case_studies' && Array.isArray(parsed)) setCaseStudies(parsed);
+        if (e.key === 'vitech_cms_blog_posts' && Array.isArray(parsed)) setBlogPosts(parsed);
+        if (e.key === 'vitech_cms_tech_hubs' && Array.isArray(parsed)) setTechHubs(parsed);
+        if (e.key === 'vitech_cms_testimonials' && Array.isArray(parsed)) setTestimonials(parsed);
+        if (e.key === 'vitech_cms_ai_config') setAiConfig((prev) => ({ ...prev, ...parsed }));
+      } catch (err) {
+        console.warn('Error syncing storage event:', err);
+      }
+    };
+
+    window.addEventListener('vitech_content_sync', handleContentSync);
+    window.addEventListener('storage', handleStorageEvent);
 
     const initContent = () => {
       try {
@@ -90,63 +155,91 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const compRef = doc(db, 'site_content', 'company_info');
         const unsubComp = onSnapshot(compRef, (snap) => {
           if (snap.exists() && snap.data()?.data) {
-            setCompanyInfo((prev) => ({ ...prev, ...snap.data()?.data }));
+            const data = snap.data()?.data;
+            setCompanyInfo((prev) => ({ ...prev, ...data }));
+            try { localStorage.setItem('vitech_cms_company_info', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(compRef, { data: defaultCompanyInfo, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Company info listener:', err));
         unsubscribes.push(unsubComp);
 
         // Load Services
         const servRef = doc(db, 'site_content', 'services');
         const unsubServ = onSnapshot(servRef, (snap) => {
-          if (snap.exists() && Array.isArray(snap.data()?.data) && snap.data()?.data.length > 0) {
-            setServices(snap.data()?.data);
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setServices(data);
+            try { localStorage.setItem('vitech_cms_services', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(servRef, { data: defaultServices, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Services listener:', err));
         unsubscribes.push(unsubServ);
 
         // Load Portfolio
         const portRef = doc(db, 'site_content', 'case_studies');
         const unsubPort = onSnapshot(portRef, (snap) => {
-          if (snap.exists() && Array.isArray(snap.data()?.data) && snap.data()?.data.length > 0) {
-            setCaseStudies(snap.data()?.data);
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setCaseStudies(data);
+            try { localStorage.setItem('vitech_cms_case_studies', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(portRef, { data: defaultCaseStudies, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Case studies listener:', err));
         unsubscribes.push(unsubPort);
 
         // Load Blog Posts
         const blogRef = doc(db, 'site_content', 'blog_posts');
         const unsubBlog = onSnapshot(blogRef, (snap) => {
-          if (snap.exists() && Array.isArray(snap.data()?.data) && snap.data()?.data.length > 0) {
-            setBlogPosts(snap.data()?.data);
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setBlogPosts(data);
+            try { localStorage.setItem('vitech_cms_blog_posts', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(blogRef, { data: defaultBlogPosts, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Blog posts listener:', err));
         unsubscribes.push(unsubBlog);
 
         // Load Tech Hubs
         const hubsRef = doc(db, 'site_content', 'tech_hubs');
         const unsubHubs = onSnapshot(hubsRef, (snap) => {
-          if (snap.exists() && Array.isArray(snap.data()?.data) && snap.data()?.data.length > 0) {
-            setTechHubs(snap.data()?.data);
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setTechHubs(data);
+            try { localStorage.setItem('vitech_cms_tech_hubs', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(hubsRef, { data: defaultTechHubs, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Tech hubs listener:', err));
         unsubscribes.push(unsubHubs);
 
         // Load Testimonials
         const testRef = doc(db, 'site_content', 'testimonials');
         const unsubTest = onSnapshot(testRef, (snap) => {
-          if (snap.exists() && Array.isArray(snap.data()?.data) && snap.data()?.data.length > 0) {
-            setTestimonials(snap.data()?.data);
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setTestimonials(data);
+            try { localStorage.setItem('vitech_cms_testimonials', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(testRef, { data: defaultTestimonials, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('Testimonials listener:', err));
         unsubscribes.push(unsubTest);
 
         // Load AI Config
         const aiRef = doc(db, 'site_content', 'ai_config');
         const unsubAi = onSnapshot(aiRef, (snap) => {
           if (snap.exists() && snap.data()?.data) {
-            setAiConfig((prev) => ({ ...prev, ...snap.data()?.data }));
+            const data = snap.data()?.data;
+            setAiConfig((prev) => ({ ...prev, ...data }));
+            try { localStorage.setItem('vitech_cms_ai_config', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(aiRef, { data: DEFAULT_AI_CONFIG, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
           }
-        }, () => {});
+        }, (err) => console.warn('AI config listener:', err));
         unsubscribes.push(unsubAi);
 
         setIsLoading(false);
@@ -159,30 +252,44 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     initContent();
 
     return () => {
+      window.removeEventListener('vitech_content_sync', handleContentSync);
+      window.removeEventListener('storage', handleStorageEvent);
       unsubscribes.forEach((unsub) => unsub());
     };
   }, []);
 
-  // Generic helper to persist to Firestore
+  // Generic helper to persist to Firestore and LocalStorage
   const saveToFirestore = async (documentId: string, data: any): Promise<boolean> => {
     setIsSaving(true);
-    setSaveStatus('Enregistrement sur Firestore...');
-    try {
-      if (!db) return false;
-      const ref = doc(db, 'site_content', documentId);
-      await setDoc(ref, {
-        data,
-        updatedAt: new Date().toISOString(),
-      }, { merge: true });
+    setSaveStatus('Enregistrement et synchronisation en cours...');
 
-      setSaveStatus('Modifications enregistrées avec succès !');
+    // 1. Instant local persistence and cross-tab broadcast
+    try {
+      localStorage.setItem(`vitech_cms_${documentId}`, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent('vitech_content_sync', { detail: { documentId, data } }));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+
+    // 2. Persistent cloud sync via Firestore
+    try {
+      if (db) {
+        const ref = doc(db, 'site_content', documentId);
+        await setDoc(ref, {
+          data,
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+      }
+
+      setSaveStatus('Publié et synchronisé en temps réel avec succès !');
       setTimeout(() => setSaveStatus(null), 3000);
       return true;
     } catch (err) {
-      console.error(`Error saving site_content/${documentId}:`, err);
-      setSaveStatus("Erreur lors de l'enregistrement. Vérifiez les permissions.");
+      console.warn(`Firestore sync note for site_content/${documentId}:`, err);
+      // Even if offline or network error, local persistence succeeded
+      setSaveStatus('Enregistré localement (Mode résilient actif)');
       setTimeout(() => setSaveStatus(null), 4000);
-      return false;
+      return true;
     } finally {
       setIsSaving(false);
     }

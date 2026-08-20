@@ -27,7 +27,7 @@ interface ScheduleModalProps {
 
 export const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, selectedHub }) => {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState<string>('2026-08-18');
+  const [selectedDate, setSelectedDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = useState<string>('14:30 UTC');
   const [fullName, setFullName] = useState<string>(user?.displayName || '');
   const [email, setEmail] = useState<string>(user?.email || '');
