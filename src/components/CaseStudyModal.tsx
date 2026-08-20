@@ -11,6 +11,7 @@ import {
   Globe
 } from 'lucide-react';
 import { CaseStudy } from '../types';
+import { useTranslation } from '../context/LanguageContext';
 
 interface CaseStudyModalProps {
   caseStudy?: CaseStudy | null;
@@ -27,6 +28,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   onStartSimilarProject,
   onStartProject,
 }) => {
+  const { t } = useTranslation();
   const caseStudy = rawCaseStudy || rawStudy;
   if (!caseStudy) return null;
 
@@ -57,7 +59,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           <div className="flex items-center space-x-2">
             <span className="text-xl">{caseStudy.countryFlag || '🌍'}</span>
             <span className="text-xs font-mono text-emerald-400 uppercase tracking-wider font-semibold">
-              Étude de Cas : {caseStudy.client || 'Client Partenaire'}
+              {caseStudy.client || 'Client Partenaire'}
             </span>
           </div>
           <button
@@ -113,7 +115,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               {caseStudy.challenge && (
                 <div className="p-5 rounded-2xl bg-red-950/20 border border-red-500/20 space-y-2">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-red-400 flex items-center gap-2">
-                    <span>Le Défi Initial</span>
+                    <span>{t('portfolio.modalChallenge', 'Le Défi Initial')}</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     {caseStudy.challenge}
@@ -124,7 +126,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               {caseStudy.solution && (
                 <div className="p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                    <span>La Solution Vitech Africa</span>
+                    <span>{t('portfolio.modalSolution', 'La Solution Vitech Africa')}</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     {caseStudy.solution}
@@ -139,7 +141,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             <div className="p-6 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
               <div className="flex items-center space-x-2 text-cyan-400 font-bold text-sm">
                 <Cpu className="w-4 h-4" />
-                <span>Choix d'Architecture & Décisions d'Ingénierie</span>
+                <span>{t('portfolio.modalArchitecture', "Choix d'Architecture & Décisions d'Ingénierie")}</span>
               </div>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {caseStudy.architecture}
@@ -148,7 +150,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               {/* Tech stack badges */}
               {techStack.length > 0 && (
                 <div className="pt-2">
-                  <span className="text-xs font-semibold text-slate-400 block mb-2">Technologies & Outils déployés :</span>
+                  <span className="text-xs font-semibold text-slate-400 block mb-2">{t('portfolio.modalTechDeployed', 'Technologies & Outils déployés :')}</span>
                   <div className="flex flex-wrap gap-2">
                     {techStack.map((tech, idx) => (
                       <span 
@@ -196,14 +198,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             onClick={onClose}
             className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-slate-400 hover:text-white text-xs sm:text-sm font-medium transition-colors cursor-pointer"
           >
-            Fermer l'étude de cas
+            {t('portfolio.modalClose', "Fermer l'étude de cas")}
           </button>
 
           <button
             onClick={handleStartProject}
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md shadow-emerald-500/30 transition-all cursor-pointer"
           >
-            <span>Démarrer un projet similaire</span>
+            <span>{t('portfolio.modalStartSimilar', 'Démarrer un projet similaire')}</span>
             <ExternalLink className="w-4 h-4" />
           </button>
         </div>

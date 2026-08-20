@@ -226,6 +226,32 @@ export const Header: React.FC<HeaderProps> = ({
     },
 
     {
+      id: 'profile',
+      labelKey: 'nav.profile',
+      defaultLabel: 'Expertise & Tarifs',
+      submenu: [
+        {
+          label: 'Profil Technique & Compétences',
+          description: 'Stack de développement, WPF/C#, PHP, APIs',
+          icon: Code2,
+          view: 'profile',
+        },
+        {
+          label: 'Grille Tarifaire Internationale (2026)',
+          description: 'Normes Banque Mondiale (4 Paliers, RWF, USD)',
+          icon: Globe2,
+          view: 'pricing',
+        },
+        {
+          label: 'Formation ULK & Disponibilité',
+          description: 'Université de Kigali & Opportunités de recrutement',
+          icon: Sparkles,
+          view: 'profile',
+        },
+      ],
+    },
+
+    {
       id: 'blog',
       labelKey: 'nav.blog',
       defaultLabel: 'Blog & R&D',
@@ -527,28 +553,29 @@ export const Header: React.FC<HeaderProps> = ({
 
             <LanguageSwitcher variant="header" />
 
-            {/* THEME */}
+            {/* THEME SWITCHER */}
 
             <button
               onClick={toggleTheme}
               className="
-                hidden h-6 items-center gap-1
-                rounded-md border border-slate-700
+                inline-flex h-6 items-center gap-1.5
+                rounded-md border border-slate-700/90
                 bg-slate-900 px-2
                 text-[10px] font-bold text-slate-300
-                transition
-                hover:bg-slate-800
-                lg:inline-flex
+                transition-all duration-200 cursor-pointer
+                hover:border-slate-600 hover:bg-slate-800 hover:text-white
+                active:scale-95 shadow-xs
               "
               aria-label="Changer le thème"
+              title={mode === 'dark' ? "Passer en mode clair" : "Passer en mode sombre"}
             >
               {mode === 'dark' ? (
-                <Sun className="h-3 w-3 text-amber-400" />
+                <Sun className="h-3 w-3 text-amber-400 shrink-0" />
               ) : (
-                <Moon className="h-3 w-3 text-cyan-300" />
+                <Moon className="h-3 w-3 text-cyan-300 shrink-0" />
               )}
 
-              <span className="hidden xl:inline">
+              <span className="inline">
                 {mode === 'dark' ? 'Clair' : 'Sombre'}
               </span>
             </button>
@@ -1130,25 +1157,6 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                   </div>
                 )}
-              </div>
-
-              {/* THEME TOGGLE (Visible on sm+) */}
-              <div className="relative group hidden sm:block">
-                <button
-                  onClick={toggleTheme}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700/80 bg-slate-900/90 text-slate-200 transition-all duration-300 hover:scale-110 active:scale-95 hover:border-slate-500 hover:bg-slate-800 hover:text-white shrink-0 cursor-pointer shadow-sm hover:shadow-md"
-                  aria-label="Basculer le thème"
-                  title="Basculer le thème"
-                >
-                  {mode === 'dark' ? (
-                    <Sun className="h-4 w-4 text-amber-400 transition-transform duration-300 group-hover:rotate-45" />
-                  ) : (
-                    <Moon className="h-4 w-4 text-cyan-300 transition-transform duration-300 group-hover:-rotate-12" />
-                  )}
-                </button>
-                <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[10px] font-medium text-slate-200 opacity-0 shadow-xl transition-opacity group-hover:opacity-100 z-50">
-                  {mode === 'dark' ? 'Mode Clair' : 'Mode Sombre'}
-                </div>
               </div>
 
               {/* 1. WHATSAPP ICON BUTTON (Tablet sm+ and Desktop) */}

@@ -25,7 +25,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 
 export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   fr: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Accueil',
     'nav.services': 'Services',
     'nav.portfolio': 'Réalisations',
@@ -42,6 +42,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp Dir.',
     'nav.directLine': 'Ligne Directeur',
     'nav.online': 'En Ligne',
+    'nav.quickActions': 'Accès Rapide',
+    'nav.search': 'Rechercher un service, un projet ou une techno...',
 
     // Hero
     'hero.badge': 'Pôle d’Excellence Technologique Panafricain',
@@ -56,6 +58,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Projets Déployés',
     'hero.statCountries': 'Pays Couverts',
     'hero.statSatisfaction': 'Satisfaction Client',
+    'hero.centerExcellence': 'Pôle d’Excellence R&D',
+    'hero.explorePortfolio': 'Explorer les Réalisations',
 
     // Services
     'services.badge': 'Pôles d’Ingénierie & R&D',
@@ -68,6 +72,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'services.ctaDetails': 'Fiche Technique & Livrables',
     'services.deliverablesTitle': 'Livrables Contractuels Clés',
     'services.featuresTitle': 'Capacités & Fonctionnalités',
+    'services.heroBadge': 'Catalogue des Services & Pôles d\'Ingénierie',
+    'services.heroTitle': 'Des Solutions Logicielle & Cloud',
+    'services.heroTitleHighlight': 'Conçues pour Durer',
+    'services.heroDesc': 'De l\'architecture de plateformes SaaS scalables au développement d\'applications mobiles panafricaines, en passant par les audits de cybersécurité et l\'intégration de modèles IA génératifs.',
+    'services.heroCtaQuote': 'Simuler un devis de projet',
+    'services.heroCtaCall': 'Réserver un cadrage technique',
+    'services.guaranteeBadge': 'Engagements d\'Excellence',
+    'services.guaranteeTitle': 'Nos Standards Contractuels & Qualité',
+    'services.propTitle': 'Code 100% Propriété Client',
+    'services.propDesc': 'Cession totale des droits d’auteur, du code source et de la propriété intellectuelle dès la livraison finale. Dépôts privés et documentation d\'architecture inclus.',
+    'services.slaTitle': 'Haute Disponibilité & SLA 99.99%',
+    'services.slaDesc': 'Infrastructures redondantes hébergées sur le Cloud (AWS, Google Cloud) avec astreinte technique 24/7 et temps de réponse contractuel garanti.',
+    'services.warrantyTitle': 'Garantie Corrective 6 Mois',
+    'services.warrantyDesc': 'Accompagnement post-lancement avec résolution prioritaire de tout incident ou anomalie sans coût supplémentaire.',
 
     // Estimator
     'estimator.badge': 'Simulateur Transparent & Devis par Pays',
@@ -94,12 +112,70 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'techHubs.title': 'Nos Hubs Technologiques en Afrique',
     'techHubs.subtitle': 'Une force d’ingénierie distribuée au cœur des écosystèmes d’innovation de Kigali, Dakar, Abidjan et Paris.',
     'techHubs.scheduleWithLead': 'Prendre rendez-vous avec ce Hub',
+    'techHubs.heroBadge': 'Réseau Panafricain & International',
+    'techHubs.heroTitle': 'Une Présence Stratégique à Travers les',
+    'techHubs.heroTitleHighlight': 'Capitales Technologiques',
+    'techHubs.heroDesc': 'De notre siège à Kigali aux pôles d\'ingénierie de Dakar, Abidjan, Nairobi, Casablanca et notre antenne de liaison à Paris, nos équipes seniors sont au plus près de vos enjeux opérationnels.',
+    'techHubs.heroCtaSchedule': 'Prendre RDV dans un de nos Hubs',
+    'techHubs.heroCtaContact': 'Contacter la Direction Générale',
+    'techHubs.officesBadge': 'Bureaux & Coordonnées',
+    'techHubs.officesTitle': 'Nos Bureaux & Centres de R&D',
+    'techHubs.team': 'Équipe',
+    'techHubs.specialty': 'Spécialité',
+    'techHubs.bookVisit': 'Réserver une visite ou un RDV',
 
     // Portfolio
     'portfolio.badge': 'Études de Cas & Déploiements',
     'portfolio.title': 'Nos Réalisations d’Ingénierie Logicielle',
     'portfolio.subtitle': 'Découvrez comment nous avons transformé des défis technologiques complexes en solutions digitales à fort impact.',
     'portfolio.ctaSimilar': 'Démarrer un projet similaire',
+    'portfolio.heroBadge': 'Études de Cas & Systèmes en Production',
+    'portfolio.heroTitle': 'Découvrez Nos Réalisations Majeures &',
+    'portfolio.heroTitleHighlight': 'Impacts Mesurés',
+    'portfolio.heroDesc': 'Des applications financières à fort volume de transactions aux plateformes logistiques et médicales, découvrez comment nos ingénieurs ont résolu des défis techniques complexes.',
+    'portfolio.heroCtaQuote': 'Chiffrer un projet similaire',
+    'portfolio.heroCtaTechDir': 'Discuter avec notre Direction Technique',
+    'portfolio.viewMetrics': 'Consulter l\'architecture & les métriques',
+    'portfolio.modalClose': 'Fermer l\'étude de cas',
+    'portfolio.modalStartSimilar': 'Démarrer un projet similaire',
+    'portfolio.modalChallenge': 'Le Défi Initial',
+    'portfolio.modalSolution': 'La Solution Vitech Africa',
+    'portfolio.modalArchitecture': 'Choix d\'Architecture & Décisions d\'Ingénierie',
+    'portfolio.modalTechDeployed': 'Technologies & Outils déployés :',
+
+    // FAQ
+    'faq.badge': 'Centre de Connaissances & Transparence',
+    'faq.title': 'Tout Ce Que Vous Devez Savoir',
+    'faq.subtitle': 'Propriété du code à 100%, modalités de paiement en devises locales, méthodologie Agile Scrum et garanties contractuelles : des réponses claires adaptées à votre contexte.',
+    'faq.searchPlaceholder': 'Rechercher une question (ex: devises, propriété du code, délais, Mobile Money)...',
+    'faq.expandAll': 'Tout déplier',
+    'faq.collapseAll': 'Tout replier',
+    'faq.askQuestion': 'Poser ma question en direct',
+    'faq.helpful': 'Cette réponse vous a-t-elle aidé ?',
+    'faq.thanks': 'Merci pour votre retour !',
+    'faq.ctaTitle': 'Une question technique non listée sur votre projet ?',
+    'faq.ctaDesc': 'Nos directeurs techniques et lead developers analysent votre cahier des charges et répondent en moins de 15 minutes sur WhatsApp ou par Live Chat.',
+    'faq.liveChat': 'Ouvrir le Live Chat',
+    'faq.bookCall': 'Réserver un Appel 30 min',
+
+    // Testimonials
+    'testimonials.badge': 'Confiance & Témoignages Leaders',
+    'testimonials.title': 'Ce que Disent les Directeurs Techniques & Fondateurs',
+    'testimonials.subtitle': 'Ils nous confient leurs applications critiques, leurs infrastructures bancaires et leurs systèmes à forte charge.',
+    'testimonials.verifiedReview': 'Avis Client Vérifié',
+
+    // Blog
+    'blog.badge': 'Veille Technologique & R&D',
+    'blog.title': 'Articles & Analyses d’Ingénierie Logicielle',
+    'blog.subtitle': 'Retours d’expérience, architectures Cloud, sécurité et intelligence artificielle appliqués au contexte africain et mondial.',
+    'blog.readMore': 'Lire l’article complet',
+    'blog.searchPlaceholder': 'Rechercher un article ou une technologie...',
+    'blog.allTags': 'Tous les Thèmes',
+    'blog.heroBadge': 'Publications d\'Ingénierie & R&D',
+    'blog.heroTitle': 'Retours d\'Expérience & Architecture',
+    'blog.heroTitleHighlight': 'Logicielle Avancée',
+    'blog.heroDesc': 'Découvrez les articles techniques rédigés par nos Lead Developers : architectures événementielles, déploiements Kubernetes multi-régions, intégration de modèles d\'IA souverains et sécurité bancaire OWASP.',
+    'blog.heroCta': 'Démarrer un projet technique',
 
     // Contact
     'contact.badge': 'Démarrage de Projet & Contact Direction',
@@ -119,6 +195,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': 'Demande Transmise avec Succès !',
     'contact.successDesc': 'Notre équipe d’ingénieurs et la Direction analysent votre projet. Un retour complet vous sera transmis sous 24h.',
 
+    // Footer
+    'footer.desc': 'Partenaire technologique de référence en ingénierie logicielle avancée, développement SaaS, infrastructures Cloud DevOps et cybersécurité.',
+    'footer.poles': 'Pôles d’Expertise',
+    'footer.navigation': 'Navigation Rapide',
+    'footer.legal': 'Conformité & Juridique',
+    'footer.rights': 'Tous droits réservés.',
+    'footer.terms': 'Conditions Générales de Vente & Prestations',
+    'footer.privacy': 'Politique de Confidentialité & RGPD/Droit OHADA',
+    'footer.ndaTerms': 'Accord de Non-Divulgation & Cession de Code',
+    'footer.currencyConverter': 'Convertisseur de Devises Panafricain',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Espace Client & Portail Projets',
+    'auth.loginDesc': 'Accédez à vos tableaux de bord de suivi de sprints, jalons de livraison et environnements de staging.',
+    'auth.signInGoogle': 'Se connecter avec Google Workspace',
+    'auth.portalAccess': 'Accéder à mon Espace Projet',
+    'auth.myProjects': 'Mes Projets en Cours',
+
     // Common
     'common.search': 'Rechercher...',
     'common.filter': 'Filtrer',
@@ -136,7 +230,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   en: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Home',
     'nav.services': 'Services',
     'nav.portfolio': 'Portfolio',
@@ -153,6 +247,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp Dir.',
     'nav.directLine': 'Managing Director',
     'nav.online': 'Online',
+    'nav.quickActions': 'Quick Actions',
+    'nav.search': 'Search services, projects, or tech stack...',
 
     // Hero
     'hero.badge': 'Pan-African Center of Software Engineering Excellence',
@@ -167,6 +263,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Projects Delivered',
     'hero.statCountries': 'Countries Covered',
     'hero.statSatisfaction': 'Client Satisfaction',
+    'hero.centerExcellence': 'R&D Center of Excellence',
+    'hero.explorePortfolio': 'Explore Case Studies',
 
     // Services
     'services.badge': 'Engineering & R&D Divisions',
@@ -179,6 +277,20 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'services.ctaDetails': 'Specifications & Deliverables',
     'services.deliverablesTitle': 'Key Contractual Deliverables',
     'services.featuresTitle': 'Capabilities & Features',
+    'services.heroBadge': 'Engineering Divisions & Services Directory',
+    'services.heroTitle': 'Software & Cloud Solutions',
+    'services.heroTitleHighlight': 'Engineered to Scale',
+    'services.heroDesc': 'From scalable SaaS platforms to pan-African mobile apps, cybersecurity audits, and enterprise AI integrations.',
+    'services.heroCtaQuote': 'Estimate project budget',
+    'services.heroCtaCall': 'Book technical scoping',
+    'services.guaranteeBadge': 'Commitment to Excellence',
+    'services.guaranteeTitle': 'Our Contractual Quality Standards',
+    'services.propTitle': '100% Client Code Ownership',
+    'services.propDesc': 'Full transfer of copyrights, source code, and intellectual property upon final handover. Includes private repositories and architectural documentation.',
+    'services.slaTitle': 'High Availability & 99.99% SLA',
+    'services.slaDesc': 'Redundant Cloud infrastructure (AWS, Google Cloud) with 24/7 technical on-call support and guaranteed response times.',
+    'services.warrantyTitle': '6 Months Warranty Included',
+    'services.warrantyDesc': 'Post-launch warranty with priority incident resolution at zero extra cost.',
 
     // Estimator
     'estimator.badge': 'Transparent Estimator & Country-Specific Quote',
@@ -205,12 +317,70 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'techHubs.title': 'Our Technology Hubs in Africa',
     'techHubs.subtitle': 'A distributed engineering force in the vibrant tech ecosystems of Kigali, Dakar, Abidjan and Paris.',
     'techHubs.scheduleWithLead': 'Book a call with this Hub',
+    'techHubs.heroBadge': 'Pan-African & International Network',
+    'techHubs.heroTitle': 'Strategic Engineering Presence Across',
+    'techHubs.heroTitleHighlight': 'Innovation Capitals',
+    'techHubs.heroDesc': 'From our Kigali headquarters to engineering hubs in Dakar, Abidjan, Nairobi, Casablanca, and Paris, our senior teams operate close to your markets.',
+    'techHubs.heroCtaSchedule': 'Book a meeting with a Hub',
+    'techHubs.heroCtaContact': 'Contact Executive Management',
+    'techHubs.officesBadge': 'Locations & Contact Info',
+    'techHubs.officesTitle': 'Our Offices & R&D Centers',
+    'techHubs.team': 'Team',
+    'techHubs.specialty': 'Specialty',
+    'techHubs.bookVisit': 'Schedule a visit or meeting',
 
     // Portfolio
     'portfolio.badge': 'Case Studies & Deployments',
     'portfolio.title': 'Our Software Engineering Achievements',
     'portfolio.subtitle': 'Discover how we transformed complex technical challenges into scalable, high-impact digital systems.',
     'portfolio.ctaSimilar': 'Start a similar project',
+    'portfolio.heroBadge': 'Case Studies & Production Systems',
+    'portfolio.heroTitle': 'Discover Our Major Achievements &',
+    'portfolio.heroTitleHighlight': 'Measured Impact',
+    'portfolio.heroDesc': 'From high-volume financial applications to logistics and healthcare platforms, see how our engineers solve complex engineering challenges.',
+    'portfolio.heroCtaQuote': 'Estimate a similar project',
+    'portfolio.heroCtaTechDir': 'Discuss with our Technical Direction',
+    'portfolio.viewMetrics': 'View architecture & key metrics',
+    'portfolio.modalClose': 'Close case study',
+    'portfolio.modalStartSimilar': 'Start a similar project',
+    'portfolio.modalChallenge': 'The Initial Challenge',
+    'portfolio.modalSolution': 'The Vitech Africa Solution',
+    'portfolio.modalArchitecture': 'Architecture Choices & Engineering Decisions',
+    'portfolio.modalTechDeployed': 'Technologies & Tools Deployed:',
+
+    // FAQ
+    'faq.badge': 'Knowledge Center & Transparency',
+    'faq.title': 'Everything You Need to Know',
+    'faq.subtitle': '100% code ownership, local currency billing, Agile Scrum milestones and contractual SLAs: clear answers designed for your context.',
+    'faq.searchPlaceholder': 'Search questions (e.g. currencies, source code ownership, timelines, Mobile Money)...',
+    'faq.expandAll': 'Expand All',
+    'faq.collapseAll': 'Collapse All',
+    'faq.askQuestion': 'Ask Question Directly',
+    'faq.helpful': 'Was this answer helpful?',
+    'faq.thanks': 'Thank you for your feedback!',
+    'faq.ctaTitle': 'Have a specific technical question about your project?',
+    'faq.ctaDesc': 'Our technical directors and lead software architects analyze your requirements and respond in under 15 minutes via WhatsApp or Live Chat.',
+    'faq.liveChat': 'Open Live Chat',
+    'faq.bookCall': 'Book 30 min Call',
+
+    // Testimonials
+    'testimonials.badge': 'Proven Trust & Executive Endorsements',
+    'testimonials.title': 'What CTOs & Tech Founders Say About Us',
+    'testimonials.subtitle': 'They trust us with their mission-critical apps, banking infrastructures and high-throughput systems.',
+    'testimonials.verifiedReview': 'Verified Client Review',
+
+    // Blog
+    'blog.badge': 'Tech Watch & R&D Insights',
+    'blog.title': 'Software Engineering Insights & Whitepapers',
+    'blog.subtitle': 'Field-tested architectures, Cloud DevOps, cybersecurity and AI implementations in Africa and globally.',
+    'blog.readMore': 'Read full article',
+    'blog.searchPlaceholder': 'Search articles, topics or tech stacks...',
+    'blog.allTags': 'All Topics',
+    'blog.heroBadge': 'Engineering Publications & R&D',
+    'blog.heroTitle': 'Production Case Studies &',
+    'blog.heroTitleHighlight': 'Advanced Architecture',
+    'blog.heroDesc': 'Explore deep-dive technical articles written by our Lead Developers: event-driven architectures, multi-region Kubernetes, sovereign AI models, and banking-grade security.',
+    'blog.heroCta': 'Start a Technical Project',
 
     // Contact
     'contact.badge': 'Project Initiation & Executive Contact',
@@ -230,6 +400,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': 'Inquiry Submitted Successfully!',
     'contact.successDesc': 'Our engineering leadership is analyzing your requirements. You will receive a detailed proposal within 24 hours.',
 
+    // Footer
+    'footer.desc': 'Premier technology partner in advanced software engineering, enterprise SaaS, Cloud DevOps and cybersecurity solutions.',
+    'footer.poles': 'Engineering Divisions',
+    'footer.navigation': 'Quick Links',
+    'footer.legal': 'Compliance & Legal',
+    'footer.rights': 'All rights reserved.',
+    'footer.terms': 'Terms of Service & Engineering Agreements',
+    'footer.privacy': 'Privacy Policy & International Data Protection',
+    'footer.ndaTerms': 'Non-Disclosure Agreement & Full IP Transfer',
+    'footer.currencyConverter': 'Pan-African Currency Converter',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Client Portal & Project Dashboard',
+    'auth.loginDesc': 'Access your real-time sprint tracking boards, deliverables schedule and staging environments.',
+    'auth.signInGoogle': 'Sign In with Google Workspace',
+    'auth.portalAccess': 'Access Project Portal',
+    'auth.myProjects': 'My Active Projects',
+
     // Common
     'common.search': 'Search...',
     'common.filter': 'Filter',
@@ -247,7 +435,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   ar: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'الرئيسية',
     'nav.services': 'الخدمات الهندسية',
     'nav.portfolio': 'مشاريعنا الناجحة',
@@ -264,6 +452,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'واتساب الإدارة',
     'nav.directLine': 'الخط المباشر',
     'nav.online': 'متصل الآن',
+    'nav.quickActions': 'وصول سريع',
+    'nav.search': 'ابحث عن خدمة، مشروع، أو تقنية...',
 
     // Hero
     'hero.badge': 'مركز التميز التكنولوجي الأفريقي والعالمي',
@@ -278,6 +468,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'مشروع تم تسليمه',
     'hero.statCountries': 'دولة نغطيها',
     'hero.statSatisfaction': 'نسبة رضا العملاء',
+    'hero.centerExcellence': 'مركز التميز والبحث والتطوير',
+    'hero.explorePortfolio': 'استكشف دراسات الحالة',
+
+    // Services
+    'services.badge': 'أقسام الهندسة والتطوير',
+    'services.title': 'حلول تكنولوجية مؤسسية مخصصة',
+    'services.subtitle': 'من البنى التحتية الحساسة إلى أتمتة الأعمال بالذكاء الاصطناعي، يقدم مهندسونا أنظمة برمجية قابلة للتوسع.',
+    'services.allCategories': 'كافة التخصصات',
+    'services.startingAt': 'تبدأ من',
+    'services.timeline': 'متوسط المدة',
+    'services.ctaConfigure': 'تهيئة الخدمة في الحاسبة',
+    'services.ctaDetails': 'المواصفات والمخرجات',
+    'services.deliverablesTitle': 'المخرجات التعاقدية الرئيسية',
+    'services.featuresTitle': 'القدرات والخصائص',
+    'services.heroBadge': 'دليل الخدمات وأقسام الهندسة البرمجية',
+    'services.heroTitle': 'حلول برمجية وسحابية مؤسسية',
+    'services.heroTitleHighlight': 'مصممة للنمو والتوسع',
+    'services.heroDesc': 'من بناء منصات SaaS الكبرى وتطبيقات الهاتف الذكية، إلى تدقيق الأمن السيبراني وتكاملات الذكاء الاصطناعي التوليدي.',
+    'services.heroCtaQuote': 'حساب تكلفة المشروع',
+    'services.heroCtaCall': 'حجز جلسة تأطير تقني',
+    'services.guaranteeBadge': 'التزامنا بالتميز',
+    'services.guaranteeTitle': 'معايير الجودة والضمان التعاقدي',
+    'services.propTitle': 'ملكية الكود والشفرة بنسبة 100٪',
+    'services.propDesc': 'تنازل كامل وتام عن حقوق الملكية الفكرية والشفرات المصدرية بمجرد التسليم النهائي، مع توثيق شامل للأنظمة.',
+    'services.slaTitle': 'جاهزية عالية وSLA 99.99٪',
+    'services.slaDesc': 'بنى تحتية سحابية موزعة على AWS وGoogle Cloud مع فريق دعم فني وطوارئ على مدار الساعة 24/7.',
+    'services.warrantyTitle': 'ضمان صيانة مجاني لمدة 6 أشهر',
+    'services.warrantyDesc': 'متابعة ما بعد الإطلاق مع حل فوري لأي ملاحظات تقنية دون أي تكلفة إضافية.',
 
     // Estimator
     'estimator.badge': 'حاسبة شفافة وعرض أسعار مخصص لكل دولة',
@@ -299,17 +517,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': 'طرق الدفع المحلية المقبولة',
     'estimator.taxCompliance': 'الامتثال الضريبي والفوترة القانونية',
 
-    // Services
-    'services.badge': 'أقسام الهندسة والتطوير',
-    'services.title': 'حلول تكنولوجية مؤسسية مخصصة',
-    'services.subtitle': 'من البنى التحتية الحساسة إلى أتمتة الأعمال بالذكاء الاصطناعي، يقدم مهندسونا أنظمة برمجية قابلة للتوسع.',
-    'services.allCategories': 'كافة التخصصات',
-    'services.startingAt': 'تبدأ من',
-    'services.timeline': 'متوسط المدة',
-    'services.ctaConfigure': 'تهيئة الخدمة في الحاسبة',
-    'services.ctaDetails': 'المواصفات والمخرجات',
-    'services.deliverablesTitle': 'المخرجات التعاقدية الرئيسية',
-    'services.featuresTitle': 'القدرات والخصائص',
+    // Tech Hubs
+    'techHubs.badge': 'الوجود الجغرافي والبحث والتطوير',
+    'techHubs.title': 'مراكزنا التكنولوجية في أفريقيا',
+    'techHubs.subtitle': 'قوة هندسية متكاملة في قلب منظومات الابتكار في كيغالي، دكار، أبيدجان، وباريس.',
+    'techHubs.scheduleWithLead': 'حجز موعد مع هذا المركز',
+    'techHubs.heroBadge': 'شبكة إقليمية ودولية متكاملة',
+    'techHubs.heroTitle': 'تواجد استراتيجي في أبرز',
+    'techHubs.heroTitleHighlight': 'عواصم الابتكار التكنولوجي',
+    'techHubs.heroDesc': 'من المقر الرئيسي في كيغالي إلى مراكز الهندسة في دكار، أبيدجان، نيروبي، الدار البيضاء، وباريس.',
+    'techHubs.heroCtaSchedule': 'حجز موعد مع أحد مراكزنا',
+    'techHubs.heroCtaContact': 'الاتصال بالإدارة العامة',
+    'techHubs.officesBadge': 'المواقع ومعلومات الاتصال',
+    'techHubs.officesTitle': 'مكاتبنا ومراكز الأبحاث والتطوير',
+    'techHubs.team': 'فريق العمل',
+    'techHubs.specialty': 'التخصص التقني',
+    'techHubs.bookVisit': 'طلب زيارة أو اجتماع تقني',
+
+    // Portfolio
+    'portfolio.badge': 'دراسات الحالة ومشاريع الإطلاق',
+    'portfolio.title': 'إنجازاتنا في الهندسة البرمجية',
+    'portfolio.subtitle': 'اكتشف كيف حولنا التحديات التقنية المعقدة إلى أنظمة رقمية قابلة للتوسع وعالية التأثير.',
+    'portfolio.ctaSimilar': 'ابدأ مشروعاً مشابهاً',
+    'portfolio.heroBadge': 'دراسات الحالة والأنظمة قيد التشغيل',
+    'portfolio.heroTitle': 'اكتشف أبرز إنجازاتنا الهندسية و',
+    'portfolio.heroTitleHighlight': 'الأثر الفعلي المقاس',
+    'portfolio.heroDesc': 'من التطبيقات المالية ذات الحجم الضخم من المعاملات إلى المنصات اللوجستية والطبية المتقدمة.',
+    'portfolio.heroCtaQuote': 'حساب تكلفة مشروع مماثل',
+    'portfolio.heroCtaTechDir': 'التحدث مع الإدارة التقنية',
+    'portfolio.viewMetrics': 'استعراض البنية التحتية والمقاييس',
+    'portfolio.modalClose': 'إغلاق دراسة الحالة',
+    'portfolio.modalStartSimilar': 'بدء مشروع مماثل الآن',
+    'portfolio.modalChallenge': 'التحدي الهندسي الأساسي',
+    'portfolio.modalSolution': 'حلول Vitech Africa المتكاملة',
+    'portfolio.modalArchitecture': 'القرارات الهندسية واختيارات البنية',
+    'portfolio.modalTechDeployed': 'التقنيات والأدوات المستخدمة:',
+
+    // FAQ
+    'faq.badge': 'مركز المعرفة والشفافية التامة',
+    'faq.title': 'كل ما تود معرفته عن خدماتنا',
+    'faq.subtitle': 'ملكية الشفرة المصدرية بنسبة 100٪، الفوترة بالعملات المحلية، منهجية Agile Scrum المعتمدة وضمانات الأداء التعاقدية.',
+    'faq.searchPlaceholder': 'ابحث عن إجابة لسؤالك (مثال: العملات، ملكية الكود، المهل الزمنية، الدفع)...',
+    'faq.expandAll': 'توسيع الكل',
+    'faq.collapseAll': 'طي الكل',
+    'faq.askQuestion': 'اطرح سؤالك مباشرة',
+    'faq.helpful': 'هل كانت هذه الإجابة مفيدة لك؟',
+    'faq.thanks': 'شكراً جزيلاً لتقييمك!',
+    'faq.ctaTitle': 'هل لديك استفسار تقني خاص بمشروعك؟',
+    'faq.ctaDesc': 'يقوم مدرائنا التقنيون وكبار المهندسين بتحليل متطلباتك والرد عليك خلال أقل من 15 دقيقة عبر واتساب أو الدردشة المباشرة.',
+    'faq.liveChat': 'فتح المحادثة المباشرة',
+    'faq.bookCall': 'حجز مكالمة 30 دقيقة',
+
+    // Testimonials
+    'testimonials.badge': 'ثقة العملاء وشهادات القادة',
+    'testimonials.title': 'ماذا يقول كبار المدراء التقنيين ورواد الأعمال عنا',
+    'testimonials.subtitle': 'يعتمدون علينا في بناء منصاتهم الحيوية، وبنيتهم التحتية المالية، وأنظمتهم ذات الأحمال العالية.',
+    'testimonials.verifiedReview': 'تقييم عميل موثق',
+
+    // Blog
+    'blog.badge': 'المتابعة التقنية وأبحاث التطوير',
+    'blog.title': 'مقالات ودراسات الهندسة البرمجية',
+    'blog.subtitle': 'أحدث المعايير في البنى السحابية، الأمن السيبراني، وتطبيقات الذكاء الاصطناعي في أفريقيا والعالم.',
+    'blog.readMore': 'قراءة المقال كاملاً',
+    'blog.searchPlaceholder': 'ابحث في المقالات أو التقنيات...',
+    'blog.allTags': 'كافة المواضيع',
+    'blog.heroBadge': 'منشورات الهندسة والبحث والتطوير',
+    'blog.heroTitle': 'دراسات هندسية متقدمة و',
+    'blog.heroTitleHighlight': 'بنى برمجية حديثة',
+    'blog.heroDesc': 'استكشف المقالات التقنية المتعمقة التي أعدها كبار مهندسينا: البنى المعتمدة على الأحداث، وحاويات Kubernetes، ونماذج الذكاء الاصطناعي.',
+    'blog.heroCta': 'بدء مشروع تقني جديد',
 
     // Contact
     'contact.badge': 'بدء المشروع والتواصل مع الإدارة',
@@ -323,11 +599,29 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.formBudget': 'النطاق المالي المقدر',
     'contact.formTimeline': 'المدة المطلوبة للتسليم',
     'contact.formDesc': 'شرح المشروع أو المواصفات التقنية',
-    'contact.formNda': 'أرغب في توقيع اتفاقية عدم إفصاح وسرية (NDA) قبل البدء',
+    'contact.formNda': 'أرغب في توقوقيع اتفاقية عدم إفصاح وسرية (NDA) قبل البدء',
     'contact.submitBtn': 'إرسال الطلب للإدارة التنفيذية',
     'contact.directWhatsapp': 'محادثة مباشرة عبر واتساب مع المدير العام',
     'contact.successTitle': 'تم إرسال طلبكم بنجاح!',
     'contact.successDesc': 'فريق المهندسين والإدارة يدرسون طلبكم حالياً. سنزودكم بتقرير مفصل خلال 24 ساعة.',
+
+    // Footer
+    'footer.desc': 'الشريك التكنولوجي الرائد في هندسة البرمجيات المتقدمة، منصات SaaS، بنيات Cloud DevOps والأمن السيبراني.',
+    'footer.poles': 'الأقسام الهندسية',
+    'footer.navigation': 'روابط سريعة',
+    'footer.legal': 'الامتثال والشؤون القانونية',
+    'footer.rights': 'جميع الحقوق محفوظة.',
+    'footer.terms': 'الشروط العامة للخدمات والتعاقد',
+    'footer.privacy': 'سياسة الخصوصية وحماية البيانات',
+    'footer.ndaTerms': 'اتفاقية السرية والتنازل الكامل عن الملكية الفكرية',
+    'footer.currencyConverter': 'محول العملات الأفريقية والدولية',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'بوابة العملاء ولوحة المشاريع',
+    'auth.loginDesc': 'تابع تقدم مراحل التطوير (Sprints)، مواعيد التسليم وبيئات الاختبار في الوقت الفعلي.',
+    'auth.signInGoogle': 'تسجيل الدخول عبر Google Workspace',
+    'auth.portalAccess': 'الدخول إلى بوابة المشروع',
+    'auth.myProjects': 'مشاريعي النشطة',
 
     // Common
     'common.search': 'بحث...',
@@ -346,7 +640,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   es: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Inicio',
     'nav.services': 'Servicios',
     'nav.portfolio': 'Proyectos',
@@ -363,6 +657,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp Dir.',
     'nav.directLine': 'Línea del Director',
     'nav.online': 'En Línea',
+    'nav.quickActions': 'Acceso Rápido',
+    'nav.search': 'Buscar servicios, proyectos o tecnologías...',
 
     // Hero
     'hero.badge': 'Polo Panafricano de Excelencia en Ingeniería de Software',
@@ -377,6 +673,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Proyectos Entregados',
     'hero.statCountries': 'Países Cubiertos',
     'hero.statSatisfaction': 'Satisfacción de Clientes',
+    'hero.centerExcellence': 'Centro de Excelencia I+D',
+    'hero.explorePortfolio': 'Explorar Casos de Éxito',
+
+    // Services
+    'services.badge': 'Divisiones de Ingeniería e I+D',
+    'services.title': 'Soluciones Tecnológicas a Medida',
+    'services.subtitle': 'Desde arquitectura de software crítica hasta automatización con IA, entregamos sistemas seguros y escalables.',
+    'services.allCategories': 'Todos los Dominios',
+    'services.startingAt': 'Desde',
+    'services.timeline': 'Plazo promedio',
+    'services.ctaConfigure': 'Configurar en el estimador',
+    'services.ctaDetails': 'Especificaciones y Entregables',
+    'services.deliverablesTitle': 'Entregables Contractuales Clave',
+    'services.featuresTitle': 'Capacidades y Funcionalidades',
+    'services.heroBadge': 'Catálogo de Servicios y Divisiones de Ingeniería',
+    'services.heroTitle': 'Soluciones de Software y Cloud',
+    'services.heroTitleHighlight': 'Diseñadas para Escalar',
+    'services.heroDesc': 'Desde arquitectura de plataformas SaaS escalables hasta aplicaciones móviles panafricanas, auditorías de ciberseguridad e IA empresarial.',
+    'services.heroCtaQuote': 'Calcular presupuesto de proyecto',
+    'services.heroCtaCall': 'Agendar sesión técnica',
+    'services.guaranteeBadge': 'Compromiso de Excelencia',
+    'services.guaranteeTitle': 'Nuestros Estándares de Calidad Contractual',
+    'services.propTitle': 'Código 100% Propiedad del Cliente',
+    'services.propDesc': 'Cesión total de derechos de autor, código fuente y propiedad intelectual en la entrega final. Repositorios privados y documentación incluidos.',
+    'services.slaTitle': 'Alta Disponibilidad y SLA 99.99%',
+    'services.slaDesc': 'Infraestructuras Cloud redundantes (AWS, Google Cloud) con guardia técnica 24/7 y tiempos de respuesta garantizados por contrato.',
+    'services.warrantyTitle': 'Garantía Correctiva de 6 Meses',
+    'services.warrantyDesc': 'Acompañamiento post-lanzamiento con resolución prioritaria de incidencias sin costo adicional.',
 
     // Estimator
     'estimator.badge': 'Simulador Transparente y Presupuesto por País',
@@ -398,17 +722,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': 'Métodos de Pago Locales Aceptados',
     'estimator.taxCompliance': 'Régimen Fiscal y Facturación',
 
-    // Services
-    'services.badge': 'Divisiones de Ingeniería e I+D',
-    'services.title': 'Soluciones Tecnológicas a Medida',
-    'services.subtitle': 'Desde arquitectura de software crítica hasta automatización con IA, entregamos sistemas seguros y escalables.',
-    'services.allCategories': 'Todos los Dominios',
-    'services.startingAt': 'Desde',
-    'services.timeline': 'Plazo promedio',
-    'services.ctaConfigure': 'Configurar en el estimador',
-    'services.ctaDetails': 'Especificaciones y Entregables',
-    'services.deliverablesTitle': 'Entregables Contractuales Clave',
-    'services.featuresTitle': 'Capacidades y Funcionalidades',
+    // Tech Hubs
+    'techHubs.badge': 'Presencia Geográfica e I+D',
+    'techHubs.title': 'Nuestros Hubs Tecnológicos en África',
+    'techHubs.subtitle': 'Una fuerza de ingeniería distribuida en los ecosistemas de innovación de Kigali, Dakar, Abidjan y París.',
+    'techHubs.scheduleWithLead': 'Agendar llamada con este Hub',
+    'techHubs.heroBadge': 'Red Panafricana e Internacional',
+    'techHubs.heroTitle': 'Presencia Estratégica en las',
+    'techHubs.heroTitleHighlight': 'Capitales de Innovación',
+    'techHubs.heroDesc': 'Desde nuestra sede en Kigali hasta los centros de ingeniería en Dakar, Abiyán, Nairobi, Casablanca y París.',
+    'techHubs.heroCtaSchedule': 'Agendar cita en un Hub',
+    'techHubs.heroCtaContact': 'Contactar a la Dirección General',
+    'techHubs.officesBadge': 'Ubicaciones y Contacto',
+    'techHubs.officesTitle': 'Nuestras Oficinas y Centros de I+D',
+    'techHubs.team': 'Equipo',
+    'techHubs.specialty': 'Especialidad',
+    'techHubs.bookVisit': 'Solicitar visita o reunión',
+
+    // Portfolio
+    'portfolio.badge': 'Estudios de Caso y Despliegues',
+    'portfolio.title': 'Nuestros Logros en Ingeniería de Software',
+    'portfolio.subtitle': 'Descubra cómo transformamos desafíos técnicos complejos en sistemas digitales escalables y de alto impacto.',
+    'portfolio.ctaSimilar': 'Iniciar un proyecto similar',
+    'portfolio.heroBadge': 'Estudios de Caso y Sistemas en Producción',
+    'portfolio.heroTitle': 'Descubra Nuestros Mayores Logros e',
+    'portfolio.heroTitleHighlight': 'Impactos Medibles',
+    'portfolio.heroDesc': 'Desde aplicaciones financieras de alto volumen hasta plataformas logísticas y de salud, vea cómo nuestros ingenieros resuelven desafíos complejos.',
+    'portfolio.heroCtaQuote': 'Presupuestar proyecto similar',
+    'portfolio.heroCtaTechDir': 'Hablar con la Dirección Técnica',
+    'portfolio.viewMetrics': 'Ver arquitectura y métricas clave',
+    'portfolio.modalClose': 'Cerrar estudio de caso',
+    'portfolio.modalStartSimilar': 'Iniciar un proyecto similar',
+    'portfolio.modalChallenge': 'El Desafío Inicial',
+    'portfolio.modalSolution': 'La Solución Vitech Africa',
+    'portfolio.modalArchitecture': 'Decisiones de Arquitectura e Ingeniería',
+    'portfolio.modalTechDeployed': 'Tecnologías y Herramientas Desplegadas:',
+
+    // FAQ
+    'faq.badge': 'Centro de Conocimiento y Transparencia',
+    'faq.title': 'Todo lo que Necesita Saber',
+    'faq.subtitle': 'Propiedad del código al 100%, facturación en monedas locales, metodología Agile Scrum y garantías contractuales.',
+    'faq.searchPlaceholder': 'Buscar preguntas (ej: monedas, propiedad del código, plazos, Mobile Money)...',
+    'faq.expandAll': 'Expandir Todo',
+    'faq.collapseAll': 'Contraer Todo',
+    'faq.askQuestion': 'Hacer pregunta directa',
+    'faq.helpful': '¿Le resultó útil esta respuesta?',
+    'faq.thanks': '¡Gracias por su valoración!',
+    'faq.ctaTitle': '¿Tiene una consulta técnica específica sobre su proyecto?',
+    'faq.ctaDesc': 'Nuestros directores técnicos analizan sus requerimientos y responden en menos de 15 minutos por WhatsApp o Chat en Vivo.',
+    'faq.liveChat': 'Abrir Chat en Vivo',
+    'faq.bookCall': 'Agendar Llamada de 30 min',
+
+    // Testimonials
+    'testimonials.badge': 'Confianza y Testimonios Ejecutivos',
+    'testimonials.title': 'Lo que Dicen Directores de Tecnología y Fundadores',
+    'testimonials.subtitle': 'Nos confían sus plataformas críticas, infraestructura bancaria y sistemas de alto tráfico.',
+    'testimonials.verifiedReview': 'Opinión de Cliente Verificada',
+
+    // Blog
+    'blog.badge': 'Vigilancia Tecnológica e I+D',
+    'blog.title': 'Artículos y Análisis de Ingeniería',
+    'blog.subtitle': 'Arquitecturas probadas en producción, Cloud DevOps, ciberseguridad e IA aplicada en África y a nivel global.',
+    'blog.readMore': 'Leer artículo completo',
+    'blog.searchPlaceholder': 'Buscar artículos o tecnologías...',
+    'blog.allTags': 'Todos los Temas',
+    'blog.heroBadge': 'Publicaciones de Ingeniería e I+D',
+    'blog.heroTitle': 'Casos Prácticos y Arquitectura',
+    'blog.heroTitleHighlight': 'Avanzada de Software',
+    'blog.heroDesc': 'Explore artículos técnicos detallados de nuestros Lead Developers: arquitecturas basadas en eventos, despliegues Kubernetes multi-región y seguridad bancaria.',
+    'blog.heroCta': 'Iniciar un Proyecto Técnico',
 
     // Contact
     'contact.badge': 'Inicio de Proyecto y Contacto Directivo',
@@ -428,6 +810,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': '¡Solicitud Enviada con Éxito!',
     'contact.successDesc': 'Nuestro equipo directivo y de ingenieros está analizando su proyecto. Recibirá una propuesta completa en 24 horas.',
 
+    // Footer
+    'footer.desc': 'Socio tecnológico de referencia en ingeniería de software avanzada, desarrollo SaaS, arquitecturas Cloud DevOps y ciberseguridad.',
+    'footer.poles': 'Divisiones de Ingeniería',
+    'footer.navigation': 'Enlaces Rápidos',
+    'footer.legal': 'Cumplimiento y Legal',
+    'footer.rights': 'Todos los derechos reservados.',
+    'footer.terms': 'Términos Generales de Servicios y Contratación',
+    'footer.privacy': 'Política de Privacidad y Protección de Datos',
+    'footer.ndaTerms': 'Acuerdo de Confidencialidad y Cesión Total de Código',
+    'footer.currencyConverter': 'Conversor de Monedas Panafricano',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Portal del Cliente y Panel de Proyectos',
+    'auth.loginDesc': 'Acceda a sus paneles de seguimiento de sprints, cronogramas de entrega y entornos de staging.',
+    'auth.signInGoogle': 'Iniciar Sesión con Google Workspace',
+    'auth.portalAccess': 'Acceder a mi Proyecto',
+    'auth.myProjects': 'Mis Proyectos Activos',
+
     // Common
     'common.search': 'Buscar...',
     'common.filter': 'Filtrar',
@@ -445,7 +845,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   pt: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Início',
     'nav.services': 'Serviços',
     'nav.portfolio': 'Portfólio',
@@ -462,6 +862,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp Dir.',
     'nav.directLine': 'Linha Direta Diretor',
     'nav.online': 'Online',
+    'nav.quickActions': 'Acesso Rápido',
+    'nav.search': 'Pesquisar serviços, projetos ou tecnologias...',
 
     // Hero
     'hero.badge': 'Polo Pan-Africano de Excelência em Engenharia de Software',
@@ -476,6 +878,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Projetos Entregues',
     'hero.statCountries': 'Países Cobertos',
     'hero.statSatisfaction': 'Satisfação do Cliente',
+    'hero.centerExcellence': 'Centro de Excelência em I&D',
+    'hero.explorePortfolio': 'Explorar Estudos de Caso',
+
+    // Services
+    'services.badge': 'Divisões de Engenharia & I&D',
+    'services.title': 'Soluções Tecnológicas Personalizadas',
+    'services.subtitle': 'Da arquitetura de software crítica à automação inteligente por IA, entregamos sistemas robustos.',
+    'services.allCategories': 'Todas as Áreas',
+    'services.startingAt': 'A partir de',
+    'services.timeline': 'Prazo médio',
+    'services.ctaConfigure': 'Configurar no estimador',
+    'services.ctaDetails': 'Especificações e Entregáveis',
+    'services.deliverablesTitle': 'Principais Entregáveis Contratuais',
+    'services.featuresTitle': 'Capacidades e Funcionalidades',
+    'services.heroBadge': 'Catálogo de Serviços & Pôlos de Engenharia',
+    'services.heroTitle': 'Soluções de Software & Cloud',
+    'services.heroTitleHighlight': 'Concebidas para Escalar',
+    'services.heroDesc': 'Da arquitetura de plataformas SaaS escaláveis ao desenvolvimento de aplicações móveis pan-africanas, auditorias de cibersegurança e IA empresarial.',
+    'services.heroCtaQuote': 'Simular orçamento de projeto',
+    'services.heroCtaCall': 'Agendar sessão técnica',
+    'services.guaranteeBadge': 'Compromisso de Excelência',
+    'services.guaranteeTitle': 'Os Nossos Padrões Contratuais & Qualidade',
+    'services.propTitle': 'Código 100% Propriedade do Cliente',
+    'services.propDesc': 'Cessão total de direitos de autor, código-fonte e propriedade intelectual na entrega final. Repositórios privados e documentação incluídos.',
+    'services.slaTitle': 'Alta Disponibilidade & SLA 99.99%',
+    'services.slaDesc': 'Infraestruturas Cloud redundantes (AWS, Google Cloud) com assistência técnica 24/7 e tempos de resposta contratuais garantidos.',
+    'services.warrantyTitle': 'Garantia Corretiva de 6 Meses',
+    'services.warrantyDesc': 'Acompanhamento pós-lançamento com resolução prioritária de ocorrências sem qualquer custo adicional.',
 
     // Estimator
     'estimator.badge': 'Simulador Transparente e Orçamento por País',
@@ -497,17 +927,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': 'Métodos de Pagamento Locais Aceites',
     'estimator.taxCompliance': 'Conformidade Fiscal e Faturação',
 
-    // Services
-    'services.badge': 'Divisões de Engenharia & I&D',
-    'services.title': 'Soluções Tecnológicas Personalizadas',
-    'services.subtitle': 'Da arquitetura de software crítica à automação inteligente por IA, entregamos sistemas robustos.',
-    'services.allCategories': 'Todas as Áreas',
-    'services.startingAt': 'A partir de',
-    'services.timeline': 'Prazo médio',
-    'services.ctaConfigure': 'Configurar no estimador',
-    'services.ctaDetails': 'Especificações e Entregáveis',
-    'services.deliverablesTitle': 'Principais Entregáveis Contratuais',
-    'services.featuresTitle': 'Capacidades e Funcionalidades',
+    // Tech Hubs
+    'techHubs.badge': 'Presença Geográfica e I&D',
+    'techHubs.title': 'Os Nossos Hubs Tecnológicos em África',
+    'techHubs.subtitle': 'Uma força de engenharia distribuída nos ecossistemas de inovação de Kigali, Dakar, Abidjan e Paris.',
+    'techHubs.scheduleWithLead': 'Agendar reunião com este Hub',
+    'techHubs.heroBadge': 'Rede Pan-Africana & Internacional',
+    'techHubs.heroTitle': 'Presença Estratégica nas',
+    'techHubs.heroTitleHighlight': 'Capitais de Inovação',
+    'techHubs.heroDesc': 'Da nossa sede em Kigali aos centros de engenharia em Dakar, Abidjan, Nairobi, Casablanca e Paris.',
+    'techHubs.heroCtaSchedule': 'Agendar reunião num Hub',
+    'techHubs.heroCtaContact': 'Contactar a Direção Geral',
+    'techHubs.officesBadge': 'Localizações & Contactos',
+    'techHubs.officesTitle': 'Os Nossos Escritórios & Centros de I&D',
+    'techHubs.team': 'Equipa',
+    'techHubs.specialty': 'Especialidade',
+    'techHubs.bookVisit': 'Solicitar visita ou reunião',
+
+    // Portfolio
+    'portfolio.badge': 'Estudos de Caso e Implementações',
+    'portfolio.title': 'As Nossas Conquistas em Engenharia de Software',
+    'portfolio.subtitle': 'Descubra como transformamos desafios técnicos complexos em sistemas digitais escaláveis e de alto impacto.',
+    'portfolio.ctaSimilar': 'Iniciar um projeto semelhante',
+    'portfolio.heroBadge': 'Estudos de Caso & Sistemas em Produção',
+    'portfolio.heroTitle': 'Descubra as Nossas Maiores Conquistas &',
+    'portfolio.heroTitleHighlight': 'Impactos Medidos',
+    'portfolio.heroDesc': 'De aplicações financeiras de alto volume a plataformas logísticas e médicas, veja como os nossos engenheiros resolvem desafios complexos.',
+    'portfolio.heroCtaQuote': 'Orçar um projeto semelhante',
+    'portfolio.heroCtaTechDir': 'Falar com a Direção Técnica',
+    'portfolio.viewMetrics': 'Ver arquitetura & métricas chave',
+    'portfolio.modalClose': 'Fechar estudo de caso',
+    'portfolio.modalStartSimilar': 'Iniciar um projeto semelhante',
+    'portfolio.modalChallenge': 'O Desafio Inicial',
+    'portfolio.modalSolution': 'A Solução Vitech Africa',
+    'portfolio.modalArchitecture': 'Decisões de Arquitetura & Engenharia',
+    'portfolio.modalTechDeployed': 'Tecnologias & Ferramentas Implementadas:',
+
+    // FAQ
+    'faq.badge': 'Centro de Conhecimento e Transparência',
+    'faq.title': 'Tudo o que Precisa de Saber',
+    'faq.subtitle': '100% de propriedade do código-fonte, faturação em moedas locais, metodologia Agile Scrum e garantias contratuais.',
+    'faq.searchPlaceholder': 'Pesquisar perguntas (ex: moedas, propriedade do código, prazos, Mobile Money)...',
+    'faq.expandAll': 'Expandir Tudo',
+    'faq.collapseAll': 'Recolher Tudo',
+    'faq.askQuestion': 'Fazer pergunta direta',
+    'faq.helpful': 'Esta resposta foi útil?',
+    'faq.thanks': 'Obrigado pelo seu feedback!',
+    'faq.ctaTitle': 'Tem alguma dúvida técnica específica sobre o seu projeto?',
+    'faq.ctaDesc': 'Os nossos diretores técnicos analisam os seus requisitos e respondem em menos de 15 minutos por WhatsApp ou Chat ao Vivo.',
+    'faq.liveChat': 'Abrir Chat ao Vivo',
+    'faq.bookCall': 'Agendar Reunião de 30 min',
+
+    // Testimonials
+    'testimonials.badge': 'Confiança e Testemunhos Executivos',
+    'testimonials.title': 'O que Dizem os Diretores de Tecnologia e Fundadores',
+    'testimonials.subtitle': 'Confiam-nos as suas aplicações críticas, infraestruturas bancárias e sistemas de alta performance.',
+    'testimonials.verifiedReview': 'Avaliação de Cliente Verificada',
+
+    // Blog
+    'blog.badge': 'Vigilância Tecnológica e I&D',
+    'blog.title': 'Artigos e Análises de Engenharia de Software',
+    'blog.subtitle': 'Arquiteturas testadas em produção, Cloud DevOps, cibersegurança e inteligência artificial aplicada.',
+    'blog.readMore': 'Ler artigo completo',
+    'blog.searchPlaceholder': 'Pesquisar artigos ou tecnologias...',
+    'blog.allTags': 'Todos os Temas',
+    'blog.heroBadge': 'Publicações de Engenharia & I&D',
+    'blog.heroTitle': 'Estudos Práticos & Arquitetura',
+    'blog.heroTitleHighlight': 'Avançada de Software',
+    'blog.heroDesc': 'Explore artigos técnicos aprofundados dos nossos Lead Developers: arquiteturas orientadas a eventos, Kubernetes multi-região e segurança bancária.',
+    'blog.heroCta': 'Iniciar um Projeto Técnico',
 
     // Contact
     'contact.badge': 'Início de Projeto e Contato Executivo',
@@ -527,6 +1015,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': 'Pedido Enviado com Sucesso!',
     'contact.successDesc': 'A nossa equipa de engenheiros e a Direção estão a analisar o seu projeto. Retorno completo em 24h.',
 
+    // Footer
+    'footer.desc': 'Parceiro tecnológico de referência em engenharia de software avançada, desenvolvimento SaaS, Cloud DevOps e cibersegurança.',
+    'footer.poles': 'Divisões de Engenharia',
+    'footer.navigation': 'Links Rápidos',
+    'footer.legal': 'Conformidade e Jurídico',
+    'footer.rights': 'Todos os direitos reservados.',
+    'footer.terms': 'Termos Gerais de Serviços e Contratação',
+    'footer.privacy': 'Política de Privacidade e Proteção de Dados',
+    'footer.ndaTerms': 'Acordo de Confidencialidade e Cedência Total de Código',
+    'footer.currencyConverter': 'Conversor de Moedas Pan-Africano',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Portal do Cliente e Painel de Projetos',
+    'auth.loginDesc': 'Aceda aos seus painéis de acompanhamento de sprints, prazos de entrega e ambientes de teste.',
+    'auth.signInGoogle': 'Iniciar Sessão com Google Workspace',
+    'auth.portalAccess': 'Aceder ao Portal do Projeto',
+    'auth.myProjects': 'Os Meus Projetos Ativos',
+
     // Common
     'common.search': 'Pesquisar...',
     'common.filter': 'Filtrar',
@@ -544,7 +1050,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   sw: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Nyumbani',
     'nav.services': 'Huduma Zetu',
     'nav.portfolio': 'Kazi Tulizofanya',
@@ -561,6 +1067,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp ya Mkurugenzi',
     'nav.directLine': 'Simu ya Mkurugenzi',
     'nav.online': 'Yuko Mtandaoni',
+    'nav.quickActions': 'Ufikiaji wa Haraka',
+    'nav.search': 'Tafuta huduma, mradi au teknolojia...',
 
     // Hero
     'hero.badge': 'Kituo Kikuu cha Uhandisi wa Programu Barani Afrika',
@@ -575,6 +1083,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Miradi Iliyokamilika',
     'hero.statCountries': 'Nchi Tunazohudumia',
     'hero.statSatisfaction': 'Kuridhika kwa Wateja',
+    'hero.centerExcellence': 'Kituo cha Utafiti na Ubunifu',
+    'hero.explorePortfolio': 'Tazama Miradi Yetu',
+
+    // Services
+    'services.badge': 'Idara za Uhandisi na Utafiti',
+    'services.title': 'Suluhu za Kiteknolojia Zilizoboreshwa',
+    'services.subtitle': 'Kutoka mifumo migumu ya kompyuta hadi Akili Mnemba (AI), wahandisi wetu wakuu hutoa mifumo dhabiti.',
+    'services.allCategories': 'Nyanja Zote',
+    'services.startingAt': 'Kuanzia',
+    'services.timeline': 'Wastani wa muda',
+    'services.ctaConfigure': 'Weka kwenye kikadiriaji',
+    'services.ctaDetails': 'Maelezo ya Kiufundi',
+    'services.deliverablesTitle': 'Matokeo Muhimu ya Mkataba',
+    'services.featuresTitle': 'Uwezo na Vipengele',
+    'services.heroBadge': 'Orodha ya Huduma & Vitengo vya Uhandisi',
+    'services.heroTitle': 'Suluhu za Programu & Mifumo ya Wingu',
+    'services.heroTitleHighlight': 'Zilizoundwa Kukua',
+    'services.heroDesc': 'Kuanzia mifumo mikubwa ya SaaS hadi programu za simu za kisasa, ukaguzi wa usalama wa mtandao na utekelezaji wa Akili Mnemba (AI).',
+    'services.heroCtaQuote': 'Kadiria bei ya mradi',
+    'services.heroCtaCall': 'Panga kikao cha kiufundi',
+    'services.guaranteeBadge': 'Ahadi ya Ubora wa Juu',
+    'services.guaranteeTitle': 'Viwango Vyetu vya Ubora wa Mkataba',
+    'services.propTitle': 'Umiliki wa Kanuni kwa 100%',
+    'services.propDesc': 'Uhawilishaji kamili wa hakimiliki na kanuni zote za programu mara tu baada ya kukabidhiwa. Ghala binafsi na nyaraka zimejumuishwa.',
+    'services.slaTitle': 'Upatikanaji wa Juu & SLA 99.99%',
+    'services.slaDesc': 'Mifumo ya Wingu iliyosambazwa (AWS, Google Cloud) yenye msaada wa kiufundi masaa 24/7.',
+    'services.warrantyTitle': 'Dhamana ya Miezi 6 Imejumuishwa',
+    'services.warrantyDesc': 'Msaada wa baada ya uzinduzi wenye utatuzi wa haraka wa hitilafu bila gharama ya ziada.',
 
     // Estimator
     'estimator.badge': 'Kikokotoo cha Wazi na Gharama kwa Kila Nchi',
@@ -596,17 +1132,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': 'Njia za Malipo Zinazokubalika',
     'estimator.taxCompliance': 'Uzingatiaji wa Kodi na Risiti',
 
-    // Services
-    'services.badge': 'Idara za Uhandisi na Utafiti',
-    'services.title': 'Suluhu za Kiteknolojia Zilizoboreshwa',
-    'services.subtitle': 'Kutoka mifumo migumu ya kompyuta hadi Akili Mnemba (AI), wahandisi wetu wakuu hutoa mifumo dhabiti.',
-    'services.allCategories': 'Nyanja Zote',
-    'services.startingAt': 'Kuanzia',
-    'services.timeline': 'Wastani wa muda',
-    'services.ctaConfigure': 'Weka kwenye kikadiriaji',
-    'services.ctaDetails': 'Maelezo ya Kiufundi',
-    'services.deliverablesTitle': 'Matokeo Muhimu ya Mkataba',
-    'services.featuresTitle': 'Uwezo na Vipengele',
+    // Tech Hubs
+    'techHubs.badge': 'Uwepo wa Kijiografia na Utafiti',
+    'techHubs.title': 'Vituo Vyetu vya Teknolojia Afrika',
+    'techHubs.subtitle': 'Nguvu kubwa ya wahandisi katika vituo vikuu vya ubunifu vya Kigali, Dakar, Abidjan na Paris.',
+    'techHubs.scheduleWithLead': 'Panga mkutano na Kituo hiki',
+    'techHubs.heroBadge': 'Mtandao wa Afrika na Kimataifa',
+    'techHubs.heroTitle': 'Uwepo wa Kimkakati Katika',
+    'techHubs.heroTitleHighlight': 'Miji ya Ubunifu',
+    'techHubs.heroDesc': 'Kutoka makao makuu yetu Kigali hadi vituo vya uhandisi Dakar, Abidjan, Nairobi, Casablanca na Paris.',
+    'techHubs.heroCtaSchedule': 'Weka miadi katika kituo chetu',
+    'techHubs.heroCtaContact': 'Wasiliana na Uongozi Mkuu',
+    'techHubs.officesBadge': 'Maeneo na Mawasiliano',
+    'techHubs.officesTitle': 'Ofisi Zetu na Vituo vya Utafiti',
+    'techHubs.team': 'Timu',
+    'techHubs.specialty': 'Utaalamu',
+    'techHubs.bookVisit': 'Omba ziara au mkutano',
+
+    // Portfolio
+    'portfolio.badge': 'Miradi Iliyotekelezwa na Mafanikio',
+    'portfolio.title': 'Mafanikio Yetu Katika Uhandisi wa Programu',
+    'portfolio.subtitle': 'Tazama jinsi tulivyobadilisha changamoto ngumu za kiteknolojia kuwa mifumo dhabiti yenye matokeo makubwa.',
+    'portfolio.ctaSimilar': 'Anzisha mradi kama huu',
+    'portfolio.heroBadge': 'Mifano ya Miradi na Mifumo Inayofanya Kazi',
+    'portfolio.heroTitle': 'Gundua Mafanikio Yetu Makuu &',
+    'portfolio.heroTitleHighlight': 'Matokeo Yaliyopimwa',
+    'portfolio.heroDesc': 'Kutoka programu za kifedha zenye miamala mikubwa hadi mifumo ya usafirishaji na afya.',
+    'portfolio.heroCtaQuote': 'Kadiria mradi kama huu',
+    'portfolio.heroCtaTechDir': 'Zungumza na Uongozi wa Kiufundi',
+    'portfolio.viewMetrics': 'Tazama muundo wa mfumo & takwimu',
+    'portfolio.modalClose': 'Funga taarifa ya mradi',
+    'portfolio.modalStartSimilar': 'Anzisha mradi sawa na huu',
+    'portfolio.modalChallenge': 'Changamoto ya Awali',
+    'portfolio.modalSolution': 'Suluhisho la Vitech Africa',
+    'portfolio.modalArchitecture': 'Maamuzi ya Muundo & Uhandisi',
+    'portfolio.modalTechDeployed': 'Teknolojia & Zana Zilizotumika:',
+
+    // FAQ
+    'faq.badge': 'Kituo cha Maarifa na Uwazi',
+    'faq.title': 'Kila Kitu Unachopaswa Kujua',
+    'faq.subtitle': 'Umiliki wa nambari za programu (Code) kwa 100%, malipo kwa sarafu za ndani, mfumo wa Agile Scrum na mikataba yenye uhakika.',
+    'faq.searchPlaceholder': 'Tafuta swali (mfano: sarafu, umiliki wa kanuni, muda, Mobile Money)...',
+    'faq.expandAll': 'Fungua Yote',
+    'faq.collapseAll': 'Funga Yote',
+    'faq.askQuestion': 'Uliza swali lako moja kwa moja',
+    'faq.helpful': 'Je, jibu hili limekusaidia?',
+    'faq.thanks': 'Asante kwa maoni yako!',
+    'faq.ctaTitle': 'Je, una swali mahususi la kiufundi kuhusu mradi wako?',
+    'faq.ctaDesc': 'Wakubwa wetu wa uhandisi wanachambua mahitaji yako na kujibu ndani ya dakika 15 kupitia WhatsApp au Mazungumzo ya Moja kwa Moja.',
+    'faq.liveChat': 'Fungua Mazungumzo ya Moja kwa Moja',
+    'faq.bookCall': 'Weka Miadi ya Dakika 30',
+
+    // Testimonials
+    'testimonials.badge': 'Uaminifu na Ushuhuda wa Viongozi',
+    'testimonials.title': 'Wakurugenzi wa Teknolojia na Waanzilishi Wanasema Nini',
+    'testimonials.subtitle': 'Wanatuamini kuendesha programu zao muhimu zaidi, mifumo ya benki na huduma zenye watumiaji wengi.',
+    'testimonials.verifiedReview': 'Tathmini Iliyothibitishwa ya Mteja',
+
+    // Blog
+    'blog.badge': 'Habari za Kiteknolojia na Utafiti',
+    'blog.title': 'Makala na Uchambuzi wa Uhandisi wa Programu',
+    'blog.subtitle': 'Mifumo ya Wingu (Cloud DevOps), usalama wa kidijitali na Akili Mnemba (AI) barani Afrika na duniani kote.',
+    'blog.readMore': 'Soma makala yote',
+    'blog.searchPlaceholder': 'Tafuta makala au teknolojia...',
+    'blog.allTags': 'Mada Zote',
+    'blog.heroBadge': 'Machapisho ya Uhandisi na Utafiti',
+    'blog.heroTitle': 'Tathmini za Kiufundi & Muundo wa',
+    'blog.heroTitleHighlight': 'Programu za Kisasa',
+    'blog.heroDesc': 'Gundua makala za kiufundi zilizoandikwa na wahandisi wetu: mifumo ya Kubernetes, usalama wa kibenki na Akili Mnemba.',
+    'blog.heroCta': 'Anzisha Mradi wa Kiufundi',
 
     // Contact
     'contact.badge': 'Kuanzisha Mradi na Mawasiliano na Viongozi',
@@ -626,6 +1220,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': 'Ombi Limewasilishwa Kikamilifu!',
     'contact.successDesc': 'Wahandisi wetu wakuu na Uongozi wanachambua mradi wako. Utapokea jibu la kina ndani ya saa 24.',
 
+    // Footer
+    'footer.desc': 'Mshirika mkuu wa kiteknolojia katika uhandisi wa hali ya juu wa programu, mifumo ya SaaS, Cloud DevOps na usalama wa kidijitali.',
+    'footer.poles': 'Idara za Uhandisi',
+    'footer.navigation': 'Viungo vya Haraka',
+    'footer.legal': 'Uzingatiaji na Sheria',
+    'footer.rights': 'Haki zote zimehifadhiwa.',
+    'footer.terms': 'Vigezo na Masharti ya Huduma na Mikataba',
+    'footer.privacy': 'Sera ya Faragha na Ulinzi wa Data',
+    'footer.ndaTerms': 'Mkataba wa Usiri na Uhawilishaji Kamili wa Umiliki',
+    'footer.currencyConverter': 'Kigeuzi cha Sarafu za Kiafrika na Kimataifa',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Tovuti ya Wateja na Dashibodi ya Miradi',
+    'auth.loginDesc': 'Tazama maendeleo ya mradi wako (Sprints), ratiba ya utoaji na mifumo ya majaribio moja kwa moja.',
+    'auth.signInGoogle': 'Ingia kwa Google Workspace',
+    'auth.portalAccess': 'Fungua Tovuti ya Mradi Wangu',
+    'auth.myProjects': 'Miradi Yangu Inayoendelea',
+
     // Common
     'common.search': 'Tafuta...',
     'common.filter': 'Chuja',
@@ -643,87 +1255,193 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   rw: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Ahabanza',
     'nav.services': 'Serivisi Zacu',
     'nav.portfolio': 'Ibyakozwe',
     'nav.estimator': 'Kubara Igiciro',
     'nav.techHubs': 'Ibiro Byacu Muri Afurika',
-    'nav.clientPortal': 'Urubuga rw\'Abakiriya',
+    'nav.clientPortal': 'Urubuga rw’Abakiriya',
     'nav.blog': 'Amakuru & Ubushakashatsi',
     'nav.contact': 'Twandikire',
     'nav.admin': 'Ubuyobozi',
     'nav.ctaQuote': 'SABA IGICIRO',
-    'nav.bookCall': 'Ibiganiro by\'Iminota 30',
+    'nav.bookCall': 'Ibiganiro by’Iminota 30',
     'nav.login': 'Kwinjira',
     'nav.logout': 'Gusohoka',
-    'nav.whatsappDir': 'WhatsApp y\'Umuyobozi',
-    'nav.directLine': 'Telefoni y\'Umuyobozi',
+    'nav.whatsappDir': 'WhatsApp y’Umuyobozi',
+    'nav.directLine': 'Telefoni y’Umuyobozi',
     'nav.online': 'Ari Kumurongo',
+    'nav.quickActions': 'Ibyihutirwa',
+    'nav.search': 'Shakisha serivisi, umushinga cyangwa ikoranabuhanga...',
 
     // Hero
-    'hero.badge': 'Ikigo cy\'Indashyikirwa mu Buhanga bwa Porogaramu Muri Afurika',
-    'hero.motto': 'GUHANGA • KUBProbability • GUKURA',
+    'hero.badge': 'Ikigo cy’Indashyikirwa mu Buhanga bwa Porogaramu Muri Afurika',
+    'hero.motto': 'GUHANGA • GUTEZA IMBERE • GUKURA',
     'hero.title1': 'Ubuhanga bwa Porogaramu',
     'hero.title2': 'Buteza Imbere Abayobozi Muri Afurika',
-    'hero.desc': 'V&I TECH AFRICA LTD ikora imbuga za SaaS zikora neza cyane, porogaramu za telefoni, ububiko bwizewe bwa Cloud n\'ubwenge bw\'ubukorano (AI) byo guteza imbere ubucuruzi bwawe.',
-    'hero.ctaEstimator': 'Bara Ingengo y\'Imari y\'Umushinga Wawe',
+    'hero.desc': 'V&I TECH AFRICA LTD ikora imbuga za SaaS zikora neza cyane, porogaramu za telefoni, ububiko bwizewe bwa Cloud n’ubwenge bw’ubukorano (AI) byo guteza imbere ubucuruzi bwawe.',
+    'hero.ctaEstimator': 'Bara Ingengo y’Imari y’Umushinga Wawe',
     'hero.ctaServices': 'Reba Serivisi Zacu',
-    'hero.ctaCall': 'Teganya Inama y\'Ikoranabuhanga (Iminota 30)',
+    'hero.ctaCall': 'Teganya Inama y’Ikoranabuhanga (Iminota 30)',
     'hero.statSla': 'Ubwizerane bwa Sisitemu (SLA)',
     'hero.statProjects': 'Imishinga Yarangiye',
     'hero.statCountries': 'Ibihugu Dukoreramo',
-    'hero.statSatisfaction': 'Kunyurwa kw\'Abakiriya',
+    'hero.statSatisfaction': 'Kunyurwa kw’Abakiriya',
+    'hero.centerExcellence': 'Ikigo cy’Ubushakashatsi n’Ubwizerane',
+    'hero.explorePortfolio': 'Reba Imishinga Twakoze',
+
+    // Services
+    'services.badge': 'Amashami y’Ubuhanga n’Ubushakashatsi',
+    'services.title': 'Ibisubizo by’Ikoranabuhanga Bikozwe ku Gipimo',
+    'services.subtitle': 'Guhera kuri sisitemu zikomeye kugeza ku bwenge bw’ubukorano (AI), inzobere zacu zitanga ibyujuje ubuziranenge.',
+    'services.allCategories': 'Ibyiciro Byose',
+    'services.startingAt': 'Bihera kuri',
+    'services.timeline': 'Igihe bitwara',
+    'services.ctaConfigure': 'Tegurira muri Estimator',
+    'services.ctaDetails': 'Ibisobanuro n’Ibizakorwa',
+    'services.deliverablesTitle': 'Iby’ingenzi Bizatangwa mu Masezerano',
+    'services.featuresTitle': 'Ubushobozi bw’Icyo Wifuza',
+    'services.heroBadge': 'Urutonde rwa Serivisi & Amashami y’Ikoranabuhanga',
+    'services.heroTitle': 'Ibisubizo bya Porogaramu & Cloud',
+    'services.heroTitleHighlight': 'Byateguriwe Kwaguka',
+    'services.heroDesc': 'Guhera ku mbuga zikomeye za SaaS, porogaramu za telefoni, umutekano w’ikoranabuhanga n’ubwenge bw’ubukorano (AI).',
+    'services.heroCtaQuote': 'Bara ingengo y’imari',
+    'services.heroCtaCall': 'Teganya inama y’ikoranabuhanga',
+    'services.guaranteeBadge': 'Isezerano ry’Ubuziranenge',
+    'services.guaranteeTitle': 'Ubwizerane n’Ubwiza mu Masezerano',
+    'services.propTitle': '100% Umutungo w’Inyandiko za Porogaramu (Code)',
+    'services.propDesc': 'Kwegurirwa byimazeyo uburenganzira bwose kuri porogaramu yawe n’inyandiko zose ziyigize.',
+    'services.slaTitle': 'Ubwizerane bwa 99.99% SLA',
+    'services.slaDesc': 'Ububiko bukomeye bwa Cloud (AWS, Google Cloud) n’abatekinisiye biteguye kugufasha amasaha 24/7.',
+    'services.warrantyTitle': 'Garanti y’Amezi 6 ku Buntu',
+    'services.warrantyDesc': 'Gukurikiranwa nyuma yo gutangiza porogaramu no gukosorera ibibazo byose ku buntu.',
 
     // Estimator
-    'estimator.badge': 'Ibarwa Ryizewe Ry\'Igiciro Buri Gihugu',
-    'estimator.title': 'Bara Ingengo y\'Imari n\'Igihe cy\'Umushinga Wanyu',
-    'estimator.subtitle': 'Bona igiciro nyacyo n\'igihe bizatwara bishingiye ku gihugu cyawe n\'uburyo bwo kwishyura buhari.',
+    'estimator.badge': 'Ibarwa Ryizewe Ry’Igiciro Buri Gihugu',
+    'estimator.title': 'Bara Ingengo y’Imari n’Igihe cy’Umushinga Wanyu',
+    'estimator.subtitle': 'Bona igiciro nyacyo n’igihe bizatwara bishingiye ku gihugu cyawe n’uburyo bwo kwishyura buhari.',
     'estimator.countryDetected': 'Igihugu cyawe cyabonetse',
     'estimator.changeCountry': 'Hindura igihugu / Aho uri',
-    'estimator.step1': '1. Ubwoko bw\'Ikoranabuhanga',
+    'estimator.step1': '1. Ubwoko bw’Ikoranabuhanga',
     'estimator.step2': '2. Aho Bizakoreshwa (Web/App)',
-    'estimator.step3': '3. Ibizakorwa n\'Ubushobozi',
+    'estimator.step3': '3. Ibizakorwa n’Ubushobozi',
     'estimator.step4': '4. Urwego rwa Serivisi (SLA)',
     'estimator.step5': '5. Incamake no Kohereza',
-    'estimator.calculatedTotal': 'Igiteranyo cy\'Ingengo y\'Imari',
+    'estimator.calculatedTotal': 'Igiteranyo cy’Ingengo y’Imari',
     'estimator.calculatedTime': 'Igihe Bizatwara Byose',
     'estimator.applyToContact': 'Emeza Wohereze mu Formulaire',
-    'estimator.instantQuotePdf': 'Kora Inyandiko y\'Igiciro Nyakuri (PDF)',
+    'estimator.instantQuotePdf': 'Kora Inyandiko y’Igiciro Nyakuri (PDF)',
     'estimator.printQuote': 'Gucapa / Kubika Igiciro',
     'estimator.localHub': 'Ibiro Byegereye bya V&I TECH',
     'estimator.paymentMethods': 'Uburyo bwo Kwishyura Bwemewe',
     'estimator.taxCompliance': 'Uburyo bwo Gusoresha na Fagitire',
 
-    // Services
-    'services.badge': 'Amashami y\'Ubuhanga n\'Ubushakashatsi',
-    'services.title': 'Ibisubizo by\'Ikoranabuhanga Bikozwe ku Gipimo',
-    'services.subtitle': 'Guhera kuri sisitemu zikomeye kugeza ku bwenge bw\'ubukorano (AI), inzobere zacu zitanga ibyujuje ubuziranenge.',
-    'services.allCategories': 'Ibyiciro Byose',
-    'services.startingAt': 'Bihera kuri',
-    'services.timeline': 'Igihe bitwara',
-    'services.ctaConfigure': 'Tegurira muri Estimator',
-    'services.ctaDetails': 'Ibisobanuro n\'Ibizakorwa',
-    'services.deliverablesTitle': 'Iby\'ingenzi Bizatangwa mu Masezerano',
-    'services.featuresTitle': 'Ubushobozi bw\'Icyo Wifuza',
+    // Tech Hubs
+    'techHubs.badge': 'Aho Dukorera & Ubushakashatsi',
+    'techHubs.title': 'Ibiro Byacu by’Ikoranabuhanga Muri Afurika',
+    'techHubs.subtitle': 'Inzobere mu by’ikoranabuhanga ziri mu mijyi y’ingenzi: Kigali, Dakar, Abidjan na Paris.',
+    'techHubs.scheduleWithLead': 'Gufata gahunda n’ibi biro',
+    'techHubs.heroBadge': 'Umuyoboro Mpuzamahanga muri Afurika',
+    'techHubs.heroTitle': 'Kuba mu Mijyi Ikomeye y’',
+    'techHubs.heroTitleHighlight': 'Ikoranabuhanga n’Ubunyangamugayo',
+    'techHubs.heroDesc': 'Guhera ku biro bikuru i Kigali kugeza i Dakar, Abidjan, Nairobi, Casablanca na Paris.',
+    'techHubs.heroCtaSchedule': 'Fata gahunda muri rimwe mu mashami yacu',
+    'techHubs.heroCtaContact': 'Vugana n’Ubuyobozi Bukuru',
+    'techHubs.officesBadge': 'Aho Dukorera & Aderesi',
+    'techHubs.officesTitle': 'Ibiro Byacu n’Ubushakashatsi',
+    'techHubs.team': 'Itsinda',
+    'techHubs.specialty': 'Icyo Bamenyereye',
+    'techHubs.bookVisit': 'Saba gusura cyangwa inama',
+
+    // Portfolio
+    'portfolio.badge': 'Imishinga Yarangiye & Ubuhamya',
+    'portfolio.title': 'Ibyo Twagezeho mu Buhanga bwa Porogaramu',
+    'portfolio.subtitle': 'Reba uko twahinduye ibibazo bikomeye by’ikoranabuhanga mo ibisubizo bifatika kandi byagutse.',
+    'portfolio.ctaSimilar': 'Tangira umushinga nk’uyu',
+    'portfolio.heroBadge': 'Imishinga n’Ibyakozwe Biri Gukora',
+    'portfolio.heroTitle': 'Vumbura Ibyo Twagezeho &',
+    'portfolio.heroTitleHighlight': 'Umusaruro Wagaragaye',
+    'portfolio.heroDesc': 'Guhera kuri porogaramu z’imari zikomeye kugeza ku buvuzi n’ubwikorezi.',
+    'portfolio.heroCtaQuote': 'Bara igiciro cy’umushinga usa n’uyu',
+    'portfolio.heroCtaTechDir': 'Vugana n’Ubuyobozi bw’Ikoranabuhanga',
+    'portfolio.viewMetrics': 'Reba uko byubatse & ibipimo',
+    'portfolio.modalClose': 'Funga amakuru y’umushinga',
+    'portfolio.modalStartSimilar': 'Tangira umushinga nk’uyu ako kanya',
+    'portfolio.modalChallenge': 'Ikibazo cyari gihari',
+    'portfolio.modalSolution': 'Igisubizo cya Vitech Africa',
+    'portfolio.modalArchitecture': 'Uko Sisitemu Yubatse',
+    'portfolio.modalTechDeployed': 'Ikoranabuhanga Ryakoreshejwe:',
+
+    // FAQ
+    'faq.badge': 'Ibisobanuro & Ubunyangamugayo',
+    'faq.title': 'Ibyo Ukwiye Kumenya Byose',
+    'faq.subtitle': 'Kwegurirwa 100% inyandiko zose za porogaramu (Code), kwishyura mu mafaranga yo mu gihugu cyawe, n’amasezerano yizewe.',
+    'faq.searchPlaceholder': 'Shakisha ikibazo (urugero: amafaranga, code, igihe, Mobile Money)...',
+    'faq.expandAll': 'Kugura Byose',
+    'faq.collapseAll': 'Kuzinga Byose',
+    'faq.askQuestion': 'Baza ikibazo ako kanya',
+    'faq.helpful': 'Ese iki gisubizo cyagufashije?',
+    'faq.thanks': 'Urakoze ku gitekerezo cyawe!',
+    'faq.ctaTitle': 'Ese ufite ikibazo cyihariye ku mushinga wawe?',
+    'faq.ctaDesc': 'Abayobozi bacu b’ikoranabuhanga barasuzuma ibyo ukeneye bakagusubiza mu minota itarenze 15 kuri WhatsApp cyangwa kuri Live Chat.',
+    'faq.liveChat': 'Fungura Live Chat',
+    'faq.bookCall': 'Teganya Ikiganiro cy’Iminota 30',
+
+    // Testimonials
+    'testimonials.badge': 'Ubwizerane & Ubuhamya bw’Abayobozi',
+    'testimonials.title': 'Icyo Abayobozi b’Ikoranabuhanga n’Abashinze Ibigo Batuvugaho',
+    'testimonials.subtitle': 'Batubikije porogaramu zabo zikomeye, ububiko bw’amabanki n’inzira z’imari zizewe.',
+    'testimonials.verifiedReview': 'Ubuhamya Bwemejwe bw’Umukiriya',
+
+    // Blog
+    'blog.badge': 'Ubushakashatsi & Amakuru Mashya',
+    'blog.title': 'Inyandiko n’Ubusesenguzi bw’Ikoranabuhanga',
+    'blog.subtitle': 'Inzira z’ububiko bwa Cloud, umutekano w’imbuga (Cybersecurity) n’ubwenge bw’ubukorano (AI).',
+    'blog.readMore': 'Soma inyandiko yose',
+    'blog.searchPlaceholder': 'Shakisha inyandiko cyangwa ikoranabuhanga...',
+    'blog.allTags': 'Ingingo Zose',
+    'blog.heroBadge': 'Ubushakashatsi n’Inyandiko z’Ikoranabuhanga',
+    'blog.heroTitle': 'Ubusesenguzi bw’Inzobere &',
+    'blog.heroTitleHighlight': 'Ubwubatsi bwa Porogaramu',
+    'blog.heroDesc': 'Soma inyandiko zicukumbuye zanditswe n’inzobere zacu: ibya Kubernetes, umutekano wa banki n’ubwenge bw’ubukorano.',
+    'blog.heroCta': 'Tangira Umushinga w’Ikoranabuhanga',
 
     // Contact
-    'contact.badge': 'Gutangira Umushinga no Kuvugana n\'Ubuyobozi',
+    'contact.badge': 'Gutangira Umushinga no Kuvugana n’Ubuyobozi',
     'contact.title': 'Reka Tuganire ku Mushinga Wawe Utaha',
-    'contact.subtitle': 'Uzuza iyi fomu cyangwa uvugane n\'Umuyobozi Mukuru wacu. Uzasubizwa mu masaha 24 hamwe n\'amasezerano yo kubika ibanga (NDA).',
-    'contact.formName': 'Amazina Yose n\'Umwanya',
-    'contact.formEmail': 'Imeli y\'Akazi',
+    'contact.subtitle': 'Uzuza iyi fomu cyangwa uvugane n’Umuyobozi Mukuru wacu. Uzasubizwa mu masaha 24 hamwe n’amasezerano yo kubika ibanga (NDA).',
+    'contact.formName': 'Amazina Yose n’Umwanya',
+    'contact.formEmail': 'Imeli y’Akazi',
     'contact.formPhone': 'Telefoni / WhatsApp',
     'contact.formCompany': 'Ikigo cyangwa Umuryango',
-    'contact.formService': 'Ishami ry\'Ikoranabuhanga Rikenewe',
-    'contact.formBudget': 'Ingengo y\'Imari Uteganya',
+    'contact.formService': 'Ishami ry’Ikoranabuhanga Rikenewe',
+    'contact.formBudget': 'Ingengo y’Imari Uteganya',
     'contact.formTimeline': 'Igihe Wifuza Byarangiye',
-    'contact.formDesc': 'Ibisobanuro by\'umushinga wawe',
+    'contact.formDesc': 'Ibisobanuro by’umushinga wawe',
     'contact.formNda': 'Nifuza gusinya amasezerano yo kubika ibanga (NDA) mbere yo gutangira',
     'contact.submitBtn': 'Ohereza Ubusabe ku Buyobozi',
-    'contact.directWhatsapp': 'Vugana ako kanya kuri WhatsApp n\'Umuyobozi',
+    'contact.directWhatsapp': 'Vugana ako kanya kuri WhatsApp n’Umuyobozi',
     'contact.successTitle': 'Ubusabe Bwoherejwe Neza!',
-    'contact.successDesc': 'Inzobere n\'Ubuyobozi bari gusesengura umushinga wawe. Uzasubizwa mu masaha 24.',
+    'contact.successDesc': 'Inzobere n’Ubuyobozi bari gusesengura umushinga wawe. Uzasubizwa mu masaha 24.',
+
+    // Footer
+    'footer.desc': 'Umufatanyabikorwa ukomeye mu gukora porogaramu zihanitse, imbuga za SaaS, Cloud DevOps n’umutekano wa mudasobwa.',
+    'footer.poles': 'Amashami y’Ikoranabuhanga',
+    'footer.navigation': 'Aho Wagana Hihuse',
+    'footer.legal': 'Amategeko n’Ubwizerane',
+    'footer.rights': 'Uburenganzira bwose burabitswe.',
+    'footer.terms': 'Amabwiriza Rusange y’Imikoranire n’Amasezerano',
+    'footer.privacy': 'Politiki yo Kubika Ibanga n’Umutekano w’Amakuru',
+    'footer.ndaTerms': 'Amasezerano yo Kubika Ibanga no Kwegurirwa Porogaramu',
+    'footer.currencyConverter': 'Ihinduramafaranga Nyafurika n’Imbata',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Urubuga rw’Abakiriya & Imishinga',
+    'auth.loginDesc': 'Reba aho umushinga wawe ugeze (Sprints), gahunda yo gutanga ibyakozwe n’aho ugeragerezwa ako kanya.',
+    'auth.signInGoogle': 'Injira ukoresheje Google Workspace',
+    'auth.portalAccess': 'Kwinjira muri Porotayeli y’Umushinga',
+    'auth.myProjects': 'Imishinga Yanjye Iri Gukorwa',
 
     // Common
     'common.search': 'Shakisha...',
@@ -742,7 +1460,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   de: {
-    // Navigation
+    // Navigation & Header
     'nav.home': 'Startseite',
     'nav.services': 'Dienstleistungen',
     'nav.portfolio': 'Projekte & Referenzen',
@@ -759,6 +1477,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': 'WhatsApp GF',
     'nav.directLine': 'Geschäftsleitung',
     'nav.online': 'Online',
+    'nav.quickActions': 'Schnellzugriff',
+    'nav.search': 'Dienstleistungen, Projekte oder Tech-Stacks suchen...',
 
     // Hero
     'hero.badge': 'Panafrikanisches Exzellenzzentrum für Software-Engineering',
@@ -773,6 +1493,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': 'Erfolgreiche Projekte',
     'hero.statCountries': 'Abgedeckte Länder',
     'hero.statSatisfaction': 'Kundenzufriedenheit',
+    'hero.centerExcellence': 'F&E-Exzellenzzentrum',
+    'hero.explorePortfolio': 'Fallstudien Entdecken',
+
+    // Services
+    'services.badge': 'Ingenieurwesen & F&E Abteilungen',
+    'services.title': 'Maßgeschneiderte Unternehmenslösungen',
+    'services.subtitle': 'Von kritischer Softwarearchitektur bis hin zu KI-Automatisierung liefern unsere Senior-Ingenieure skalierbare Systeme.',
+    'services.allCategories': 'Alle Bereiche',
+    'services.startingAt': 'Ab',
+    'services.timeline': 'Durchschnittliche Dauer',
+    'services.ctaConfigure': 'Im Schätzer konfigurieren',
+    'services.ctaDetails': 'Spezifikationen & Lieferbestandteile',
+    'services.deliverablesTitle': 'Wesentliche vertragliche Lieferbestandteile',
+    'services.featuresTitle': 'Kapazitäten & Funktionen',
+    'services.heroBadge': 'Leistungskatalog & Ingenieurbereiche',
+    'services.heroTitle': 'Enterprise Software & Cloud-Lösungen',
+    'services.heroTitleHighlight': 'Für Maximale Skalierbarkeit',
+    'services.heroDesc': 'Von hochgradig skalierbaren SaaS-Plattformen über native mobile Apps bis hin zu Sicherheitsaudits und Unternehmens-KI.',
+    'services.heroCtaQuote': 'Projektbudget kalkulieren',
+    'services.heroCtaCall': 'Technisches Scoping vereinbaren',
+    'services.guaranteeBadge': 'Exzellenzgarantie',
+    'services.guaranteeTitle': 'Unsere Vertraglichen Qualitätsstandards',
+    'services.propTitle': '100% Eigentum am Quellcode',
+    'services.propDesc': 'Vollständige Übertragung aller Urheberrechte und Repositories nach Projektabnahme inklusive lückenloser Dokumentation.',
+    'services.slaTitle': 'Hochverfügbarkeit & 99.99% SLA',
+    'services.slaDesc': 'Ausfallsichere Cloud-Infrastrukturen auf AWS und Google Cloud mit 24/7-Support und vertraglich garantierten Reaktionszeiten.',
+    'services.warrantyTitle': '6 Monate Kostenlose Fehlerbehebungsgarantie',
+    'services.warrantyDesc': 'Prioritäre Fehlerbehebung und Betreuung nach dem Go-Live ohne zusätzliche Kosten.',
 
     // Estimator
     'estimator.badge': 'Transparenter Kalkulator & Länderspezifisches Angebot',
@@ -794,17 +1542,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': 'Akzeptierte lokale Zahlungsmethoden',
     'estimator.taxCompliance': 'Steuerkonformität & Rechnungsstellung',
 
-    // Services
-    'services.badge': 'Ingenieurwesen & F&E Abteilungen',
-    'services.title': 'Maßgeschneiderte Unternehmenslösungen',
-    'services.subtitle': 'Von kritischer Softwarearchitektur bis hin zu KI-Automatisierung liefern unsere Senior-Ingenieure skalierbare Systeme.',
-    'services.allCategories': 'Alle Bereiche',
-    'services.startingAt': 'Ab',
-    'services.timeline': 'Durchschnittliche Dauer',
-    'services.ctaConfigure': 'Im Schätzer konfigurieren',
-    'services.ctaDetails': 'Spezifikationen & Lieferbestandteile',
-    'services.deliverablesTitle': 'Wesentliche vertragliche Lieferbestandteile',
-    'services.featuresTitle': 'Kapazitäten & Funktionen',
+    // Tech Hubs
+    'techHubs.badge': 'Geografische Präsenz & F&E',
+    'techHubs.title': 'Unsere Technologie-Hubs in Afrika',
+    'techHubs.subtitle': 'Ein verteiltes Ingenieurteam in den Innovationszentren von Kigali, Dakar, Abidjan und Paris.',
+    'techHubs.scheduleWithLead': 'Gespräch mit diesem Hub vereinbaren',
+    'techHubs.heroBadge': 'Panafrikanisches & Internationales Netzwerk',
+    'techHubs.heroTitle': 'Strategische Präsenz in den',
+    'techHubs.heroTitleHighlight': 'Innovations-Metropolen',
+    'techHubs.heroDesc': 'Vom Hauptsitz in Kigali bis zu den Ingenieurbüros in Dakar, Abidjan, Nairobi, Casablanca und Paris.',
+    'techHubs.heroCtaSchedule': 'Termin in einem Hub vereinbaren',
+    'techHubs.heroCtaContact': 'Geschäftsleitung kontaktieren',
+    'techHubs.officesBadge': 'Standorte & Kontakt',
+    'techHubs.officesTitle': 'Unsere Standorte & F&E-Zentren',
+    'techHubs.team': 'Team',
+    'techHubs.specialty': 'Spezialisierung',
+    'techHubs.bookVisit': 'Besuch oder Besprechung anfragen',
+
+    // Portfolio
+    'portfolio.badge': 'Fallstudien & Erfolgreiche Projekte',
+    'portfolio.title': 'Unsere Erfolge im Software-Engineering',
+    'portfolio.subtitle': 'Erfahren Sie, wie wir komplexe technologische Herausforderungen in skalierbare, wirkungsvolle Systeme verwandelt haben.',
+    'portfolio.ctaSimilar': 'Ähnliches Projekt starten',
+    'portfolio.heroBadge': 'Fallstudien & Produktivsysteme',
+    'portfolio.heroTitle': 'Entdecken Sie Unsere Wichtigsten Erfolge &',
+    'portfolio.heroTitleHighlight': 'Messbare Resultate',
+    'portfolio.heroDesc': 'Von hochvolumigen Finanzanwendungen bis zu komplexen Logistik- und Medizinsystemen.',
+    'portfolio.heroCtaQuote': 'Ähnliches Projekt kalkulieren',
+    'portfolio.heroCtaTechDir': 'Mit der Technischen Leitung sprechen',
+    'portfolio.viewMetrics': 'Architektur & Kennzahlen ansehen',
+    'portfolio.modalClose': 'Fallstudie schließen',
+    'portfolio.modalStartSimilar': 'Ähnliches Projekt jetzt starten',
+    'portfolio.modalChallenge': 'Die Ausgangsherausforderung',
+    'portfolio.modalSolution': 'Die Vitech Africa Lösung',
+    'portfolio.modalArchitecture': 'Architektur- & Engineering-Entscheidungen',
+    'portfolio.modalTechDeployed': 'Eingesetzte Technologien & Tools:',
+
+    // FAQ
+    'faq.badge': 'Wissenszentrum & Transparenz',
+    'faq.title': 'Alles, was Sie wissen müssen',
+    'faq.subtitle': '100% Quellcode-Eigentum, Abrechnung in lokalen Währungen, Agile-Scrum-Methode und vertragliche SLAs.',
+    'faq.searchPlaceholder': 'Frage suchen (z. B. Währungen, Quellcode-Eigentum, Fristen, Mobile Money)...',
+    'faq.expandAll': 'Alle ausklappen',
+    'faq.collapseAll': 'Alle einklappen',
+    'faq.askQuestion': 'Frage direkt stellen',
+    'faq.helpful': 'War diese Antwort hilfreich?',
+    'faq.thanks': 'Vielen Dank für Ihr Feedback!',
+    'faq.ctaTitle': 'Haben Sie eine spezifische technische Frage zu Ihrem Projekt?',
+    'faq.ctaDesc': 'Unsere technischen Direktoren und Leitenden Ingenieure analysieren Ihre Anforderungen und antworten innerhalb von 15 Minuten per WhatsApp oder Live-Chat.',
+    'faq.liveChat': 'Live-Chat Öffnen',
+    'faq.bookCall': '30-Min-Gespräch Buchen',
+
+    // Testimonials
+    'testimonials.badge': 'Vertrauen & Führungskräfte-Referenzen',
+    'testimonials.title': 'Was CTOs und Gründer über uns sagen',
+    'testimonials.subtitle': 'Sie vertrauen uns ihre unternehmenskritischen Anwendungen, Bankinfrastrukturen und Hochlastsysteme an.',
+    'testimonials.verifiedReview': 'Verifizierte Kundenbewertung',
+
+    // Blog
+    'blog.badge': 'Technologie-Radar & F&E',
+    'blog.title': 'Fachartikel & Software-Engineering-Analysen',
+    'blog.subtitle': 'Erprobte Architekturen, Cloud DevOps, Cybersicherheit und angewandte KI in Afrika und weltweit.',
+    'blog.readMore': 'Vollständigen Artikel lesen',
+    'blog.searchPlaceholder': 'Artikel oder Technologien suchen...',
+    'blog.allTags': 'Alle Themen',
+    'blog.heroBadge': 'F&E- und Engineering-Publikationen',
+    'blog.heroTitle': 'Praxisberichte & Moderne',
+    'blog.heroTitleHighlight': 'Software-Architekturen',
+    'blog.heroDesc': 'Erfahren Sie mehr in ausführlichen Fachartikeln unserer Chefentwickler: Event-Driven-Architekturen, Kubernetes und Bankensicherheit.',
+    'blog.heroCta': 'Technisches Projekt Starten',
 
     // Contact
     'contact.badge': 'Projektstart & Geschäftsleitungskontakt',
@@ -824,6 +1630,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.successTitle': 'Anfrage erfolgreich übermittelt!',
     'contact.successDesc': 'Unsere Geschäftsführung analysiert Ihre Anforderungen. Sie erhalten innerhalb von 24 Stunden eine Rückmeldung.',
 
+    // Footer
+    'footer.desc': 'Führender Technologiepartner für anspruchsvolles Software-Engineering, SaaS-Entwicklung, Cloud DevOps und Cybersicherheit.',
+    'footer.poles': 'Fachbereiche',
+    'footer.navigation': 'Schnellnavigation',
+    'footer.legal': 'Rechtliches & Compliance',
+    'footer.rights': 'Alle Rechte vorbehalten.',
+    'footer.terms': 'Allgemeine Geschäfts- und Leistungsbedingungen',
+    'footer.privacy': 'Datenschutzrichtlinie & DSGVO-Konformität',
+    'footer.ndaTerms': 'Geheimhaltungsvereinbarung & Vollständige Code-Übergabe',
+    'footer.currencyConverter': 'Panafrikanischer Währungsrechner',
+
+    // Client Portal & Auth
+    'auth.loginTitle': 'Kundenportal & Projektübersicht',
+    'auth.loginDesc': 'Verfolgen Sie Ihre Sprint-Fortschritte, Meilensteine und Staging-Umgebungen in Echtzeit.',
+    'auth.signInGoogle': 'Mit Google Workspace Anmelden',
+    'auth.portalAccess': 'Zum Projektportal',
+    'auth.myProjects': 'Meine Aktiven Projekte',
+
     // Common
     'common.search': 'Suchen...',
     'common.filter': 'Filtern',
@@ -841,7 +1665,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
   },
 
   zh: {
-    // Navigation
+    // Navigation & Header
     'nav.home': '首页',
     'nav.services': '工程服务',
     'nav.portfolio': '成功案例',
@@ -858,6 +1682,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'nav.whatsappDir': '总经理WhatsApp',
     'nav.directLine': '总经办专线',
     'nav.online': '在线支持',
+    'nav.quickActions': '快捷访问',
+    'nav.search': '搜索工程服务、项目案例或技术架构...',
 
     // Hero
     'hero.badge': '泛非卓越软件工程与研发中心',
@@ -872,6 +1698,34 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'hero.statProjects': '已成功交付项目',
     'hero.statCountries': '业务覆盖国家',
     'hero.statSatisfaction': '客户满意度',
+    'hero.centerExcellence': '研发卓越中心',
+    'hero.explorePortfolio': '查阅企业案例',
+
+    // Services
+    'services.badge': '软件工程与研发部门',
+    'services.title': '企业级定制化技术解决方案',
+    'services.subtitle': '从核心底层架构到智能AI自动化，资深工程师团队交付高可用、高扩展性系统。',
+    'services.allCategories': '全部分类',
+    'services.startingAt': '起价',
+    'services.timeline': '平均交付周期',
+    'services.ctaConfigure': '在估算器中配置此服务',
+    'services.ctaDetails': '技术规范与交付清单',
+    'services.deliverablesTitle': '合同核心交付物',
+    'services.featuresTitle': '功能与系统特性',
+    'services.heroBadge': '工程服务目录与研发部门',
+    'services.heroTitle': '企业级软件与云原生方案',
+    'services.heroTitleHighlight': '为大规模高并发而生',
+    'services.heroDesc': '从千万级用户架构的SaaS云平台、跨平台高性能移动App，到银行级安全审计与定制化大模型AI赋能。',
+    'services.heroCtaQuote': '在线核算项目预算',
+    'services.heroCtaCall': '预约资深架构师评估',
+    'services.guaranteeBadge': '品质与合规保障',
+    'services.guaranteeTitle': '我们严格的合同级交付与服务承诺',
+    'services.propTitle': '100% 源代码全权交付与知识产权',
+    'services.propDesc': '项目最终验收后，无保留移交全部源代码、专属 Git 代码仓库及完整架构设计文档，知识产权完全归属于客户。',
+    'services.slaTitle': '99.99% 系统高可用性保证 (SLA)',
+    'services.slaDesc': '基于 AWS 与 Google Cloud 多可用区容灾部署，提供 7×24 小时应急响应和合同保障机制。',
+    'services.warrantyTitle': '项目交付后 6 个月免费质保',
+    'services.warrantyDesc': '提供长期运维监控与故障快速修复服务，上线后六个月内无任何隐形二次收费。',
 
     // Estimator
     'estimator.badge': '透明化项目估算与国家专属报价单',
@@ -893,17 +1747,75 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'estimator.paymentMethods': '支持的本地及国际结算方式',
     'estimator.taxCompliance': '财税合规与国际发票条款',
 
-    // Services
-    'services.badge': '软件工程与研发部门',
-    'services.title': '企业级定制化技术解决方案',
-    'services.subtitle': '从核心底层架构到智能AI自动化，资深工程师团队交付高可用、高扩展性系统。',
-    'services.allCategories': '全部分类',
-    'services.startingAt': '起价',
-    'services.timeline': '平均交付周期',
-    'services.ctaConfigure': '在估算器中配置此服务',
-    'services.ctaDetails': '技术规范与交付清单',
-    'services.deliverablesTitle': '合同核心交付物',
-    'services.featuresTitle': '功能与系统特性',
+    // Tech Hubs
+    'techHubs.badge': '全球研发布局与创新网络',
+    'techHubs.title': '我们在非洲的科技研发中心',
+    'techHubs.subtitle': '分布于基加利、达喀尔、阿比让和巴黎等核心创新枢纽的资深工程力量。',
+    'techHubs.scheduleWithLead': '预约对接该研发中心',
+    'techHubs.heroBadge': '泛非与国际创新研发网络',
+    'techHubs.heroTitle': '战略布局核心科技',
+    'techHubs.heroTitleHighlight': '与创新枢纽城市',
+    'techHubs.heroDesc': '从卢旺达基加利全球总部到塞内加尔达喀尔、科特迪瓦阿比让、肯尼亚内罗毕、摩洛哥卡萨布兰卡以及法国巴黎研发基地。',
+    'techHubs.heroCtaSchedule': '预约实地考察或视频对接',
+    'techHubs.heroCtaContact': '联系总经办执行董事',
+    'techHubs.officesBadge': '全球办公网点与联络方式',
+    'techHubs.officesTitle': '我们的研发中心与分支机构',
+    'techHubs.team': '核心工程团队',
+    'techHubs.specialty': '核心技术专长',
+    'techHubs.bookVisit': '申请技术调研与交流',
+
+    // Portfolio
+    'portfolio.badge': '深度案例与部署成果',
+    'portfolio.title': '我们的软件工程成就与交付标杆',
+    'portfolio.subtitle': '了解我们如何将复杂的技术挑战转化为高扩展性、强健的高性能数字化业务系统。',
+    'portfolio.ctaSimilar': '启动类似工程项目',
+    'portfolio.heroBadge': '真实商业案例与在线系统',
+    'portfolio.heroTitle': '探索标志性工程案例与',
+    'portfolio.heroTitleHighlight': '可量化的商业成效',
+    'portfolio.heroDesc': '从海量高频金融交易结算系统，到跨国智慧物流调度与医疗物联网平台，了解我们如何攻克底层复杂技术瓶颈。',
+    'portfolio.heroCtaQuote': '快速估算同类型项目',
+    'portfolio.heroCtaTechDir': '直接对话技术总监与架构师',
+    'portfolio.viewMetrics': '查阅系统架构与关键性能指标',
+    'portfolio.modalClose': '关闭案例详情',
+    'portfolio.modalStartSimilar': '立即发起同类项目',
+    'portfolio.modalChallenge': '项目面临的核心业务与技术挑战',
+    'portfolio.modalSolution': 'Vitech Africa 全栈工程解决方案',
+    'portfolio.modalArchitecture': '系统架构选型与高可用设计',
+    'portfolio.modalTechDeployed': '投入使用的关键技术与工具栈:',
+
+    // FAQ
+    'faq.badge': '知识库与透明化保障',
+    'faq.title': '您需要了解的一切',
+    'faq.subtitle': '100% 源代码全权交付、支持本地货币结算、Agile Scrum 敏捷迭代开发流程以及合同级 SLA 服务承诺。',
+    'faq.searchPlaceholder': '搜索技术与商务问题（例如：货币结算、源码产权、交付周期、Mobile Money）...',
+    'faq.expandAll': '全部展开',
+    'faq.collapseAll': '全部折叠',
+    'faq.askQuestion': '直接在线提问',
+    'faq.helpful': '该解答对您是否有帮助？',
+    'faq.thanks': '感谢您的评价！',
+    'faq.ctaTitle': '对您的项目有定制化技术疑问？',
+    'faq.ctaDesc': '我们的技术总监与首席软件架构师将在 15 分钟内通过 WhatsApp 或在线实时客服为您提供深度解答。',
+    'faq.liveChat': '打开即时在线客服',
+    'faq.bookCall': '预约 30 分钟技术沟通',
+
+    // Testimonials
+    'testimonials.badge': '行业信任与高管背书',
+    'testimonials.title': '技术官 (CTO) 与企业创始人对我们的评价',
+    'testimonials.subtitle': '他们将核心业务平台、银行级金融结算通道与高并发关键系统托付给我们。',
+    'testimonials.verifiedReview': '已认证客户真实评价',
+
+    // Blog
+    'blog.badge': '前沿技术追踪与研发白皮书',
+    'blog.title': '软件工程技术洞察与实战分析',
+    'blog.subtitle': '深耕非洲与全球市场的云原生架构、微服务、网络安全及企业级 AI 落地实践。',
+    'blog.readMore': '阅读完整文章',
+    'blog.searchPlaceholder': '搜索技术文章或技术栈...',
+    'blog.allTags': '全部主题分类',
+    'blog.heroBadge': '前沿技术追踪与研发洞察',
+    'blog.heroTitle': '技术深度解析与',
+    'blog.heroTitleHighlight': '企业级架构实战',
+    'blog.heroDesc': '阅读由我们首席架构师与资深开发主管撰写的技术文章：事件驱动微服务架构、Kubernetes多集群部署及银行级金融安全。',
+    'blog.heroCta': '发起企业技术研讨',
 
     // Contact
     'contact.badge': '启动项目与总经办直接对接',
@@ -922,6 +1834,24 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     'contact.directWhatsapp': '通过 WhatsApp 与总经理即时对话',
     'contact.successTitle': '需求已成功提交！',
     'contact.successDesc': '工程管理团队正在深入分析您的项目需求，将在24小时内与您取得联系。',
+
+    // Footer
+    'footer.desc': '企业级高端软件工程、SaaS 开发、云原生 DevOps 及网络安全领域的首选技术合作伙伴。',
+    'footer.poles': '工程专业部门',
+    'footer.navigation': '快速导航',
+    'footer.legal': '合规与法律事务',
+    'footer.rights': '版权所有，保留所有权利。',
+    'footer.terms': '通用服务条款与工程合同',
+    'footer.privacy': '隐私政策与国际数据保护合规',
+    'footer.ndaTerms': '保密协议与 100% 知识产权全权转让',
+    'footer.currencyConverter': '泛非与国际多币种实时换算器',
+
+    // Client Portal & Auth
+    'auth.loginTitle': '客户门户与项目管理看板',
+    'auth.loginDesc': '实时查看您的敏捷迭代 (Sprint) 进度、交付里程碑以及预发布测试环境。',
+    'auth.signInGoogle': '使用 Google Workspace 快速登录',
+    'auth.portalAccess': '进入项目控制台',
+    'auth.myProjects': '我正在进行的项目',
 
     // Common
     'common.search': '搜索...',
@@ -961,6 +1891,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const savedLang = localStorage.getItem('vitech_lang') as LanguageCode | null;
       if (savedLang && ['fr', 'en', 'ar', 'es', 'pt', 'sw', 'rw', 'de', 'zh'].includes(savedLang)) {
         setLanguageState(savedLang);
+        const selectedOption = SUPPORTED_LANGUAGES.find((l) => l.code === savedLang);
+        if (selectedOption?.dir) {
+          document.documentElement.dir = selectedOption.dir;
+        }
         return;
       }
 
@@ -1005,6 +1939,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       setLanguageState(detected);
       setIsAutoDetected(true);
+      const selectedOption = SUPPORTED_LANGUAGES.find((l) => l.code === detected);
+      if (selectedOption?.dir) {
+        document.documentElement.dir = selectedOption.dir;
+      }
     } catch {
       setLanguageState('fr');
     }

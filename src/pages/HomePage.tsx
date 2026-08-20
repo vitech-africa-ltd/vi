@@ -1,7 +1,9 @@
 import React from 'react';
 import { Hero } from '../components/Hero';
 import { ServicesSection } from '../components/ServicesSection';
+import { InternationalPricingSection } from '../components/InternationalPricingSection';
 import { ProjectEstimator } from '../components/ProjectEstimator';
+import { FounderSkillsSection } from '../components/FounderSkillsSection';
 import { TechHubsMap } from '../components/TechHubsMap';
 import { PortfolioSection } from '../components/PortfolioSection';
 import { ClientDashboard } from '../components/ClientDashboard';
@@ -54,6 +56,17 @@ export const HomePage: React.FC<HomePageProps> = ({
         onSelectServiceForQuote={onSelectServiceForQuote}
       />
 
+      {/* Founder & Engineering Technical Skills Matrix */}
+      <FounderSkillsSection
+        onContactFounder={() => onNavigateToView('contact')}
+      />
+
+      {/* International World Bank 4-Tier Pricing Grid */}
+      <InternationalPricingSection
+        onNavigateToEstimator={onSelectServiceForQuote}
+        onNavigateToContact={() => onNavigateToView('contact')}
+      />
+
       {/* Live Interactive Project Estimator */}
       <ProjectEstimator
         onApplyEstimateToContact={onApplyEstimateToContact}
@@ -79,6 +92,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       <FaqSection
         onOpenChat={onOpenChat}
         onOpenEstimator={() => onNavigateToView('estimator')}
+        onOpenScheduleModal={onOpenScheduleModal}
+        onNavigateToView={onNavigateToView}
       />
 
       {/* Technical Engineering Blog */}

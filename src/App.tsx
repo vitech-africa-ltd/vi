@@ -7,6 +7,7 @@ import { CountryProvider } from './context/CountryContext';
 import { SiteDataProvider } from './context/SiteDataContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { SEOHead } from './components/SEOHead';
 import { LiveChatWidget } from './components/LiveChatWidget';
 import { ScheduleModal } from './components/ScheduleModal';
 import { CurrencyConverterModal } from './components/CurrencyConverterModal';
@@ -22,6 +23,7 @@ import { TechHubsPage } from './pages/TechHubsPage';
 import { ClientPortalPage } from './pages/ClientPortalPage';
 import { BlogPage } from './pages/BlogPage';
 import { ContactPage } from './pages/ContactPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 import { ContactFormData, OfficeHub } from './types';
 
@@ -38,7 +40,7 @@ export default function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      const validViews = ['home', 'services', 'portfolio', 'estimator', 'tech-hubs', 'client-portal', 'blog', 'contact', 'admin'];
+      const validViews = ['home', 'services', 'portfolio', 'estimator', 'tech-hubs', 'client-portal', 'blog', 'contact', 'admin', 'profile', 'pricing'];
       if (validViews.includes(hash)) {
         if (hash === 'admin') {
           setIsAdminPortalOpen(true);
@@ -121,7 +123,8 @@ Délais Estimés : ${data.estimatedTimeline}`,
           <CurrencyProvider>
             <CountryProvider>
               <ThemeProvider>
-              <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
+                <SEOHead activeView={activeView} />
+                <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
                 
                 {/* Main Navigation Header with Active View Support */}
                 <Header
@@ -201,6 +204,14 @@ Délais Estimés : ${data.estimatedTimeline}`,
                     <ContactPage
                       initialData={contactInitialData}
                       onOpenScheduleModal={handleOpenScheduleForHub}
+                      onOpenChat={() => setIsChatOpen(true)}
+                    />
+                  )}
+
+                  {(activeView === 'profile' || activeView === 'pricing') && (
+                    <ProfilePage
+                      onNavigateToView={navigateToView}
+                      onOpenScheduleModal={() => handleOpenScheduleForHub()}
                       onOpenChat={() => setIsChatOpen(true)}
                     />
                   )}

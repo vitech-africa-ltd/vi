@@ -150,6 +150,120 @@ Chiffres clés : Plus de 140 projets livrés, présence dans 18 pays, SLA 99.99%
 - Facturation : Émission de factures proforma et factures officielles conformes aux normes fiscales locales (dont EBM au Rwanda et TVA selon localisation).`
   },
   {
+    id: "international-pricing-world-bank-2026",
+    title: "Grille Tarifaire Internationale 2026 (Normes Banque Mondiale)",
+    category: "pricing",
+    tags: ["grille", "tarifs", "banque mondiale", "rwanda", "rdc", "low income", "high income", "prix"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `GRILLE TARIFAIRE INTERNATIONALE 2026 (Basée sur les 4 Catégories Économiques de la Banque Mondiale) :
+
+1. Marché Low-Income (Afrique & Pays à faible revenu : Rwanda, RDC, Burundi, Ouganda, etc.) :
+- Logo Pro : $30 – $80
+- Flyer / Poster : $15 – $50
+- Carte de visite : $15 – $40
+- Site Web Starter : $150 – $300
+- Site Web Business Pro : $300 – $600
+- E-commerce : $500 – $1,000
+- Application Web SaaS : $700 – $2,000
+- Logiciel sur-mesure Desktop : $800 – $3,000+
+- Application Mobile iOS/Android : $800 – $3,500+
+- Système de Gestion ERP : $700 – $3,000+
+- UI/UX Design Figma : $100 – $500
+- Marketing Digital : $100 – $500 / mois
+- Nom de domaine + Hébergement : $50 – $150 / an
+- Maintenance & Support : $50 – $300 / mois
+- Intégration API & Mobile Money : $100 – $500+
+- Solutions d'IA & RAG : $500 – $5,000+
+- Cybersécurité : $200 – $2,000+
+
+2. Marché Lower-Middle-Income (Kenya, Tanzanie, Ghana, Nigeria, Sénégal, Côte d'Ivoire, Maroc, Égypte, Inde...) :
+- Logo : $50 – $150 | Flyer : $25 – $80 | Carte : $25 – $60
+- Site Starter : $250 – $500 | Business : $500 – $1,000 | E-commerce : $800 – $1,800
+- Web App SaaS : $1,000 – $3,500 | Logiciel : $1,500 – $5,000+ | Mobile App : $1,500 – $6,000+
+- Système ERP : $1,200 – $5,000+ | UI/UX : $200 – $800 | Marketing : $200 – $800/m
+- Domaine + Hébergement : $70 – $200/an | Maintenance : $100 – $500/m | API : $200 – $800+ | IA : $1,000 – $8,000+ | Sécurité : $400 – $3,000+
+
+3. Marché Upper-Middle-Income (Afrique du Sud, Chine, Brésil, Mexique, Malaisie, Turquie, Thaïlande...) :
+- Logo : $100 – $300 | Flyer : $50 – $150 | Carte : $50 – $120
+- Site Starter : $500 – $1,000 | Business : $1,000 – $2,500 | E-commerce : $1,500 – $4,000
+- Web App SaaS : $2,000 – $7,000 | Logiciel : $3,000 – $10,000+ | Mobile App : $3,000 – $12,000+
+- Système ERP : $2,500 – $10,000+ | UI/UX : $500 – $2,000 | Marketing : $400 – $1,500/m
+- Domaine + Hébergement : $100 – $300/an | Maintenance : $200 – $1,000/m | API : $500 – $2,000+ | IA : $2,000 – $15,000+ | Sécurité : $1,000 – $6,000+
+
+4. Marché High-Income / International (USA, Canada, Royaume-Uni, France, Allemagne, Suisse, Belgique, EAU, Arabie Saoudite, Japon...) :
+- Logo : $200 – $600 | Flyer : $100 – $300 | Carte : $80 – $200
+- Site Starter : $800 – $1,500 | Business : $1,500 – $4,000 | E-commerce : $2,500 – $7,000
+- Web App SaaS : $4,000 – $15,000+ | Logiciel : $5,000 – $25,000+ | Mobile App : $5,000 – $30,000+
+- Système ERP : $4,000 – $20,000+ | UI/UX : $1,000 – $4,000 | Marketing : $800 – $3,000/m
+- Domaine + Hébergement : $150 – $500/an | Maintenance : $300 – $1,500/m | API : $800 – $4,000+ | IA : $5,000 – $50,000+ | Sécurité : $2,000 – $15,000+
+
+5. Tarifs Spéciaux Rwanda (en RWF) :
+- Starter Website : 150,000 – 300,000 RWF | Business : 300,000 – 600,000 RWF | E-commerce : 500,000 – 1,200,000 RWF
+- Web App : 700,000 – 2,500,000 RWF | Logiciel : 800,000 – 4,000,000+ RWF | Mobile App : 1,000,000 – 5,000,000+ RWF
+- Logo : 30,000 – 100,000 RWF | Flyer : 15,000 – 50,000 RWF | UI/UX : 100,000 – 600,000 RWF | Maintenance : 50,000 – 300,000 RWF/m
+
+6. Tarifs Spéciaux RDC (en USD) :
+- Website : $150 – $600 | E-commerce : $500 – $1,000 | Web App : $700 – $2,000 | Mobile App : $800 – $3,500+ | Logiciel : $800 – $3,000+ | Logo : $30 – $80 | Design : $15 – $50 | Maintenance : $50 – $300/m
+
+Moyens de paiement :
+- Rwanda : MTN MoMo
+- RDC : Airtel Money
+- International : Western Union, Virement Swift, Cartes Bancaires.`
+  },
+  {
+    id: "founder-skills-and-education",
+    title: "Profil Technique, Compétences & Formation du Fondateur",
+    category: "company",
+    tags: ["fondateur", "competences", "cv", "formation", "ulk", "projets", "c#", "wpf", "php", "react"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `PROFIL TECHNIQUE ET COMPÉTENCES DU FONDATEUR / DIRECTION TECHNIQUE (V&I TECH AFRICA LTD) :
+
+1. Formation Académique :
+- Diplôme : Bachelor / Licence – Computer Science / Software Engineering
+- Établissement : University of Kigali (ULK) – Gisenyi Campus, Rwanda (Niveau actuel : Year 2)
+- Disciplines : Génie logiciel, Algorithmique & POO, Bases de données relationnelles (SQL, MySQL, SQLite), Conception UML, Développement web & desktop.
+
+2. Compétences Techniques & Niveaux de Maîtrise :
+- HTML / CSS : 90% (Expert)
+- PHP : 85% (Avancé, architectures MVC, backends)
+- API Integration : 85% (Avancé, Webhooks, passerelles de paiement)
+- JavaScript & TypeScript : 80% (Avancé)
+- SQL / MySQL / SQLite : 80% (Avancé, requêtes optimisées, exports)
+- Python : 70% (Maîtrisé, Tkinter, scripts)
+- C++ : 70% (Maîtrisé, algorithmique)
+- Java : 60% (Intermédiaire)
+- C# / .NET / WPF : Intermédiaire / Solide (Applications desktop, WPF UI, SQLite, Export Excel)
+- React / Vite : Intermédiaire / Solide (SPA, composants modernes)
+- Laravel : Intermédiaire
+- Bootstrap / Tailwind CSS : 85% (Avancé)
+- Git / GitHub : 85% (Avancé)
+- Maintenance et dépannage informatique : 85% (Diagnostic matériel & logiciel)
+
+3. Applications & Systèmes Desktop :
+- Développement d'applications desktop professionnelles avec C# / .NET / WPF
+- Interfaces graphiques Python Tkinter
+- Gestion de bases de données locales (SQLite, MySQL)
+- Export et traitement de données (Excel, PDF, CSV)
+- Installation, configuration de logiciels et assistance utilisateurs
+
+4. Solutions Numériques & Mobile Money :
+- Intégration de passerelles Mobile Money (MTN MoMo au Rwanda, Airtel Money en RDC)
+- Développement de solutions web et digitalisation de processus d'entreprise
+- Création de sites web professionnels et e-commerce
+
+5. Projets Phares Réalisés :
+- "V&I Manager System" : Application desktop de gestion développée en C# / .NET / WPF avec SQLite embarquée, gestion des stocks et opérations, et export Excel automatisé.
+- "Vitech Africa – Digital Solutions" : Plateforme technologique d'ingénierie et de transformation numérique (vitechafrica.vercel.app).
+- "Vitech Scripts" : Marketplace numérique pour scripts, templates et solutions web prêtes à l'emploi.
+- "SmartPharma / MyLibrary / Solutions de gestion" : Suites de gestion spécialisées.
+
+6. Postes Recherchés & Disponibilité :
+- Statut : Disponibilité Immédiate
+- Postes cibles : Junior Software Developer, Web Developer, IT Support, IT Technician, Computer Operator, Technical Assistant, Data Assistant, Administration & Opérations, Vente / Commercial.`
+  },
+  {
     id: "escalation-and-support",
     title: "Canaux de Support et Escalade vers un Humain",
     category: "company",

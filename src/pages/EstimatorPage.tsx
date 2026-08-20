@@ -10,6 +10,7 @@ import {
   Calendar 
 } from 'lucide-react';
 import { ProjectEstimator } from '../components/ProjectEstimator';
+import { InternationalPricingSection } from '../components/InternationalPricingSection';
 import { FaqSection } from '../components/FaqSection';
 import { useCurrency } from '../context/CurrencyContext';
 
@@ -75,6 +76,9 @@ export const EstimatorPage: React.FC<EstimatorPageProps> = ({
         initialServiceId={initialServiceId}
         onApplyEstimateToContact={onApplyEstimateToContact}
       />
+
+      {/* International World Bank 4-Tier Pricing Reference Grid */}
+      <InternationalPricingSection />
 
       {/* FAQ on pricing & terms */}
       <div className="bg-slate-50 text-slate-900">

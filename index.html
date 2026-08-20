@@ -1,19 +1,52 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>V&amp;I TECH AFRICA LTD — Innovate • Develop • Grow</title>
-    <meta name="description" content="V&amp;I TECH AFRICA LTD - Solutions digitales innovantes, développement web & mobile sur mesure, architectures Cloud, IA et cybersécurité en Afrique." />
+    <title>V&amp;I TECH AFRICA LTD — Ingénierie Logicielle, Cloud &amp; Solutions Digitales Panafricaines</title>
+    <meta name="description" content="V&amp;I TECH AFRICA LTD — Entreprise panafricaine d'ingénierie logicielle, applications web &amp; mobiles, architectures Cloud, IA, APIs Mobile Money et logiciels de gestion." />
+    <meta name="keywords" content="VITECH AFRICA, V&amp;I TECH AFRICA, développement web Rwanda, logiciel Kinshasa, application mobile Dakar, C# .NET WPF, PHP, Python, React, MTN MoMo, Airtel Money, ULK Gisenyi" />
+    <meta name="author" content="V&amp;I TECH AFRICA LTD" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph Default Meta -->
+    <meta property="og:site_name" content="V&amp;I TECH AFRICA LTD" />
+    <meta property="og:title" content="V&amp;I TECH AFRICA LTD — Digital Solutions For Your Business" />
+    <meta property="og:description" content="Développement web, mobile, e-commerce, cloud &amp; solutions logicielles d'entreprise en Afrique et à l'international." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vitechafrica.vercel.app" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&h=630&q=80" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card Meta -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@VitechAfrica" />
+    <meta name="twitter:creator" content="@VitechAfrica" />
+    <meta name="twitter:title" content="V&amp;I TECH AFRICA LTD — Digital Solutions For Your Business" />
+    <meta name="twitter:description" content="Ingénierie logicielle, plateformes web, apps mobiles &amp; IA en Afrique." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&h=630&q=80" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <meta property="og:title" content="VITECH AFRICA LTD — Digital Solutions For Your Business" />
-    <meta property="og:description" content="Développement web, mobile, e-commerce, cloud & solutions logicielles d'entreprise." />
-    <meta property="og:type" content="website" />
+
+    <!-- Google Analytics 4 (GA4) Tracking Script -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VITECHAFR26"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-VITECHAFR26', {
+        page_title: document.title,
+        page_location: window.location.href,
+        send_page_view: true
+      });
+    </script>
   </head>
-  <body class="bg-white text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
+  <body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
