@@ -18,8 +18,28 @@ import {
   Layers,
   Search,
   Eye,
-  X
+  X,
+  LifeBuoy,
+  MessageSquare,
+  AlertCircle,
+  CheckCircle2,
+  Cpu
 } from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area, 
+  BarChart, 
+  Bar, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  Tooltip, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Legend 
+} from 'recharts';
 import { INITIAL_CLIENT_PROJECT } from '../data/companyData';
 import { VaultFile, TeamPermissionUser } from '../types';
 import { VitechLogo } from './VitechLogo';
@@ -35,6 +55,44 @@ export const ClientDashboard: React.FC = () => {
   const [projectData] = useState(INITIAL_CLIENT_PROJECT);
   const [vaultFiles, setVaultFiles] = useState<VaultFile[]>(INITIAL_CLIENT_PROJECT.vaultFiles);
   const [teamMembers, setTeamMembers] = useState<TeamPermissionUser[]>(INITIAL_CLIENT_PROJECT.teamPermissions);
+
+  // Support Tickets State
+  const [supportTickets, setSupportTickets] = useState([
+    { id: 'TICK-801', title: 'Ajout endpoint webhook notification MTN MoMo', status: 'resolved', priority: 'high', category: 'API', openedAt: 'Il y a 3j', resolvedAt: 'Il y a 1j', assignee: 'Lead Dev Vitech' },
+    { id: 'TICK-802', title: 'Optimisation indexation SQLite mode offline', status: 'in_progress', priority: 'medium', category: 'Mobile', openedAt: 'Hier à 14h', assignee: 'Ingénieur Mobile' },
+    { id: 'TICK-803', title: 'Configuration certificat mTLS passerelle bancaire', status: 'open', priority: 'critical', category: 'Sécurité', openedAt: 'Aujourd\'hui à 09h', assignee: 'DevSecOps Lead' },
+    { id: 'TICK-804', title: 'Mise à jour export relevé comptable en PDF', status: 'resolved', priority: 'low', category: 'Reporting', openedAt: 'Il y a 5j', resolvedAt: 'Il y a 4j', assignee: 'Front Architect' },
+  ]);
+
+  const [showNewTicketModal, setShowNewTicketModal] = useState<boolean>(false);
+  const [newTicketTitle, setNewTicketTitle] = useState<string>('');
+  const [newTicketCategory, setNewTicketCategory] = useState<string>('API');
+  const [newTicketPriority, setNewTicketPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
+
+  // Chart Datasets
+  const weeklyActivityData = [
+    { week: 'Sem 1', commits: 45, apiCalls: 12000, testsPassed: 98 },
+    { week: 'Sem 2', commits: 68, apiCalls: 28000, testsPassed: 142 },
+    { week: 'Sem 3', commits: 82, apiCalls: 45000, testsPassed: 210 },
+    { week: 'Sem 4', commits: 95, apiCalls: 89000, testsPassed: 320 },
+    { week: 'Sem 5', commits: 110, apiCalls: 135000, testsPassed: 415 },
+    { week: 'Sem 6 (En cours)', commits: 124, apiCalls: 180000, testsPassed: 512 },
+  ];
+
+  const ticketStatusData = [
+    { name: 'Résolus', count: supportTickets.filter(t => t.status === 'resolved').length, fill: '#10b981' },
+    { name: 'En cours', count: supportTickets.filter(t => t.status === 'in_progress').length, fill: '#06b6d4' },
+    { name: 'Ouverts', count: supportTickets.filter(t => t.status === 'open').length, fill: '#f59e0b' },
+  ];
+
+  const milestonesVelocityData = [
+    { name: 'Sprint 1', prevu: 42, livre: 42 },
+    { name: 'Sprint 2', prevu: 58, livre: 58 },
+    { name: 'Sprint 3', prevu: 48, livre: 48 },
+    { name: 'Sprint 4', prevu: 50, livre: 34 },
+    { name: 'Sprint 5', prevu: 45, livre: 0 },
+    { name: 'Sprint 6', prevu: 40, livre: 0 },
+  ];
   
   // Real-time Vault upload simulator state
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -132,6 +190,26 @@ export const ClientDashboard: React.FC = () => {
     setNewMemberEmail('');
     setNewMemberName('');
     showNotification(`Collaborateur ${newMemberName} invité avec le rôle ${newMemberRole}.`);
+  };
+
+  const handleCreateTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTicketTitle.trim()) return;
+
+    const newTicket = {
+      id: `TICK-${Math.floor(805 + Math.random() * 100)}`,
+      title: newTicketTitle.trim(),
+      status: 'open',
+      priority: newTicketPriority,
+      category: newTicketCategory,
+      openedAt: "À l'instant",
+      assignee: 'Lead Support Vitech',
+    };
+
+    setSupportTickets((prev) => [newTicket, ...prev]);
+    setNewTicketTitle('');
+    setShowNewTicketModal(false);
+    showNotification(`Ticket ${newTicket.id} ouvert avec succès. SLA de prise en charge < 15 min.`);
   };
 
   // Filter vault files
@@ -572,61 +650,213 @@ export const ClientDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Performance Graphs Mock / Diagnostics */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-5">
-              <h3 className="text-lg font-bold text-white">Diagnostics de Charge & Santé de l'Infrastructure</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Sprint Burn-down velocity */}
-                <div className="p-4 rounded-xl bg-[#020617] border border-slate-800 space-y-3">
-                  <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                    Vélocité des Sprints (Story Points Livrés)
-                  </span>
-                  <div className="space-y-2.5">
-                    {[
-                      { sprint: 'Sprint 1 (Architecture & DB)', points: '42 / 42 pts', pct: 100, color: 'bg-cyan-400' },
-                      { sprint: 'Sprint 2 (Core Engine & Kafka)', points: '58 / 58 pts', pct: 100, color: 'bg-cyan-400' },
-                      { sprint: 'Sprint 3 (App Mobile Flutter)', points: '48 / 48 pts', pct: 100, color: 'bg-cyan-400' },
-                      { sprint: 'Sprint 4 (Intégration Télécoms)', points: '34 / 50 pts', pct: 68, color: 'bg-blue-400' },
-                    ].map((s, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-300">{s.sprint}</span>
-                          <span className="font-mono text-cyan-400 font-bold">{s.points}</span>
-                        </div>
-                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                          <div className={`${s.color} h-full rounded-full`} style={{ width: `${s.pct}%` }} />
-                        </div>
-                      </div>
-                    ))}
+            {/* Performance Graphs / Recharts Telemetry & Activity */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-cyan-400" />
+                    <span>Activité Projet &amp; Trafic API en Temps Réel (Recharts)</span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Volume de requêtes API et vélocité des commits Git par semaine.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Flux Live CI/CD</span>
+                </div>
+              </div>
+
+              {/* AreaChart: API Calls & Commits */}
+              <div className="h-64 sm:h-72 w-full bg-[#020617] p-3 rounded-2xl border border-slate-800/80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={weeklyActivityData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorApi" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorCommits" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="week" stroke="#64748b" fontSize={11} />
+                    <YAxis stroke="#64748b" fontSize={11} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                      itemStyle={{ color: '#38bdf8' }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                    <Area type="monotone" dataKey="apiCalls" name="Requêtes API" stroke="#06b6d4" strokeWidth={2} fillOpacity={1} fill="url(#colorApi)" />
+                    <Area type="monotone" dataKey="commits" name="Commits Git" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorCommits)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* 2-Column Grid: Sprints Velocity & Tickets Distribution */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                
+                {/* Sprints Burn-down BarChart */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#020617] border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      <span>Vélocité Story Points par Sprint</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">
+                      Agile Scrum
+                    </span>
+                  </div>
+                  
+                  <div className="h-52 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={milestonesVelocityData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                        <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
+                        <YAxis stroke="#64748b" fontSize={10} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px', color: '#fff' }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: '10px' }} />
+                        <Bar dataKey="prevu" name="Points Prévus" fill="#334155" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="livre" name="Points Livrés" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
-                {/* Security & Vulnerability Scanner */}
-                <div className="p-4 rounded-xl bg-[#020617] border border-slate-800 space-y-3">
-                  <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
-                    Rapport Continu DevSecOps (SonarQube & Trivy)
-                  </span>
-                  <div className="grid grid-cols-2 gap-2.5 text-center">
-                    <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                      <span className="text-xl font-black text-emerald-400 font-mono">0</span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Vulnérabilités Critiques</span>
+                {/* Support Tickets PieChart & SLA Resolution */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#020617] border border-slate-800 space-y-3 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <LifeBuoy className="w-4 h-4 text-amber-400" />
+                      <span>Répartition des Tickets de Support</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                      SLA Réponse &lt; 15 min
+                    </span>
+                  </div>
+
+                  <div className="h-44 w-full flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={ticketStatusData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={38}
+                          outerRadius={65}
+                          paddingAngle={5}
+                          dataKey="count"
+                        >
+                          {ticketStatusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '11px', color: '#fff' }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: '10px' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-slate-800/80">
+                    <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                      <span className="text-sm font-black text-emerald-400 font-mono">
+                        {supportTickets.filter(t => t.status === 'resolved').length}
+                      </span>
+                      <span className="text-[9px] text-slate-400 block">Résolus</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                      <span className="text-xl font-black text-cyan-400 font-mono">98.4%</span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Couverture de Tests</span>
+                    <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                      <span className="text-sm font-black text-cyan-400 font-mono">
+                        {supportTickets.filter(t => t.status === 'in_progress').length}
+                      </span>
+                      <span className="text-[9px] text-slate-400 block">En Cours</span>
                     </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                      <span className="text-xl font-black text-blue-400 font-mono">A+</span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Note SSL/TLS</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                      <span className="text-xl font-black text-emerald-400 font-mono">0.02s</span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">Temps Moyen Requête</span>
+                    <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                      <span className="text-sm font-black text-amber-400 font-mono">
+                        {supportTickets.filter(t => t.status === 'open').length}
+                      </span>
+                      <span className="text-[9px] text-slate-400 block">Ouverts</span>
                     </div>
                   </div>
+
+                </div>
+
+              </div>
+
+              {/* Support Tickets Table & Action Button */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#020617] border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <MessageSquare className="w-4 h-4 text-cyan-400" />
+                      <span>Tickets de Support &amp; Demandes d'Évolution ({supportTickets.length})</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-400">
+                      Astreinte technique 24/7 et suivi des correctifs par nos leads architectes.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setShowNewTicketModal(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Créer un Ticket de Support</span>
+                  </button>
+                </div>
+
+                <div className="divide-y divide-slate-800 rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+                  {supportTickets.map((ticket) => (
+                    <div key={ticket.id} className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:bg-slate-900/50 transition-colors">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-cyan-400">{ticket.id}</span>
+                          <span className="text-xs font-semibold text-white">{ticket.title}</span>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                            {ticket.category}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                          <span>Ouvert : {ticket.openedAt}</span>
+                          <span>Assigné : <strong className="text-slate-300">{ticket.assignee}</strong></span>
+                          {ticket.resolvedAt && (
+                            <span className="text-emerald-400 font-semibold">Résolu : {ticket.resolvedAt}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                          ticket.priority === 'critical'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            : ticket.priority === 'high'
+                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {ticket.priority}
+                        </span>
+
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                          ticket.status === 'resolved'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : ticket.status === 'in_progress'
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        }`}>
+                          {ticket.status === 'resolved' ? 'Résolu' : ticket.status === 'in_progress' ? 'En Traitement' : 'Ouvert'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+
             </div>
           </div>
         )}
@@ -778,6 +1008,85 @@ export const ClientDashboard: React.FC = () => {
                   className="px-4 py-1.5 rounded-lg bg-cyan-600 text-white font-bold hover:bg-cyan-500 text-xs cursor-pointer"
                 >
                   Envoyer l'invitation MFA
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: New Support Ticket */}
+      {showNewTicketModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <LifeBuoy className="w-4 h-4 text-cyan-400" />
+                <h4 className="text-sm font-bold text-white">Nouveau Ticket de Support Technique</h4>
+              </div>
+              <button
+                onClick={() => setShowNewTicketModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTicket} className="space-y-3.5 text-xs">
+              <div>
+                <label className="text-slate-300 block mb-1 font-semibold">Titre de la demande / incident :</label>
+                <input
+                  type="text"
+                  required
+                  value={newTicketTitle}
+                  onChange={(e) => setNewTicketTitle(e.target.value)}
+                  placeholder="Ex: Demande d'accès sandbox MTN ou latence anormale"
+                  className="w-full p-2.5 rounded-lg bg-[#020617] border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-300 block mb-1 font-semibold">Catégorie :</label>
+                <select
+                  value={newTicketCategory}
+                  onChange={(e) => setNewTicketCategory(e.target.value)}
+                  className="w-full p-2.5 rounded-lg bg-[#020617] border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="API">API &amp; Webhooks</option>
+                  <option value="Mobile">Application Mobile (Flutter/iOS/Android)</option>
+                  <option value="Sécurité">Sécurité &amp; Certificats</option>
+                  <option value="Infrastructure">Infrastructure Cloud &amp; Base de données</option>
+                  <option value="Reporting">Exportation &amp; Rapports Financiers</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-300 block mb-1 font-semibold">Niveau d'Urgence / Criticité SLA :</label>
+                <select
+                  value={newTicketPriority}
+                  onChange={(e) => setNewTicketPriority(e.target.value as any)}
+                  className="w-full p-2.5 rounded-lg bg-[#020617] border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="low">Faible — Demande d'évolution standard</option>
+                  <option value="medium">Moyen — Incident non bloquant</option>
+                  <option value="high">Élevé — Dégradation de service partielle (SLA 30 min)</option>
+                  <option value="critical">Critique — Blocage complet de production (SLA 15 min)</option>
+                </select>
+              </div>
+
+              <div className="pt-3 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewTicketModal(false)}
+                  className="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white text-xs cursor-pointer"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg bg-cyan-600 text-white font-bold hover:bg-cyan-500 text-xs cursor-pointer"
+                >
+                  Ouvrir le Ticket
                 </button>
               </div>
             </form>

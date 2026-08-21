@@ -77,6 +77,18 @@ service cloud.firestore {
         && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
     }
 
+    // Validation for Wishlist Item
+    function isValidWishlistItem(data) {
+      return data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128
+        && data.scriptId is string && data.scriptId.size() > 0 && data.scriptId.size() <= 128
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('priceUSD' in data) || data.priceUSD is number)
+        && (!('priceRWF' in data) || data.priceRWF is number)
+        && (!('previewImage' in data) || (data.previewImage is string && data.previewImage.size() <= 500))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
     // 1. Contact Inquiries Collection
     match /contact_inquiries/{inquiryId} {
       allow get: if isValidId(inquiryId) && (
@@ -142,6 +154,17 @@ service cloud.firestore {
     match /site_content/{contentId} {
       allow get, list: if isValidId(contentId);
       allow create, update, delete: if isValidId(contentId);
+    }
+
+    // 6. Wishlists Collection (Authenticated Member ABAC)
+    match /wishlists/{wishlistId} {
+      allow get: if isValidId(wishlistId) && (
+        isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid)
+      );
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(wishlistId) && isSignedIn() && incoming().userId == request.auth.uid && isValidWishlistItem(incoming());
+      allow update: if isValidId(wishlistId) && isSignedIn() && resource.data.userId == request.auth.uid && incoming().userId == request.auth.uid && isValidWishlistItem(incoming());
+      allow delete: if isValidId(wishlistId) && isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
     }
   }
 }

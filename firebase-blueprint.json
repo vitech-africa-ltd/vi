@@ -74,6 +74,22 @@
         "updatedBy": { "type": "string", "maxLength": 150 }
       },
       "required": ["contentKey", "data"]
+    },
+    "WishlistItem": {
+      "title": "Script Wishlist Item",
+      "description": "Saved favorite marketplace script for authenticated members",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "scriptId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "category": { "type": "string", "maxLength": 100 },
+        "priceUSD": { "type": "number" },
+        "priceRWF": { "type": "number" },
+        "previewImage": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["userId", "scriptId", "title"]
     }
   },
   "firestore": {
@@ -96,6 +112,10 @@
     "/site_content/{contentId}": {
       "schema": "SiteContent",
       "description": "Dynamic content blocks managed in real-time by the site administrator"
+    },
+    "/wishlists/{wishlistId}": {
+      "schema": "WishlistItem",
+      "description": "Saved script favorites synchronized in real time for members"
     }
   }
 }

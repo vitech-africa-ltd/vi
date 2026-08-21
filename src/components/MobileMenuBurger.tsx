@@ -30,6 +30,7 @@ export interface NavSubMenuItem {
   description?: string;
   icon: React.ElementType;
   view: string;
+  badge?: string;
 }
 
 export interface NavItemType {
@@ -37,6 +38,7 @@ export interface NavItemType {
   labelKey: string;
   defaultLabel: string;
   featured?: boolean;
+  isMoreMenu?: boolean;
   submenu?: NavSubMenuItem[];
 }
 
@@ -441,7 +443,12 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
                             return (
                               <button
                                 key={`${link.id}-${item.label}-burger`}
-                                onClick={() => handleLinkSelect(item.view)}
+                                onClick={() => {
+                                  handleLinkSelect(item.view);
+                                  if (item.view === 'estimator') {
+                                    handleOpenQuote();
+                                  }
+                                }}
                                 className={`
                                   group
                                   flex
@@ -482,8 +489,15 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
                                 </div>
 
                                 <span className="min-w-0 flex-1">
-                                  <span className="block text-xs font-bold">
-                                    {item.label}
+                                  <span className="flex items-center gap-1.5">
+                                    <span className="block text-xs font-bold">
+                                      {item.label}
+                                    </span>
+                                    {item.badge && (
+                                      <span className="rounded-full bg-emerald-400 px-1.5 py-0.2 text-[7px] font-black uppercase text-slate-950">
+                                        {item.badge}
+                                      </span>
+                                    )}
                                   </span>
                                   {item.description && (
                                     <span className="mt-0.5 block text-[10px] text-slate-500">
@@ -498,10 +512,21 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
                           })}
 
                           <button
-                            onClick={() => handleLinkSelect(link.id)}
+                            onClick={() => {
+                              if (link.id === 'more') {
+                                handleLinkSelect('estimator');
+                                handleOpenQuote();
+                              } else {
+                                handleLinkSelect(link.id);
+                              }
+                            }}
                             className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-800 py-2 text-[10px] font-black uppercase text-slate-400 hover:border-cyan-500/30 hover:text-cyan-300 transition"
                           >
-                            <span>Voir tout : {t(link.labelKey, link.defaultLabel)}</span>
+                            <span>
+                              {link.id === 'more'
+                                ? 'Simulateur de Devis en Ligne'
+                                : `Voir tout : ${t(link.labelKey, link.defaultLabel)}`}
+                            </span>
                             <ArrowRight className="h-3 w-3" />
                           </button>
                         </div>

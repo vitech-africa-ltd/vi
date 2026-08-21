@@ -338,6 +338,113 @@ Retourne une recommandation structurée en JSON valide avec les clés suivantes 
     });
   });
 
+  // Global Semantic Search powered by Gemini AI
+  app.post("/api/semantic-search", async (req, res) => {
+    try {
+      const { query } = req.body;
+      if (!query || typeof query !== "string" || query.trim().length === 0) {
+        return res.status(400).json({ error: "Requête de recherche requise." });
+      }
+
+      const cleanQuery = query.trim();
+      const allDocs = getKnowledgeDocs();
+
+      // Keyword & Fuzzy match first
+      const queryLower = cleanQuery.toLowerCase();
+      const terms = queryLower.split(/\s+/).filter((t: string) => t.length > 2);
+
+      const scoredDocs = allDocs.map((doc) => {
+        let score = 0;
+        const titleLower = doc.title.toLowerCase();
+        const contentLower = doc.content.toLowerCase();
+        const tagsLower = doc.tags.map((t: string) => t.toLowerCase());
+
+        if (titleLower.includes(queryLower)) score += 10;
+        if (tagsLower.some((t: string) => t.includes(queryLower) || queryLower.includes(t))) score += 8;
+        if (contentLower.includes(queryLower)) score += 5;
+
+        for (const term of terms) {
+          if (titleLower.includes(term)) score += 3;
+          if (tagsLower.some((t: string) => t.includes(term))) score += 2;
+          if (contentLower.includes(term)) score += 1;
+        }
+
+        return { doc, score };
+      });
+
+      const topResults = scoredDocs
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+        .map((item) => item.doc);
+
+      // Call Gemini for intelligent semantic synthesis if client is available
+      let aiSummary = "";
+      const ai = getAI();
+      if (ai) {
+        try {
+          const contextSnippets = (topResults.length > 0 ? topResults : allDocs.slice(0, 4))
+            .map((d) => `[${d.title}] (${d.category}): ${d.content.slice(0, 300)}...`)
+            .join("\n\n");
+
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `Tu es le moteur de recherche sémantique intelligent de V&I TECH AFRICA LTD.
+L'utilisateur a recherché : "${cleanQuery}".
+Voici le contexte de la documentation technique et des offres de VITECH AFRICA :
+${contextSnippets}
+
+Génère une réponse ultra concise (2-3 phrases maximum), très claire et orientée action pour guider l'utilisateur vers les services, tarifs ou hubs appropriés. Mentionne directement les points clés.`,
+                  },
+                ],
+              },
+            ],
+          });
+          aiSummary = response.text || "";
+        } catch (aiErr) {
+          console.warn("Semantic AI summary generation fallback:", aiErr);
+        }
+      }
+
+      // Format results with target route navigation IDs
+      const mappedResults = (topResults.length > 0 ? topResults : allDocs.slice(0, 3)).map((d) => {
+        let route = "services";
+        if (d.category === "pricing" || d.id.includes("pricing")) route = "pricing";
+        else if (d.category === "offices" || d.id.includes("hubs")) route = "hubs";
+        else if (d.category === "faq") route = "faq";
+        else if (d.category === "security") route = "services";
+        else if (d.tags.includes("devis") || d.tags.includes("calculateur")) route = "estimator";
+        else if (d.tags.includes("contact") || d.tags.includes("direction")) route = "contact";
+        else if (d.tags.includes("blog") || d.tags.includes("ia") || d.tags.includes("offline")) route = "blog";
+
+        return {
+          id: d.id,
+          title: d.title,
+          category: d.category,
+          tags: d.tags,
+          snippet: d.content.slice(0, 160) + "...",
+          route,
+        };
+      });
+
+      res.json({
+        success: true,
+        query: cleanQuery,
+        aiSummary: aiSummary || undefined,
+        results: mappedResults,
+        total: mappedResults.length,
+      });
+    } catch (err: any) {
+      console.error("Semantic search error:", err);
+      res.status(500).json({ error: "Erreur lors de la recherche sémantique" });
+    }
+  });
+
   // Contact form submission
   app.post("/api/contact", (req, res) => {
     const data = req.body;

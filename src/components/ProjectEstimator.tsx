@@ -22,6 +22,7 @@ import {
   Printer,
   ChevronDown
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -594,37 +595,44 @@ Donne une recommandation d'architecture senior concise (en 3 points clés clairs
               </div>
 
               {/* Primary Action to transfer to contact */}
-              <button
+              <motion.button
                 id="apply-estimate-to-contact-btn"
+                whileHover={{ scale: 1.025, boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)' }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                 onClick={handleApplyToContact}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-500/25 cursor-pointer relative overflow-hidden group"
               >
-                <span>Valider &amp; Transférer au Formulaire</span>
-                <Send className="w-4 h-4" />
-              </button>
+                <span className="relative z-10">Valider &amp; Transférer au Formulaire</span>
+                <Send className="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1" />
+              </motion.button>
 
               {/* Official Country Quote PDF Modal Trigger */}
               <div className="mt-2.5">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => setIsQuoteModalOpen(true)}
                   className="w-full py-2.5 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <FileText className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Télécharger le Devis Officiel {currentCountry.name} (PDF)</span>
-                </button>
+                </motion.button>
               </div>
 
               {/* AI Architecture recommendation Trigger */}
               <div className="mt-2.5">
-                <button
+                <motion.button
                   id="ai-architecture-recommendation-btn"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={handleRequestAiScope}
                   disabled={isAiLoading}
-                  className="w-full py-2.5 px-3 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center justify-center space-x-2 transition-colors cursor-pointer"
+                  className="w-full py-2.5 px-3 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/40 border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center justify-center space-x-2 transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <Sparkles className={`w-3.5 h-3.5 ${isAiLoading ? 'animate-spin text-amber-400' : ''}`} />
                   <span>{isAiLoading ? 'Analyse par Gemini AI en cours...' : 'Générer l\'Architecture par IA'}</span>
-                </button>
+                </motion.button>
               </div>
 
               {/* AI Recommendation display */}

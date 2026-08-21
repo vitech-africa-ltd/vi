@@ -5,6 +5,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { CountryProvider } from './context/CountryContext';
 import { SiteDataProvider } from './context/SiteDataContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { SEOHead } from './components/SEOHead';
@@ -13,6 +14,7 @@ import { ScheduleModal } from './components/ScheduleModal';
 import { CurrencyConverterModal } from './components/CurrencyConverterModal';
 import { CountrySelectorModal } from './components/CountrySelectorModal';
 import { AdminPortal } from './components/AdminPortal';
+import { GlobalSemanticSearch } from './components/GlobalSemanticSearch';
 
 // Dedicated Modular Pages
 import { HomePage } from './pages/HomePage';
@@ -24,6 +26,11 @@ import { ClientPortalPage } from './pages/ClientPortalPage';
 import { BlogPage } from './pages/BlogPage';
 import { ContactPage } from './pages/ContactPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { ScriptsMarketplace } from './components/scripts/ScriptsMarketplace';
+import { ScriptsMemberSpace } from './components/scripts/ScriptsMemberSpace';
+import { ScriptsAdminDashboard } from './components/scripts/ScriptsAdminDashboard';
+import { ScriptsArchitectureDeliverables } from './components/scripts/ScriptsArchitectureDeliverables';
+import { TeamPublicPage } from './components/TeamPublicPage';
 
 import { ContactFormData, OfficeHub } from './types';
 
@@ -32,15 +39,32 @@ export default function App() {
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
   const [isAdminPortalOpen, setIsAdminPortalOpen] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [selectedHubForSchedule, setSelectedHubForSchedule] = useState<OfficeHub | null>(null);
   const [selectedServiceForEstimator, setSelectedServiceForEstimator] = useState<string>('web-saas');
   const [contactInitialData, setContactInitialData] = useState<Partial<ContactFormData>>({});
+
+  // Keyboard shortcut for search (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Sync hash routing on mount and hashchange
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      const validViews = ['home', 'services', 'portfolio', 'estimator', 'tech-hubs', 'client-portal', 'blog', 'contact', 'admin', 'profile', 'pricing'];
+      const validViews = [
+        'home', 'services', 'portfolio', 'estimator', 'tech-hubs', 
+        'client-portal', 'blog', 'contact', 'admin', 'profile', 'pricing',
+        'scripts', 'scripts-member', 'scripts-admin', 'scripts-deliverables', 'team'
+      ];
       if (validViews.includes(hash)) {
         if (hash === 'admin') {
           setIsAdminPortalOpen(true);
@@ -118,12 +142,13 @@ Délais Estimés : ${data.estimatedTimeline}`,
 
   return (
     <AuthProvider>
-      <SiteDataProvider>
-        <LanguageProvider>
-          <CurrencyProvider>
-            <CountryProvider>
-              <ThemeProvider>
-                <SEOHead activeView={activeView} />
+      <WishlistProvider>
+        <SiteDataProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <CountryProvider>
+                <ThemeProvider>
+                  <SEOHead activeView={activeView} />
                 <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
                 
                 {/* Main Navigation Header with Active View Support */}
@@ -133,6 +158,7 @@ Délais Estimés : ${data.estimatedTimeline}`,
                   onOpenChat={() => setIsChatOpen(true)}
                   onOpenScheduleModal={() => handleOpenScheduleForHub()}
                   onOpenAdminPortal={() => setIsAdminPortalOpen(true)}
+                  onOpenSearch={() => setIsSearchOpen(true)}
                 />
 
                 {/* If Admin Portal is open as full-screen modal */}
@@ -215,6 +241,41 @@ Délais Estimés : ${data.estimatedTimeline}`,
                       onOpenChat={() => setIsChatOpen(true)}
                     />
                   )}
+
+                  {activeView === 'scripts' && (
+                    <ScriptsMarketplace
+                      onNavigateMemberSpace={() => navigateToView('scripts-member')}
+                      onNavigateAdminSpace={() => navigateToView('scripts-admin')}
+                      onNavigateDeliverables={() => navigateToView('scripts-deliverables')}
+                      onNavigateTeam={() => navigateToView('team')}
+                    />
+                  )}
+
+                  {activeView === 'scripts-member' && (
+                    <ScriptsMemberSpace
+                      onBackToMarketplace={() => navigateToView('scripts')}
+                      onSelectProduct={() => navigateToView('scripts')}
+                    />
+                  )}
+
+                  {activeView === 'scripts-admin' && (
+                    <ScriptsAdminDashboard
+                      onBackToMarketplace={() => navigateToView('scripts')}
+                    />
+                  )}
+
+                  {activeView === 'scripts-deliverables' && (
+                    <ScriptsArchitectureDeliverables
+                      onBackToMarketplace={() => navigateToView('scripts')}
+                    />
+                  )}
+
+                  {activeView === 'team' && (
+                    <TeamPublicPage
+                      onNavigateContact={() => navigateToView('contact')}
+                      onNavigateScripts={() => navigateToView('scripts')}
+                    />
+                  )}
                 </main>
 
                 {/* Global Footer */}
@@ -245,12 +306,20 @@ Délais Estimés : ${data.estimatedTimeline}`,
                 {/* Visitor Geolocation & Country Selector Modal */}
                 <CountrySelectorModal />
 
+                {/* Global Semantic Search powered by Gemini */}
+                <GlobalSemanticSearch
+                  isOpen={isSearchOpen}
+                  onClose={() => setIsSearchOpen(false)}
+                  onNavigateToView={navigateToView}
+                />
+
               </div>
             </ThemeProvider>
           </CountryProvider>
         </CurrencyProvider>
       </LanguageProvider>
       </SiteDataProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

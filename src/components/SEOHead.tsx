@@ -1,8 +1,13 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from '../context/LanguageContext';
+import { generateMarketplaceJsonLd, generateProductJsonLd } from '../utils/seoStructuredData';
+import { INITIAL_SCRIPTS, ScriptProduct } from '../data/scriptsData';
+
+export { generateMarketplaceJsonLd, generateProductJsonLd };
 
 interface SEOHeadProps {
   activeView: string;
+  selectedProduct?: ScriptProduct | null;
 }
 
 interface PageMeta {
@@ -15,7 +20,7 @@ interface PageMeta {
   breadcrumbs: { name: string; item: string }[];
 }
 
-export const SEOHead: React.FC<SEOHeadProps> = ({ activeView }) => {
+export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedProduct }) => {
   const { currentLanguage } = useTranslation();
 
   useEffect(() => {
@@ -135,6 +140,72 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView }) => {
         breadcrumbs: [
           { name: 'Accueil', item: `${baseUrl}/#home` },
           { name: 'Grille Tarifaire', item: `${baseUrl}/#pricing` },
+        ],
+      },
+      scripts: {
+        title: selectedProduct 
+          ? `${selectedProduct.title} — Code Source & Licence | Vitech Scripts`
+          : 'Vitech Scripts — Marketplace de Codes Sources, Passerelles MoMo & Starter Kits Pro 2026',
+        description: selectedProduct
+          ? `${selectedProduct.description} — Audité OWASP (${selectedProduct.analysis.securityScore}/100), compatible MTN/Airtel MoMo & Stripe.`
+          : 'Place de marché premium de codes sources audités, passerelles de paiement panafricaines (MTN MoMo, Airtel Money), architectures SaaS Laravel 11, apps Flutter et kits admin.',
+        keywords: 'vitech scripts, code source laravel 11, mtn momo api php, flutter ecommerce template, starter kit admin bootstrap, scripts pan-africains',
+        ogType: 'website',
+        canonicalPath: selectedProduct ? `#scripts/${selectedProduct.slug}` : '#scripts',
+        image: selectedProduct?.previewImage || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Vitech Scripts', item: `${baseUrl}/#scripts` },
+          ...(selectedProduct ? [{ name: selectedProduct.title, item: `${baseUrl}/#scripts/${selectedProduct.slug}` }] : []),
+        ],
+      },
+      'scripts-member': {
+        title: 'Espace Membre & Gestionnaire de Licences — Vitech Scripts',
+        description: 'Espace membre sécurisé pour télécharger vos archives de scripts protégées, gérer vos clés de licence et lier vos domaines de production.',
+        keywords: 'espace membre vitech scripts, téléchargement code source, licences logicielles, factures vitech',
+        ogType: 'website',
+        canonicalPath: '#scripts-member',
+        image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Vitech Scripts', item: `${baseUrl}/#scripts` },
+          { name: 'Espace Membre', item: `${baseUrl}/#scripts-member` },
+        ],
+      },
+      'scripts-admin': {
+        title: 'Tableau de Bord Administrateur — Vitech Scripts Marketplace',
+        description: 'Console d’administration de Vitech Scripts : gestion des ventes, validation des scripts, attribution des licences et monitoring des revenus MoMo.',
+        keywords: 'admin vitech scripts, tableau de bord ventes scripts, modération scripts',
+        ogType: 'website',
+        canonicalPath: '#scripts-admin',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Admin Scripts', item: `${baseUrl}/#scripts-admin` },
+        ],
+      },
+      'scripts-deliverables': {
+        title: 'Livrables d’Architecture & Spécifications Techniques — Vitech Scripts',
+        description: 'Spécifications techniques complètes, diagrammes d’architecture C4, modèle de licence et conformité OWASP Top 10 de la plateforme Vitech Scripts.',
+        keywords: 'architecture logicielle vitech, audit securite owasp, conformite pci-dss mobile money',
+        ogType: 'article',
+        canonicalPath: '#scripts-deliverables',
+        image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Livrables Techniques', item: `${baseUrl}/#scripts-deliverables` },
+        ],
+      },
+      team: {
+        title: 'Équipe d’Experts & Fondateurs — V&I TECH AFRICA LTD',
+        description: 'Faites connaissance avec notre équipe d’ingénieurs, architectes logiciels, experts en cybersécurité et consultants Cloud basés à Kigali et dans la région des Grands Lacs.',
+        keywords: 'équipe vitech africa, ingenieurs kigali rwanda, fondateurs tech rwanda, software engineers rwanda',
+        ogType: 'profile',
+        canonicalPath: '#team',
+        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Notre Équipe', item: `${baseUrl}/#team` },
         ],
       },
     };
@@ -284,6 +355,13 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView }) => {
             item: crumb.item,
           })),
         },
+        // Dynamically add Marketplace or Product structured data when on scripts view
+        ...(selectedProduct 
+          ? [generateProductJsonLd(selectedProduct)]
+          : activeView === 'scripts' 
+            ? [generateMarketplaceJsonLd(INITIAL_SCRIPTS)]
+            : []
+        ),
       ],
     };
 
@@ -295,7 +373,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView }) => {
       document.head.appendChild(jsonLdScript);
     }
     jsonLdScript.textContent = JSON.stringify(structuredData);
-  }, [activeView, currentLanguage]);
+  }, [activeView, currentLanguage, selectedProduct]);
 
   return null;
 };

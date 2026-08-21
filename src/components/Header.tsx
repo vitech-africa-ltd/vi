@@ -28,6 +28,7 @@ import {
   Headphones,
   CheckCircle2,
   Zap,
+  Search,
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -49,6 +50,7 @@ interface HeaderProps {
   onOpenChat?: () => void;
   onOpenScheduleModal?: () => void;
   onOpenAdminPortal?: () => void;
+  onOpenSearch?: () => void;
 }
 
 type SubMenuItem = {
@@ -56,6 +58,7 @@ type SubMenuItem = {
   description?: string;
   icon: React.ElementType;
   view: string;
+  badge?: string;
 };
 
 type NavItem = {
@@ -63,6 +66,7 @@ type NavItem = {
   labelKey: string;
   defaultLabel: string;
   featured?: boolean;
+  isMoreMenu?: boolean;
   submenu?: SubMenuItem[];
 };
 
@@ -74,6 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenChat,
   onOpenScheduleModal,
   onOpenAdminPortal,
+  onOpenSearch,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileQuickActionsOpen, setMobileQuickActionsOpen] = useState(false);
@@ -105,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
     {
       id: 'home',
       labelKey: 'nav.home',
-      defaultLabel: 'Accueil',
+      defaultLabel: 'Home',
     },
 
     {
@@ -115,25 +120,25 @@ export const Header: React.FC<HeaderProps> = ({
       submenu: [
         {
           label: 'Développement Web',
-          description: 'Applications web rapides et évolutives',
+          description: 'Applications web rapides, SaaS et portails',
           icon: Code2,
           view: 'services',
         },
         {
           label: 'Applications Mobile',
-          description: 'iOS, Android & solutions cross-platform',
+          description: 'iOS, Android & solutions Flutter cross-platform',
           icon: Smartphone,
           view: 'services',
         },
         {
           label: 'Cloud & DevOps',
-          description: 'Infrastructure, déploiement & disponibilité',
+          description: 'Infrastructure haute disponibilité & CI/CD',
           icon: Cloud,
           view: 'services',
         },
         {
           label: 'Data & IA',
-          description: 'Automatisation, analytics & intelligence',
+          description: 'Automatisation, LLMs, RAG & analytics',
           icon: BarChart3,
           view: 'services',
         },
@@ -143,110 +148,25 @@ export const Header: React.FC<HeaderProps> = ({
     {
       id: 'portfolio',
       labelKey: 'nav.portfolio',
-      defaultLabel: 'Réalisations',
+      defaultLabel: 'Portfolio',
       submenu: [
         {
           label: 'Études de cas',
-          description: 'Nos projets à fort impact',
+          description: 'Nos projets et architectures à fort impact',
           icon: Briefcase,
           view: 'portfolio',
         },
         {
           label: 'Fintech & Paiement',
-          description: 'Solutions financières sécurisées',
+          description: 'Passerelles MoMo, banques & solutions sécurisées',
           icon: Database,
           view: 'portfolio',
         },
         {
           label: 'Agritech & IA',
-          description: 'Technologies pour l’Afrique',
+          description: 'Solutions intelligentes adaptées à l’Afrique',
           icon: Sparkles,
           view: 'portfolio',
-        },
-      ],
-    },
-
-    {
-      id: 'estimator',
-      labelKey: 'nav.estimator',
-      defaultLabel: 'Devis',
-      featured: true,
-    },
-
-    {
-      id: 'tech-hubs',
-      labelKey: 'nav.techHubs',
-      defaultLabel: 'Hubs',
-      submenu: [
-        {
-          label: 'Rwanda',
-          description: 'Innovation & développement régional',
-          icon: MapPin,
-          view: 'tech-hubs',
-        },
-        {
-          label: 'Sénégal',
-          description: 'Présence & opérations Afrique de l’Ouest',
-          icon: MapPin,
-          view: 'tech-hubs',
-        },
-        {
-          label: 'Côte d’Ivoire',
-          description: 'Solutions & accompagnement entreprises',
-          icon: MapPin,
-          view: 'tech-hubs',
-        },
-      ],
-    },
-
-    {
-      id: 'client-portal',
-      labelKey: 'nav.clientPortal',
-      defaultLabel: 'Espace Client',
-      submenu: [
-        {
-          label: 'Mes projets',
-          description: 'Suivi des projets et livrables',
-          icon: Briefcase,
-          view: 'client-portal',
-        },
-        {
-          label: 'Support',
-          description: 'Assistance technique et demandes',
-          icon: Headphones,
-          view: 'client-portal',
-        },
-        {
-          label: 'Connexion',
-          description: 'Accéder à votre espace sécurisé',
-          icon: Shield,
-          view: 'client-portal',
-        },
-      ],
-    },
-
-    {
-      id: 'profile',
-      labelKey: 'nav.profile',
-      defaultLabel: 'Expertise & Tarifs',
-      submenu: [
-        {
-          label: 'Profil Technique & Compétences',
-          description: 'Stack de développement, WPF/C#, PHP, APIs',
-          icon: Code2,
-          view: 'profile',
-        },
-        {
-          label: 'Grille Tarifaire Internationale (2026)',
-          description: 'Normes Banque Mondiale (4 Paliers, RWF, USD)',
-          icon: Globe2,
-          view: 'pricing',
-        },
-        {
-          label: 'Formation ULK & Disponibilité',
-          description: 'Université de Kigali & Opportunités de recrutement',
-          icon: Sparkles,
-          view: 'profile',
         },
       ],
     },
@@ -257,20 +177,20 @@ export const Header: React.FC<HeaderProps> = ({
       defaultLabel: 'Blog & R&D',
       submenu: [
         {
-          label: 'Technologie',
-          description: 'Tendances, architecture & développement',
+          label: 'Technologie & Architecture',
+          description: 'Tendances, bonnes pratiques & code 2026',
           icon: Code2,
           view: 'blog',
         },
         {
-          label: 'Innovation',
-          description: 'IA, cloud & transformation digitale',
+          label: 'Innovation & IA',
+          description: 'Intelligence artificielle & transformation digitale',
           icon: Rocket,
           view: 'blog',
         },
         {
-          label: 'R&D',
-          description: 'Nos expérimentations technologiques',
+          label: 'Laboratoire R&D',
+          description: 'Expérimentations et prototypes technologiques',
           icon: Sparkles,
           view: 'blog',
         },
@@ -278,9 +198,82 @@ export const Header: React.FC<HeaderProps> = ({
     },
 
     {
+      id: 'scripts',
+      labelKey: 'nav.scripts',
+      defaultLabel: 'Vitech Scripts',
+      featured: true,
+      submenu: [
+        {
+          label: 'Marketplace Scripts & Apps',
+          description: 'Téléchargez des codes sources audités et prêts à l’emploi',
+          icon: Code2,
+          view: 'scripts',
+        },
+        {
+          label: 'Espace Membre & Téléchargements',
+          description: 'Clés de licence, archives sécurisées & mises à jour',
+          icon: Shield,
+          view: 'scripts-member',
+        },
+        {
+          label: 'Analyseur de Code IA & Admin',
+          description: 'Analyse automatique de ZIP et monitoring',
+          icon: Sparkles,
+          view: 'scripts-admin',
+        },
+        {
+          label: 'Livrables & Architecture PHP 8.4',
+          description: 'Schémas MySQL 8, Architecture MVC & API REST',
+          icon: Database,
+          view: 'scripts-deliverables',
+        },
+      ],
+    },
+
+    {
+      id: 'team',
+      labelKey: 'nav.team',
+      defaultLabel: 'Notre Équipe',
+    },
+
+    {
       id: 'contact',
       labelKey: 'nav.contact',
       defaultLabel: 'Contact',
+    },
+
+    {
+      id: 'more',
+      labelKey: 'nav.more',
+      defaultLabel: 'Plus',
+      isMoreMenu: true,
+      submenu: [
+        {
+          label: 'Online Estimate',
+          description: 'Simulateur budgétaire & chiffrage instantané personnalisé',
+          icon: Calculator,
+          view: 'estimator',
+          badge: 'POPULAIRE',
+        },
+        {
+          label: 'Pan-African Hubs',
+          description: 'Centres régionaux : Rwanda (Kigali), Sénégal, Côte d’Ivoire',
+          icon: MapPin,
+          view: 'tech-hubs',
+        },
+        {
+          label: 'Client Portal',
+          description: 'Suivi des projets, livrables chiffrés et support technique',
+          icon: Shield,
+          view: 'client-portal',
+        },
+        {
+          label: 'Expertise & Tarifs',
+          description: 'Normes Banque Mondiale 2026 & Stack technique d’ingénierie',
+          icon: Globe2,
+          view: 'profile',
+        },
+      ],
     },
   ];
 
@@ -868,7 +861,8 @@ export const Header: React.FC<HeaderProps> = ({
                               border-b
                               border-slate-800
                               bg-gradient-to-r
-                              from-cyan-500/5
+                              from-cyan-500/10
+                              via-cyan-500/5
                               to-transparent
                               px-4
                               py-3
@@ -891,9 +885,18 @@ export const Header: React.FC<HeaderProps> = ({
                                   )}
                                 </p>
 
-                                <p className="mt-1 text-[10px] text-slate-500">
-                                  Découvrez nos solutions
-                                  et expertises
+                                <p className="mt-0.5 text-[10px] text-slate-400">
+                                  {link.id === 'more'
+                                    ? 'Outils stratégiques, hubs régionaux & espaces'
+                                    : link.id === 'services'
+                                    ? 'Nos pôles d’ingénierie logicielle & cloud'
+                                    : link.id === 'portfolio'
+                                    ? 'Nos études de cas & réalisations déployées'
+                                    : link.id === 'blog'
+                                    ? 'Articles tech, innovations & publications R&D'
+                                    : link.id === 'scripts'
+                                    ? 'Marketplace de codes sources audités & licences'
+                                    : 'Découvrez nos solutions et expertises'}
                                 </p>
                               </div>
 
@@ -914,36 +917,43 @@ export const Header: React.FC<HeaderProps> = ({
 
                           {/* ITEMS */}
 
-                          <div className="p-2">
+                          <div className="p-2 space-y-1">
                             {link.submenu?.map(
                               (item) => {
                                 const Icon = item.icon;
+                                const isItemActive = activeView === item.view;
 
                                 return (
                                   <button
                                     key={`${link.id}-${item.label}`}
-                                    onClick={() =>
-                                      handleNavClick(
-                                        item.view
-                                      )
-                                    }
-                                    className="
+                                    onClick={() => {
+                                      handleNavClick(item.view);
+                                      if (item.view === 'estimator') {
+                                        handleOpenQuote();
+                                      }
+                                    }}
+                                    className={`
                                       group
                                       flex
                                       w-full
                                       items-center
                                       gap-3
                                       rounded-xl
-                                      p-3
+                                      p-2.5
                                       text-left
                                       transition-all
-                                      hover:bg-cyan-500/10
-                                    "
+                                      cursor-pointer
+                                      ${
+                                        isItemActive
+                                          ? 'bg-cyan-500/15 border border-cyan-500/40 text-cyan-300'
+                                          : 'hover:bg-slate-900 border border-transparent text-slate-100'
+                                      }
+                                    `}
                                   >
                                     {/* ICON */}
 
                                     <div
-                                      className="
+                                      className={`
                                         flex
                                         h-10
                                         w-10
@@ -952,13 +962,13 @@ export const Header: React.FC<HeaderProps> = ({
                                         justify-center
                                         rounded-xl
                                         border
-                                        border-slate-700
-                                        bg-slate-900
-                                        text-cyan-400
                                         transition-all
-                                        group-hover:border-cyan-500/30
-                                        group-hover:bg-cyan-500/10
-                                      "
+                                        ${
+                                          isItemActive
+                                            ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300'
+                                            : 'border-slate-800 bg-slate-900 text-cyan-400 group-hover:border-cyan-500/40 group-hover:bg-cyan-500/10 group-hover:text-cyan-300'
+                                        }
+                                      `}
                                     >
                                       <Icon className="h-4 w-4" />
                                     </div>
@@ -966,17 +976,28 @@ export const Header: React.FC<HeaderProps> = ({
                                     {/* TEXT */}
 
                                     <div className="min-w-0 flex-1">
-                                      <p
-                                        className="
-                                          text-xs
-                                          font-bold
-                                          text-slate-100
-                                          transition
-                                          group-hover:text-cyan-300
-                                        "
-                                      >
-                                        {item.label}
-                                      </p>
+                                      <div className="flex items-center gap-1.5">
+                                        <p
+                                          className={`
+                                            text-xs
+                                            font-bold
+                                            transition
+                                            ${
+                                              isItemActive
+                                                ? 'text-cyan-300'
+                                                : 'text-slate-100 group-hover:text-cyan-300'
+                                            }
+                                          `}
+                                        >
+                                          {item.label}
+                                        </p>
+
+                                        {item.badge && (
+                                          <span className="rounded-full bg-emerald-400 px-1.5 py-0.5 text-[7.5px] font-black uppercase text-slate-950 shadow-xs">
+                                            {item.badge}
+                                          </span>
+                                        )}
+                                      </div>
 
                                       {item.description && (
                                         <p
@@ -984,7 +1005,7 @@ export const Header: React.FC<HeaderProps> = ({
                                             mt-0.5
                                             text-[10px]
                                             leading-4
-                                            text-slate-500
+                                            text-slate-400
                                           "
                                         >
                                           {item.description}
@@ -997,7 +1018,7 @@ export const Header: React.FC<HeaderProps> = ({
                                         h-3.5
                                         w-3.5
                                         shrink-0
-                                        text-slate-700
+                                        text-slate-600
                                         transition-all
                                         group-hover:translate-x-1
                                         group-hover:text-cyan-400
@@ -1013,9 +1034,14 @@ export const Header: React.FC<HeaderProps> = ({
 
                           <div className="border-t border-slate-800 p-2">
                             <button
-                              onClick={() =>
-                                handleNavClick(link.id)
-                              }
+                              onClick={() => {
+                                if (link.id === 'more') {
+                                  handleNavClick('estimator');
+                                  handleOpenQuote();
+                                } else {
+                                  handleNavClick(link.id);
+                                }
+                              }}
                               className="
                                 flex
                                 w-full
@@ -1037,9 +1063,14 @@ export const Header: React.FC<HeaderProps> = ({
                                 hover:border-cyan-500/30
                                 hover:bg-cyan-500/5
                                 hover:text-cyan-300
+                                cursor-pointer
                               "
                             >
-                              Voir toute la section
+                              <span>
+                                {link.id === 'more'
+                                  ? 'Calculer un Devis en Ligne'
+                                  : 'Voir toute la section'}
+                              </span>
 
                               <ArrowRight className="h-3 w-3" />
                             </button>
@@ -1288,6 +1319,23 @@ export const Header: React.FC<HeaderProps> = ({
                   Appel 30 min
                 </div>
               </div>
+
+              {/* SEARCH MODAL TRIGGER (Gemini AI Search) */}
+              {onOpenSearch && (
+                <div className="relative group">
+                  <button
+                    onClick={onOpenSearch}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/40 bg-cyan-950/60 text-cyan-300 transition-all duration-300 hover:scale-110 active:scale-95 hover:border-cyan-400 hover:bg-cyan-900/50 hover:text-white shadow-sm cursor-pointer shrink-0"
+                    aria-label="Recherche Sémantique Gemini"
+                    title="Recherche Globale (Cmd + K)"
+                  >
+                    <Search className="h-4 w-4 text-cyan-400" />
+                  </button>
+                  <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[10px] font-medium text-slate-300 opacity-0 shadow-xl transition-opacity group-hover:opacity-100 z-50">
+                    Recherche (Cmd+K)
+                  </div>
+                </div>
+              )}
 
               {/* 4. DEMANDER UN DEVIS (Icon on mobile, Button on sm+) */}
               <div className="relative group">

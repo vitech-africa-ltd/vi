@@ -8,7 +8,10 @@ import {
   Twitter, 
   ArrowUp, 
   CheckCircle2,
-  Coins
+  Coins,
+  Sparkles,
+  Code2,
+  Users
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
@@ -16,6 +19,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { VitechLogo } from './VitechLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { CurrencySwitcher } from './CurrencySwitcher';
+import { Newsletter } from './Newsletter';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -36,6 +40,30 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
     <footer className="bg-[#020617] text-slate-100 border-t border-slate-900 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         
+        {/* TOP SECTION: Integrated Footer Newsletter Bar */}
+        <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-cyan-950/40 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+            <div className="lg:col-span-6 space-y-2">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950 text-cyan-400 text-xs font-mono font-semibold border border-cyan-500/30">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Vitech Engineering Dispatch • Actualités Tech &amp; Scripts</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Abonnez-vous aux <span className="text-cyan-400">Actualités Technologiques</span> de Vitech Africa
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed max-w-lg">
+                Recevez nos analyses d'architecture logicielle, sorties de scripts &amp; templates open-source/premium, et veille en cybersécurité africaine.
+              </p>
+            </div>
+
+            <div className="lg:col-span-6">
+              <Newsletter variant="footer" />
+            </div>
+          </div>
+        </div>
+
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-slate-900">
           
@@ -107,12 +135,24 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
             </ul>
           </div>
 
-          {/* Col 3: Navigation Rapide */}
+          {/* Col 3: Navigation Rapide & Vitech Scripts */}
           <div className="space-y-3">
             <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
-              {t('footer.navigation', 'Navigation')}
+              {t('footer.navigation', 'Navigation & Plateformes')}
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
+              <li>
+                <button onClick={() => onNavigate('scripts')} className="text-cyan-400 font-bold hover:underline flex items-center gap-1 cursor-pointer">
+                  <Code2 className="w-3 h-3" />
+                  <span>Vitech Scripts (Marketplace)</span>
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('team')} className="text-amber-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+                  <Users className="w-3 h-3" />
+                  <span>Notre Équipe (Team)</span>
+                </button>
+              </li>
               <li>
                 <button onClick={() => onNavigate('services')} className="hover:text-cyan-400 transition-colors cursor-pointer">
                   {t('nav.services', 'Services')}

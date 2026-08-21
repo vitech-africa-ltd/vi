@@ -8,6 +8,7 @@ import { TechHubsMap } from '../components/TechHubsMap';
 import { PortfolioSection } from '../components/PortfolioSection';
 import { ClientDashboard } from '../components/ClientDashboard';
 import { ClientTestimonials } from '../components/ClientTestimonials';
+import { SocialProofVideos } from '../components/SocialProofVideos';
 import { FaqSection } from '../components/FaqSection';
 import { TechBlogSection } from '../components/TechBlogSection';
 import { ContactSection } from '../components/ContactSection';
@@ -87,6 +88,9 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Interactive Client Testimonials Slider with Social Proof */}
       <ClientTestimonials />
+
+      {/* Social Proof Veo-generated Video Demonstrations & Case Studies */}
+      <SocialProofVideos />
 
       {/* Interactive FAQ Accordion Section */}
       <FaqSection

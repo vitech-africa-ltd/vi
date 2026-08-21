@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   X, 
   Printer, 
@@ -12,10 +12,13 @@ import {
   CreditCard,
   Send,
   Sparkles,
-  Globe
+  Globe,
+  Check
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useCountry } from '../context/CountryContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { generateQuotePDF } from '../utils/pdfGenerator';
 
 interface CountryQuoteModalProps {
   isOpen: boolean;
@@ -44,6 +47,8 @@ export const CountryQuoteModal: React.FC<CountryQuoteModalProps> = ({
   const { currentCountry, getCountryQuoteDetails } = useCountry();
   const { formatRawAmount } = useCurrency();
   const printRef = useRef<HTMLDivElement>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -62,6 +67,37 @@ export const CountryQuoteModal: React.FC<CountryQuoteModalProps> = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = () => {
+    try {
+      setIsDownloadingPdf(true);
+      generateQuotePDF({
+        quoteRefNumber,
+        issueDate,
+        validUntil,
+        clientName: estimatorState.clientName,
+        clientCompany: estimatorState.clientCompany,
+        clientEmail: estimatorState.clientEmail,
+        clientPhone: estimatorState.clientPhone,
+        country: currentCountry,
+        serviceName: estimatorState.serviceName,
+        platforms: estimatorState.platforms,
+        features: estimatorState.features,
+        slaOption: estimatorState.slaOption,
+        timelineWeeks: estimatorState.timelineWeeks,
+        totalEUR: estimatorState.totalEUR,
+        formattedLocalPrice: quote.formattedLocal,
+        formattedEURPrice: quote.formattedEUR,
+        formattedUSDPrice: quote.formattedUSD,
+      });
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 4000);
+    } catch (err) {
+      console.error('PDF export error:', err);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   };
 
   return (
@@ -86,12 +122,35 @@ export const CountryQuoteModal: React.FC<CountryQuoteModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={handleDownloadPDF}
+              disabled={isDownloadingPdf}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                downloadSuccess
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-blue-600 hover:bg-blue-500 text-white'
+              }`}
+            >
+              {downloadSuccess ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  <span>PDF Téléchargé !</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isDownloadingPdf ? 'Génération PDF...' : 'Télécharger Devis PDF'}</span>
+                </>
+              )}
+            </motion.button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              title="Imprimer"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Imprimer / Télécharger PDF</span>
+              <Printer className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
@@ -317,16 +376,32 @@ export const CountryQuoteModal: React.FC<CountryQuoteModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrint}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleDownloadPDF}
+              disabled={isDownloadingPdf}
+              className={`px-4 py-2.5 rounded-xl text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md ${
+                downloadSuccess ? 'bg-emerald-600' : 'bg-slate-900 hover:bg-slate-800'
+              }`}
             >
-              <Download className="w-4 h-4" />
-              <span>Télécharger Devis PDF</span>
-            </button>
+              {downloadSuccess ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-300" />
+                  <span>Devis PDF Téléchargé !</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 text-cyan-400" />
+                  <span>{isDownloadingPdf ? 'Génération PDF...' : 'Télécharger Devis PDF'}</span>
+                </>
+              )}
+            </motion.button>
 
             {onTransferToContact && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   onClose();
                   onTransferToContact();
@@ -335,7 +410,7 @@ export const CountryQuoteModal: React.FC<CountryQuoteModalProps> = ({
               >
                 <Send className="w-4 h-4" />
                 <span>Transmettre ce Devis à la Direction</span>
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
