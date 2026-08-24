@@ -1301,7 +1301,7 @@ export const AiPromptConfigTab: React.FC = () => {
 
           {/* Edit/Add Modal */}
           {isDocModalOpen && editingDoc && (
-            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[210] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
               <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <h3 className="text-base font-bold text-white">
@@ -1498,7 +1498,7 @@ export const AiPromptConfigTab: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[210] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}

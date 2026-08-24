@@ -277,6 +277,117 @@ Moyens de paiement :
   3. Email Général : contact.vitechdev@gmail.com.
   4. Prise de Rendez-vous : Possibilité de réserver une session de cadrage technique gratuite de 30 minutes directement sur le site web.
 - Horaires d'assistance : Du Lundi au Samedi, de 08h00 à 20h00 (GMT+2 / Kigali & GMT / Dakar-Abidjan). Support critique 24/7 disponible pour les clients sous contrat SLA.`
+  },
+  {
+    id: "tech-offline-first-sync",
+    title: "Spécification Technique : Architecture Offline-First & Synchronisation Résiliente",
+    category: "stack",
+    tags: ["offline", "sqlite", "sync", "watermelondb", "crdt", "synchronisation", "mobile", "architecture"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `Architecture Technique Offline-First & Synchronisation par V&I TECH AFRICA LTD :
+1. Stockage Local Embarqué :
+   - Applications Mobiles (Flutter / React Native) : SQLite chiffré via SQLCipher ou WatermelonDB / Hive pour un accès local instantané en 0ms.
+   - Applications Desktop C# WPF : SQLite local embarqué avec ORM Entity Framework Core ou Dapper.
+2. Moteur de Synchronisation Bidirectionnelle :
+   - Détection automatique de connectivité réseau (Online/Offline) via des écouteurs réseau natifs.
+   - File d'attente locale d'événements (Action Queue) persistée sur disque : toutes les mutations effectuées hors-ligne (créations, modifications, signatures) sont stockées dans une file FIFO horodatée.
+   - Algorithme de synchronisation delta : seuls les enregistrements modifiés depuis le dernier 'last_synced_at' sont transmis pour minimiser la consommation de bande passante (critique en Afrique).
+3. Résolution des Conflits de Données :
+   - Modèle standard : 'Last-Write-Wins' basé sur des horodatages vectoriels (Vector Clocks) ou 'Merge CRDT' (Conflict-free Replicated Data Types) pour les champs collaboratifs.
+   - Journalisation des conflits pour revue humaine si une divergence métier est détectée.
+4. Tolérance aux Coupures Réseau & Retry Automatique :
+   - Mécanisme d'Exponential Backoff avec Jitter pour les tentatives de réexpédition après reconnexion, évitant la surcharge des serveurs (Thundering Herd).`
+  },
+  {
+    id: "tech-security-encryption-audit",
+    title: "Spécification Sécurité : Cryptographie, Chiffrement AES-256 & Conformité eIDAS / OHADA",
+    category: "security",
+    tags: ["securite", "chiffrement", "aes-256", "eidas", "ohada", "hash", "sha-256", "audit", "vault"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `Standards de Sécurité, Cryptographie & Conformité Légale par V&I TECH AFRICA LTD :
+1. Chiffrement des Données :
+   - Données en transit : TLS 1.3 obligatoire, suites cryptographiques modernes avec Perfect Forward Secrecy (PFS), HSTS activé.
+   - Données au repos (Data at Rest) : Chiffrement symétrique fort AES-256-GCM pour les bases de données et le coffre-fort documentaire (Vault).
+   - Mots de passe et clés secrètes : Hachage avec sel via Argon2id ou PBKDF2 (min. 100 000 itérations), secrets hébergés sous HashiCorp Vault / Google Secret Manager.
+2. Traçabilité & Journal d'Audit Immuable :
+   - Chaque action critique (téléchargement de livrable, validation de jalon, modification de droits) génère une entrée signée cryptographiquement avec empreinte SHA-256.
+   - Chaînage des blocs d'audit (Merkle Chain) empêchant toute falsification rétrospective des logs.
+3. Conformité Légale & Signature Électronique :
+   - Conformité eIDAS (UE) et Acte Uniforme OHADA sur le Droit Commercial Général (Afrique) pour la validité probante des documents et signatures numériques.
+   - Signature de documents via certificat cryptographique X.509 et horodatage certifié (RFC 3161).
+4. Protection Applicative OWASP Top 10 :
+   - Protection CSRF, en-têtes CSP (Content Security Policy) stricts, validation systématique des schémas d'entrée avec Zod / Joi, protection anti-injections SQL via requêtes préparées paramétrées.`
+  },
+  {
+    id: "tech-sla-telemetry-support",
+    title: "Spécification SLA : Disponibilité 99.99%, Délais d'Intervention & Monitoring 24/7",
+    category: "guarantees",
+    tags: ["sla", "uptime", "support", "gtr", "gti", "monitoring", "telemetrie", "sauvegarde", "astreinte"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `Accords de Niveau de Service (SLA) & Télémétrie Opérationnelle par V&I TECH AFRICA LTD :
+1. Uptime et Haute Disponibilité :
+   - Engagement de disponibilité serveur de 99.99% sur les infrastructures cloud managées.
+   - Tolérance de panne maximale : Moins de 4,38 minutes d'indisponibilité non planifiée par mois.
+2. Matrice de Gravité & Délais Contractuels :
+   - Incident Critique P1 (Système ou paiement totalement bloqué) :
+     * GTI (Garantie de Temps d'Intervention) : < 15 minutes.
+     * GTR (Garantie de Temps de Rétablissement) : < 1 heure.
+   - Incident Majeur P2 (Fonctionnalité clé dégradée, contournement possible) :
+     * GTI : < 1 heure | GTR : < 4 heures.
+   - Incident Mineur P3 (Anomalie cosmétique ou demande d'évolution) :
+     * GTI : < 4 heures | GTR : < 24 à 48 heures.
+3. Stratégie de Sauvegarde & Reprise d'Activité (PRA/PCA) :
+   - Sauvegardes continues des bases de données avec Point-in-Time Recovery (PITR) sur 30 jours.
+   - Sauvegardes froides quotidiennes répliquées sur une seconde région géographique isolée.
+   - RPO (Perte de données max admissible) < 5 minutes | RTO (Temps de reprise max) < 15 minutes.
+4. Télémétrie en Temps Réel :
+   - Monitoring via Prometheus & Grafana avec sondes de santé (Health Checks) exécutées toutes les 30 secondes.
+   - Alertes instantanées par PagerDuty / Webhook Telegram / SMS aux ingénieurs d'astreinte.`
+  },
+  {
+    id: "tech-mobile-money-integrations",
+    title: "Spécification Technique : Intégrations Mobile Money (Wave, MTN MoMo, Orange, Airtel)",
+    category: "services",
+    tags: ["mobile money", "wave", "momo", "orange money", "airtel", "webhooks", "paiement", "api"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `Architecture d'Intégration des Paiements Mobile Money par V&I TECH AFRICA LTD :
+1. Opérateurs & Passerelles Couvertes :
+   - Afrique de l'Ouest & Centrale : Wave (Sénégal, Côte d'Ivoire), Orange Money (Sénégal, CI, Cameroun, Mali), MTN Mobile Money (Bénin, Ghana, Cameroun, Côte d'Ivoire).
+   - Afrique de l'Est & Grands Lacs : MTN MoMo (Rwanda, Ouganda), Airtel Money (RDC, Rwanda, Kenya, Tanzanie), M-Pesa (Kenya, RDC).
+   - Internationales : Stripe, Paystack, Flutterwave, PayPal.
+2. Flux de Transaction Sécurisé & Webhooks :
+   - Initiation du paiement côté client avec génération d'un jeton de transaction unique et non réutilisable (UUID v4).
+   - Confirmation asynchrone par Webhook sécurisé :
+     * Validation systématique de la signature cryptographique du payload (HMAC-SHA256 avec clé secrète partagée).
+     * Protection contre les attaques par rejeu (Replay Attacks) grâce au contrôle du timestamp (fenêtre < 300 secondes).
+     * Traitement idempotent des notifications : vérification en base de l'état préalable avant tout crédit ou déblocage de service.
+3. Mécanisme de Réconciliation & Retry :
+   - Si le serveur distant ne reçoit pas le code HTTP 200, relances automatiques programmées selon une séquence Fibonacci (1m, 2m, 5m, 15m, 1h).
+   - Tableau de bord de réconciliation automatique en fin de journée pour détecter tout écart entre les soldes bancaires et le grand livre logiciel.`
+  },
+  {
+    id: "tech-ip-git-warranty-lifecycle",
+    title: "Cycle de Vie Projet, Transfert de Propriété (IP), Recette & Garantie 6 Mois",
+    category: "guarantees",
+    tags: ["propriete", "ip", "code source", "git", "recette", "garantie", "sprint", "agile", "livraison"],
+    lastUpdated: "2026-03-01",
+    isOfficial: true,
+    content: `Modalités Opérationnelles, Propriété Intellectuelle et Garantie par V&I TECH AFRICA LTD :
+1. Cession Intégrale de Propriété Intellectuelle (100% IP) :
+   - Dès l'encaissement du solde final, le client acquiert la pleine et entière propriété exclusive de tous les codes sources, maquettes UI/UX Figma, schémas de bases de données et documentations.
+   - VITECH AFRICA renonce expressément à tout droit de rétention ou de propriété ultérieure sur le code développé sur-mesure.
+   - Les dépôts Git privés (GitHub ou GitLab de l'organisation du client) sont transférés avec l'historique complet des commits.
+2. Garantie Corrective de 6 Mois Incluse :
+   - Période de 180 jours calendaires débutant le jour de la signature du Procès-Verbal (PV) de Recette Définitive.
+   - Prise en charge gratuite et prioritaire de toute anomalie de code, régression ou écart par rapport aux spécifications initiales validées.
+3. Déroulement des Sprints & Processus de Recette :
+   - Sprints de développement de 14 jours (Agile Scrum).
+   - À chaque fin de sprint, une version exécutable est déployée sur l'environnement de Staging privé accessible au client.
+   - Le client dispose d'une phase de recette formelle avec liste de contrôle (Checklist) pour valider chaque fonctionnalité avant la mise en production.`
   }
 ];
 

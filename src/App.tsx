@@ -6,6 +6,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { CountryProvider } from './context/CountryContext';
 import { SiteDataProvider } from './context/SiteDataContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { VisitorCounterProvider } from './context/VisitorCounterContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { SEOHead } from './components/SEOHead';
@@ -15,6 +16,7 @@ import { CurrencyConverterModal } from './components/CurrencyConverterModal';
 import { CountrySelectorModal } from './components/CountrySelectorModal';
 import { AdminPortal } from './components/AdminPortal';
 import { GlobalSemanticSearch } from './components/GlobalSemanticSearch';
+import { VisitorCounterBadge } from './components/VisitorCounterBadge';
 
 // Dedicated Modular Pages
 import { HomePage } from './pages/HomePage';
@@ -26,6 +28,8 @@ import { ClientPortalPage } from './pages/ClientPortalPage';
 import { BlogPage } from './pages/BlogPage';
 import { ContactPage } from './pages/ContactPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { TechLabPage } from './pages/TechLabPage';
+import { FaqPage } from './pages/FaqPage';
 import { ScriptsMarketplace } from './components/scripts/ScriptsMarketplace';
 import { ScriptsMemberSpace } from './components/scripts/ScriptsMemberSpace';
 import { ScriptsAdminDashboard } from './components/scripts/ScriptsAdminDashboard';
@@ -63,7 +67,7 @@ export default function App() {
       const validViews = [
         'home', 'services', 'portfolio', 'estimator', 'tech-hubs', 
         'client-portal', 'blog', 'contact', 'admin', 'profile', 'pricing',
-        'scripts', 'scripts-member', 'scripts-admin', 'scripts-deliverables', 'team'
+        'scripts', 'scripts-member', 'scripts-admin', 'scripts-deliverables', 'team', 'tech-lab', 'faq'
       ];
       if (validViews.includes(hash)) {
         if (hash === 'admin') {
@@ -144,12 +148,13 @@ Délais Estimés : ${data.estimatedTimeline}`,
     <AuthProvider>
       <WishlistProvider>
         <SiteDataProvider>
-          <LanguageProvider>
-            <CurrencyProvider>
-              <CountryProvider>
-                <ThemeProvider>
-                  <SEOHead activeView={activeView} />
-                <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
+          <VisitorCounterProvider>
+            <LanguageProvider>
+              <CurrencyProvider>
+                <CountryProvider>
+                  <ThemeProvider>
+                    <SEOHead activeView={activeView} />
+                  <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col font-sans transition-colors duration-200">
                 
                 {/* Main Navigation Header with Active View Support */}
                 <Header
@@ -163,7 +168,7 @@ Délais Estimés : ${data.estimatedTimeline}`,
 
                 {/* If Admin Portal is open as full-screen modal */}
                 {isAdminPortalOpen && (
-                  <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950">
+                  <div className="fixed inset-0 z-[200] overflow-y-auto bg-slate-950">
                     <AdminPortal onClose={() => setIsAdminPortalOpen(false)} />
                   </div>
                 )}
@@ -242,6 +247,14 @@ Délais Estimés : ${data.estimatedTimeline}`,
                     />
                   )}
 
+                  {activeView === 'tech-lab' && (
+                    <TechLabPage
+                      onNavigateToView={navigateToView}
+                      onOpenScheduleModal={handleOpenScheduleForHub}
+                      onOpenChat={() => setIsChatOpen(true)}
+                    />
+                  )}
+
                   {activeView === 'scripts' && (
                     <ScriptsMarketplace
                       onNavigateMemberSpace={() => navigateToView('scripts-member')}
@@ -274,6 +287,15 @@ Délais Estimés : ${data.estimatedTimeline}`,
                     <TeamPublicPage
                       onNavigateContact={() => navigateToView('contact')}
                       onNavigateScripts={() => navigateToView('scripts')}
+                    />
+                  )}
+
+                  {activeView === 'faq' && (
+                    <FaqPage
+                      onOpenChat={() => setIsChatOpen(true)}
+                      onOpenScheduleModal={handleOpenScheduleForHub}
+                      onNavigateToView={navigateToView}
+                      onSelectServiceForQuote={handleSelectServiceForQuote}
                     />
                   )}
                 </main>
@@ -313,13 +335,17 @@ Délais Estimés : ${data.estimatedTimeline}`,
                   onNavigateToView={navigateToView}
                 />
 
+                {/* Floating Real-time Visitor Counter Pulse Badge */}
+                <VisitorCounterBadge variant="floating" />
+
               </div>
             </ThemeProvider>
           </CountryProvider>
         </CurrencyProvider>
       </LanguageProvider>
-      </SiteDataProvider>
-      </WishlistProvider>
-    </AuthProvider>
+    </VisitorCounterProvider>
+    </SiteDataProvider>
+    </WishlistProvider>
+  </AuthProvider>
   );
 }

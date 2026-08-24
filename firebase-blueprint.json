@@ -90,6 +90,77 @@
         "createdAt": { "type": "string", "maxLength": 100 }
       },
       "required": ["userId", "scriptId", "title"]
+    },
+    "ProjectDocument": {
+      "title": "Project Document",
+      "description": "Secure client deliverables, contracts, technical specifications, and sprint validation reports stored and synced for project milestones",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string", "maxLength": 128 },
+        "milestoneId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "docRef": { "type": "string", "maxLength": 100 },
+        "documentType": { "type": "string", "enum": ["contract", "spec", "audit", "delivery_report", "sla", "invoice", "nda"] },
+        "fileName": { "type": "string", "maxLength": 250 },
+        "fileSize": { "type": "string", "maxLength": 50 },
+        "fileUrl": { "type": "string", "maxLength": 1000 },
+        "hashSha256": { "type": "string", "maxLength": 64 },
+        "version": { "type": "string", "maxLength": 50 },
+        "encrypted": { "type": "boolean" },
+        "signatories": { "type": "array" },
+        "status": { "type": "string", "enum": ["draft", "signed", "certified", "archived"] },
+        "uploadedAt": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "userId": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["projectId", "title", "documentType", "fileName"]
+    },
+    "DocumentAuditLog": {
+      "title": "Document Audit Log",
+      "description": "Cryptographic audit trail of all client actions on documents including downloads, digital signatures, integrity verifications, and milestone approvals",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string", "maxLength": 128 },
+        "documentId": { "type": "string", "maxLength": 128 },
+        "documentTitle": { "type": "string", "maxLength": 250 },
+        "docRef": { "type": "string", "maxLength": 100 },
+        "actionType": { "type": "string", "enum": ["signature_created", "document_downloaded", "document_viewed", "document_uploaded", "hash_verified", "milestone_validated"] },
+        "actorName": { "type": "string", "maxLength": 150 },
+        "actorRole": { "type": "string", "maxLength": 150 },
+        "actorEmail": { "type": "string", "maxLength": 150 },
+        "actorCompany": { "type": "string", "maxLength": 150 },
+        "timestamp": { "type": "string", "maxLength": 100 },
+        "timestampUtc": { "type": "string", "maxLength": 100 },
+        "ipAddress": { "type": "string", "maxLength": 100 },
+        "userAgent": { "type": "string", "maxLength": 300 },
+        "certificateId": { "type": "string", "maxLength": 100 },
+        "hashSha256": { "type": "string", "maxLength": 64 },
+        "verificationStatus": { "type": "string", "enum": ["verified", "tamper_proof", "certified", "standard"] },
+        "details": { "type": "string", "maxLength": 1000 },
+        "metadata": { "type": "object" }
+      },
+      "required": ["projectId", "documentTitle", "actionType", "actorName", "actorRole", "timestamp", "timestampUtc"]
+    },
+    "ClientNotification": {
+      "title": "Client Notification",
+      "description": "Real-time project notification and alerts for the client portal",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "message": { "type": "string", "maxLength": 1000 },
+        "type": { "type": "string", "maxLength": 50 },
+        "timestamp": { "type": "string", "maxLength": 100 },
+        "timestampUtc": { "type": "string", "maxLength": 100 },
+        "read": { "type": "boolean" },
+        "docId": { "type": "string", "maxLength": 128 },
+        "docRef": { "type": "string", "maxLength": 100 },
+        "milestoneId": { "type": "string", "maxLength": 128 },
+        "actionUrl": { "type": "string", "maxLength": 200 },
+        "actionLabel": { "type": "string", "maxLength": 100 },
+        "actorName": { "type": "string", "maxLength": 150 }
+      },
+      "required": ["title", "message", "type"]
     }
   },
   "firestore": {
@@ -116,6 +187,18 @@
     "/wishlists/{wishlistId}": {
       "schema": "WishlistItem",
       "description": "Saved script favorites synchronized in real time for members"
+    },
+    "/project_documents/{documentId}": {
+      "schema": "ProjectDocument",
+      "description": "Secure milestone PDF documents, legal contracts, C4 diagrams, and technical specifications"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "DocumentAuditLog",
+      "description": "Certified immutable audit trail tracking document downloads, digital signatures, hash checks, and deliveries"
+    },
+    "/client_notifications/{notificationId}": {
+      "schema": "ClientNotification",
+      "description": "Real-time client alerts, document release notices, and audit completion events"
     }
   }
 }

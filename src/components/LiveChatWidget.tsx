@@ -168,7 +168,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   };
 
   return (
-    <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[130]">
       
       {/* Floating Trigger Button with Framer Motion */}
       <AnimatePresence>
@@ -182,12 +182,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             whileHover={{ scale: 1.08, shadow: "0 20px 25px -5px rgba(59, 130, 246, 0.5)" }}
             whileTap={{ scale: 0.92 }}
             transition={{ type: "spring", stiffness: 380, damping: 22 }}
-            className="relative group p-2.5 rounded-full bg-slate-950 border-2 border-blue-500/60 text-white shadow-2xl shadow-blue-500/30 flex items-center justify-center cursor-pointer"
+            className="relative group p-2 sm:p-2.5 rounded-full bg-slate-950 border-2 border-blue-500/60 text-white shadow-2xl shadow-blue-500/30 flex items-center justify-center cursor-pointer"
             title="Discuter avec l'Assistant IA V&I TECH AFRICA"
           >
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 z-20">
+            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 sm:h-4 sm:w-4 z-20">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400 border-2 border-slate-950"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-emerald-400 border-2 border-slate-950"></span>
             </span>
             <VitechLogo variant="badge" size="lg" />
           </motion.button>
@@ -202,7 +202,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.88, y: 40, transition: { duration: 0.2 } }}
             transition={{ type: "spring", stiffness: 320, damping: 26 }}
-            className="w-[calc(100vw-32px)] sm:w-[440px] h-[600px] max-h-[calc(100vh-80px)] rounded-3xl bg-slate-900 border border-slate-700/80 shadow-2xl shadow-slate-950/80 flex flex-col overflow-hidden text-white"
+            className="w-[calc(100vw-32px)] sm:w-[440px] h-[520px] sm:h-[600px] max-h-[calc(100vh-80px)] rounded-3xl bg-slate-900 border border-slate-700/80 shadow-2xl shadow-slate-950/80 flex flex-col overflow-hidden text-white"
           >
             
             {/* Header */}

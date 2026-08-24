@@ -510,7 +510,7 @@ Donne une recommandation d'architecture senior concise (en 3 points clés clairs
           </div>
 
           {/* Right Column: Live Calculated Estimate Card (4 cols) */}
-          <div className="lg:col-span-4 sticky top-28 space-y-6">
+          <div className="lg:col-span-4 static lg:sticky lg:top-28 space-y-6">
             
             <div className="rounded-3xl bg-slate-900 border border-emerald-500/40 p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />

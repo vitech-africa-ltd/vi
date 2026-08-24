@@ -48,7 +48,8 @@ import {
   Briefcase,
   Layers3,
   Cpu,
-  Bot
+  Bot,
+  Megaphone
 } from 'lucide-react';
 import { 
   collection, 
@@ -65,7 +66,23 @@ import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { VitechLogo } from './VitechLogo';
 import { AiPromptConfigTab } from './admin/AiPromptConfigTab';
-import { ServiceItem, CaseStudy, BlogPost, OfficeHub, Testimonial } from '../types';
+import { AuditLogView } from './AuditLogView';
+import { PdfViewerModal } from './PdfViewerModal';
+import { sendClientNotification } from '../services/notificationService';
+import { subscribeToProjectDocuments, saveProjectDocument, downloadDocument } from '../services/projectDocumentsService';
+import { INITIAL_PROJECT_DOCUMENTS } from '../data/projectDocumentsData';
+import { 
+  ServiceItem, 
+  CaseStudy, 
+  BlogPost, 
+  OfficeHub, 
+  Testimonial, 
+  TeamMember, 
+  LiveAnnouncementConfig,
+  ProjectDocument,
+  NotificationType
+} from '../types';
+import { GeneratedPdfMetadata } from '../utils/pdfGenerator';
 
 interface ContactInquiryDoc {
   id: string;
@@ -118,7 +135,9 @@ interface SubscriberDoc {
 type AdminTab = 
   | 'dashboard' 
   | 'ai-assistant'
+  | 'announcement'
   | 'company'
+  | 'team'
   | 'services' 
   | 'portfolio' 
   | 'blog' 
@@ -127,7 +146,11 @@ type AdminTab =
   | 'inquiries' 
   | 'bookings' 
   | 'estimates' 
-  | 'subscribers' 
+  | 'subscribers'
+  | 'vault'
+  | 'audit'
+  | 'invoicing'
+  | 'notifications' 
   | 'security';
 
 export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -155,6 +178,12 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     addTestimonial,
     updateTestimonial,
     deleteTestimonial,
+    teamMembers,
+    addTeamMember,
+    updateTeamMember,
+    deleteTeamMember,
+    liveAnnouncement,
+    updateLiveAnnouncement,
     resetAllToFactoryDefaults,
     isSaving,
     saveStatus
@@ -173,6 +202,26 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [estimates, setEstimates] = useState<ProjectEstimateDoc[]>([]);
   const [subscribers, setSubscribers] = useState<SubscriberDoc[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(true);
+
+  // Real-time Project Documents State
+  const [projectDocs, setProjectDocs] = useState<(ProjectDocument & { pdfData?: GeneratedPdfMetadata })[]>(INITIAL_PROJECT_DOCUMENTS);
+  const [selectedDocForPdfModal, setSelectedDocForPdfModal] = useState<(ProjectDocument & { pdfData?: GeneratedPdfMetadata }) | null>(null);
+
+  // Real-time Notification Broadcast Form State
+  const [notifTitle, setNotifTitle] = useState('');
+  const [notifMessage, setNotifMessage] = useState('');
+  const [notifType, setNotifType] = useState<NotificationType>('document_uploaded');
+  const [notifFeedback, setNotifFeedback] = useState<string | null>(null);
+
+  // Subscribe to Project Documents on mount
+  useEffect(() => {
+    const unsub = subscribeToProjectDocuments('proj-afripay-001', (docs) => {
+      setProjectDocs(docs);
+    });
+    return () => {
+      if (typeof unsub === 'function') unsub();
+    };
+  }, []);
 
   // Search and filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -194,6 +243,17 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [isNewTestimonial, setIsNewTestimonial] = useState(false);
+
+  const [editingTeamMember, setEditingTeamMember] = useState<Partial<TeamMember> | null>(null);
+  const [isNewTeamMember, setIsNewTeamMember] = useState(false);
+
+  // Announcement Form State
+  const [announcementForm, setAnnouncementForm] = useState<LiveAnnouncementConfig>(liveAnnouncement);
+  const [announcementSavedAlert, setAnnouncementSavedAlert] = useState(false);
+
+  useEffect(() => {
+    setAnnouncementForm(liveAnnouncement);
+  }, [liveAnnouncement]);
 
   // Company Info Edit Form State
   const [companyForm, setCompanyForm] = useState(companyInfo);
@@ -747,6 +807,25 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
 
               <button
+                onClick={() => setActiveTab('announcement')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'announcement'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Megaphone className="w-4 h-4 text-amber-400" />
+                  <span>Bannière Promo Live</span>
+                </div>
+                {liveAnnouncement.enabled && (
+                  <span className="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono font-bold">
+                    ACTIVE
+                  </span>
+                )}
+              </button>
+
+              <button
                 onClick={() => setActiveTab('company')}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === 'company'
@@ -757,6 +836,20 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <div className="flex items-center gap-2.5">
                   <Building2 className="w-4 h-4" />
                   <span>Coordonnées &amp; Direction</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('team')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'team'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Users className="w-4 h-4 text-cyan-400" />
+                  <span>Équipe &amp; Fondateurs ({teamMembers.length})</span>
                 </div>
               </button>
 
@@ -827,6 +920,60 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <div className="flex items-center gap-2.5">
                   <Star className="w-4 h-4" />
                   <span>Avis Clients ({testimonials.length})</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Gouvernance, Coffre-Fort & Conformité eIDAS */}
+          <div>
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-cyan-400 px-3 mb-2 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" />
+              <span>Gouvernance &amp; Portails Clients</span>
+            </p>
+            <div className="space-y-1">
+              <button
+                onClick={() => setActiveTab('vault')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'vault'
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <FileText className="w-4 h-4 text-cyan-400" />
+                  <span>Coffre Documents eIDAS</span>
+                </div>
+                <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950 px-1.5 py-0.2 rounded border border-cyan-500/30">
+                  {projectDocs.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('audit')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'audit'
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <History className="w-4 h-4 text-cyan-400" />
+                  <span>Journal d'Audit (Export PDF/CSV)</span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'notifications'
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Megaphone className="w-4 h-4 text-cyan-400" />
+                  <span>Diffuser une Notification</span>
                 </div>
               </button>
             </div>
@@ -1606,12 +1753,42 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-300 mb-1">Catégorie</label>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Catégorie Thématique</label>
                       <input
                         type="text"
                         value={editingBlogPost.category || ''}
                         onChange={(e) => setEditingBlogPost({ ...editingBlogPost, category: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                        placeholder="Ex: Architecture Cloud & FinOps"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Pôle Technologique (Filtre)</label>
+                      <select
+                        value={editingBlogPost.techCategory || 'Web'}
+                        onChange={(e) => setEditingBlogPost({ ...editingBlogPost, techCategory: e.target.value as any })}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                      >
+                        <option value="Cloud">Cloud (Cloud & DevOps)</option>
+                        <option value="AI">AI (Intelligence Artificielle & Data)</option>
+                        <option value="Web">Web (Ingénierie Web & SaaS)</option>
+                        <option value="Mobile">Mobile (Mobile & Offline-First)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Tags (séparés par des virgules)</label>
+                      <input
+                        type="text"
+                        value={Array.isArray(editingBlogPost.tags) ? editingBlogPost.tags.join(', ') : ''}
+                        onChange={(e) => {
+                          const rawTags = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+                          setEditingBlogPost({ ...editingBlogPost, tags: rawTags });
+                        }}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs"
+                        placeholder="Ex: Kubernetes, FinOps, Terraform"
                       />
                     </div>
                   </div>
@@ -2266,6 +2443,433 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
 
+            {/* TAB: LIVE ANNOUNCEMENT BANNER */}
+          {activeTab === 'announcement' && (
+            <div className="space-y-6 max-w-4xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
+                    <Megaphone className="w-7 h-7 text-amber-400" />
+                    <span>Bannière Promo &amp; Mises à Jour en Temps Réel</span>
+                  </h1>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Diffusez des annonces urgentes, promotions et nouveautés en direct à l'ensemble des visiteurs sur toutes les pages.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={announcementForm.enabled}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, enabled: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                  <span className="text-xs font-bold text-white">
+                    {announcementForm.enabled ? 'Affichage Public ACTIF' : 'Affichage Désactivé'}
+                  </span>
+                </div>
+              </div>
+
+              {announcementSavedAlert && (
+                <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Bannière enregistrée et diffusée en direct à tous les visiteurs !</span>
+                </div>
+              )}
+
+              {/* Live Preview Box */}
+              <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+                <span className="text-[11px] font-mono text-slate-400 uppercase font-bold">Aperçu en Direct pour les Visiteurs :</span>
+                <div className={`p-3 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs ${
+                  announcementForm.theme === 'emerald' ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-200' :
+                  announcementForm.theme === 'cyan' ? 'bg-cyan-950/80 border-cyan-500/40 text-cyan-200' :
+                  announcementForm.theme === 'amber' ? 'bg-amber-950/80 border-amber-500/40 text-amber-200' :
+                  announcementForm.theme === 'purple' ? 'bg-purple-950/80 border-purple-500/40 text-purple-200' :
+                  'bg-rose-950/80 border-rose-500/40 text-rose-200'
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-slate-950/60 border border-white/20">
+                      {announcementForm.badge || 'PROMO'}
+                    </span>
+                    <span className="font-medium">{announcementForm.message || 'Votre annonce apparaîtra ici.'}</span>
+                    {announcementForm.couponCode && (
+                      <span className="px-2 py-0.5 rounded bg-white/10 font-mono font-bold text-[10px] uppercase border border-white/20">
+                        Code: {announcementForm.couponCode}
+                      </span>
+                    )}
+                  </div>
+                  {announcementForm.linkText && (
+                    <span className="px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 font-bold text-[11px] cursor-pointer">
+                      {announcementForm.linkText} →
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Form */}
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  await updateLiveAnnouncement(announcementForm);
+                  setAnnouncementSavedAlert(true);
+                  setTimeout(() => setAnnouncementSavedAlert(false), 3500);
+                }}
+                className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 text-xs"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-medium">Badge / Tag :</label>
+                    <input
+                      type="text"
+                      value={announcementForm.badge}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, badge: e.target.value })}
+                      placeholder="ex: 🚀 NOUVEAU 2026"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-semibold focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-medium">Code Promo (Optionnel) :</label>
+                    <input
+                      type="text"
+                      value={announcementForm.couponCode || ''}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, couponCode: e.target.value })}
+                      placeholder="ex: KIGALI2026"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono font-bold uppercase focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-medium">Thème Couleur :</label>
+                    <select
+                      value={announcementForm.theme}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, theme: e.target.value as any })}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="emerald">Émeraude (Fintech &amp; Pro)</option>
+                      <option value="cyan">Cyan (Tech &amp; IA)</option>
+                      <option value="amber">Ambre (Promo Flash)</option>
+                      <option value="purple">Violet (Nouveautés Exclusives)</option>
+                      <option value="rose">Rose (Offre Spéciale)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-medium">Texte du Message Public :</label>
+                  <input
+                    type="text"
+                    required
+                    value={announcementForm.message}
+                    onChange={(e) => setAnnouncementForm({ ...announcementForm, message: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-medium">Texte du Bouton d'Action :</label>
+                    <input
+                      type="text"
+                      value={announcementForm.linkText || ''}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, linkText: e.target.value })}
+                      placeholder="ex: Découvrir les Scripts"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-400 font-medium">Page Cible :</label>
+                    <select
+                      value={announcementForm.targetView || 'scripts'}
+                      onChange={(e) => setAnnouncementForm({ ...announcementForm, targetView: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="scripts">Marketplace Scripts (/scripts)</option>
+                      <option value="services">Services Numériques (/services)</option>
+                      <option value="estimator">Simulateur de Devis (/estimator)</option>
+                      <option value="contact">Formulaire de Contact (/contact)</option>
+                      <option value="team">Équipe Vitech (/team)</option>
+                      <option value="portfolio">Études de Cas (/portfolio)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500 font-mono">Diffusion instantanée par WebSocket &amp; Firestore</span>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow active:scale-95 transition-all"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Enregistrer &amp; Diffuser aux Visiteurs</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* TAB: TEAM MEMBERS */}
+          {activeTab === 'team' && (
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
+                    <Users className="w-7 h-7 text-cyan-400" />
+                    <span>Gestion des Membres de l'Équipe &amp; Fondateurs ({teamMembers.length})</span>
+                  </h1>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Ces profils s'affichent publiquement sur la page /team et dans les fiches auteurs des scripts logiciels.
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsNewTeamMember(true);
+                    setEditingTeamMember({
+                      id: `member-${Date.now()}`,
+                      name: '',
+                      role: '',
+                      department: 'Software Engineering',
+                      bio: '',
+                      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+                      location: 'Kigali, Rwanda',
+                      skills: ['TypeScript', 'Node.js', 'DevOps'],
+                      socialLinks: {
+                        linkedin: 'https://linkedin.com',
+                        github: 'https://github.com',
+                        twitter: 'https://twitter.com',
+                        email: 'contact.vitechdev@gmail.com'
+                      },
+                      highlightQuote: '',
+                      featured: true
+                    });
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Ajouter un Membre</span>
+                </button>
+              </div>
+
+              {/* Team Members Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {teamMembers.map((member) => (
+                  <div key={member.id} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 shadow-lg flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <img src={member.avatar} alt={member.name} className="w-14 h-14 rounded-2xl object-cover border border-slate-700" />
+                        <div>
+                          <h4 className="font-bold text-base text-white">{member.name}</h4>
+                          <span className="text-xs text-amber-400 font-mono block font-semibold">{member.role}</span>
+                          <span className="text-[10px] text-slate-500">{member.location}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-slate-300 leading-relaxed line-clamp-3">{member.bio}</p>
+
+                      {member.highlightQuote && (
+                        <blockquote className="p-2.5 rounded-xl bg-slate-950 text-[11px] italic text-slate-400 border border-slate-800">
+                          "{member.highlightQuote}"
+                        </blockquote>
+                      )}
+
+                      <div className="flex flex-wrap gap-1">
+                        {member.skills.slice(0, 4).map((s, i) => (
+                          <span key={i} className="px-2 py-0.5 rounded-lg text-[10px] font-mono bg-slate-950 text-slate-300 border border-slate-800">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                      <span className="text-[11px] font-mono text-slate-500">{member.department}</span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setIsNewTeamMember(false);
+                            setEditingTeamMember({ ...member });
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white cursor-pointer"
+                          title="Modifier"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm(`Supprimer ${member.name} ?`)) {
+                              await deleteTeamMember(member.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950 text-slate-400 hover:text-rose-400 cursor-pointer"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Modal Edit/Create Team Member */}
+              {editingTeamMember && (
+                <div className="fixed inset-0 z-[210] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                  <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 my-8 shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <h3 className="font-bold text-base text-white flex items-center gap-2">
+                        <Users className="w-5 h-5 text-cyan-400" />
+                        <span>{isNewTeamMember ? 'Ajouter un Membre de l\'Équipe' : 'Modifier le Profil'}</span>
+                      </h3>
+                      <button
+                        onClick={() => setEditingTeamMember(null)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!editingTeamMember || !editingTeamMember.name) return;
+
+                        const finalMember: TeamMember = {
+                          ...(editingTeamMember as TeamMember),
+                          skills: Array.isArray(editingTeamMember.skills) ? editingTeamMember.skills : 
+                                  typeof editingTeamMember.skills === 'string' ? (editingTeamMember.skills as string).split(',').map(s => s.trim()).filter(Boolean) : []
+                        };
+
+                        if (isNewTeamMember) {
+                          await addTeamMember(finalMember);
+                        } else {
+                          await updateTeamMember(finalMember);
+                        }
+
+                        setEditingTeamMember(null);
+                      }}
+                      className="space-y-4 text-xs"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Nom Complet :</label>
+                          <input
+                            type="text"
+                            required
+                            value={editingTeamMember.name || ''}
+                            onChange={(e) => setEditingTeamMember({ ...editingTeamMember, name: e.target.value })}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-semibold focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Rôle / Titre :</label>
+                          <input
+                            type="text"
+                            required
+                            value={editingTeamMember.role || ''}
+                            onChange={(e) => setEditingTeamMember({ ...editingTeamMember, role: e.target.value })}
+                            placeholder="ex: Lead Architect &amp; Developer"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-amber-400 font-semibold focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Département :</label>
+                          <input
+                            type="text"
+                            value={editingTeamMember.department || ''}
+                            onChange={(e) => setEditingTeamMember({ ...editingTeamMember, department: e.target.value })}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Localisation :</label>
+                          <input
+                            type="text"
+                            value={editingTeamMember.location || ''}
+                            onChange={(e) => setEditingTeamMember({ ...editingTeamMember, location: e.target.value })}
+                            placeholder="ex: Kigali, Rwanda"
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-medium">Biographie Professionnelle :</label>
+                        <textarea
+                          rows={3}
+                          value={editingTeamMember.bio || ''}
+                          onChange={(e) => setEditingTeamMember({ ...editingTeamMember, bio: e.target.value })}
+                          className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-white resize-none focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-medium">Citation / Devise :</label>
+                        <input
+                          type="text"
+                          value={editingTeamMember.highlightQuote || ''}
+                          onChange={(e) => setEditingTeamMember({ ...editingTeamMember, highlightQuote: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Avatar URL :</label>
+                          <input
+                            type="text"
+                            value={editingTeamMember.avatar || ''}
+                            onChange={(e) => setEditingTeamMember({ ...editingTeamMember, avatar: e.target.value })}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-medium">Email Direct :</label>
+                          <input
+                            type="email"
+                            value={editingTeamMember.socialLinks?.email || ''}
+                            onChange={(e) => setEditingTeamMember({
+                              ...editingTeamMember,
+                              socialLinks: { ...(editingTeamMember.socialLinks || {}), email: e.target.value }
+                            })}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => setEditingTeamMember(null)}
+                          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold shadow"
+                        >
+                          Enregistrer
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* TAB: SYSTEM DIAGNOSTICS, INTEGRITY & SECURITY */}
           {activeTab === 'security' && (
             <div className="space-y-8 max-w-5xl">
@@ -2561,8 +3165,288 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </div>
           )}
 
+          {/* TAB: VAULT & DOCUMENTS SÉCURISÉS (eIDAS / OHADA) */}
+          {activeTab === 'vault' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black text-white flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-cyan-400" />
+                    <span>Coffre-Fort des Livrables &amp; Contrats eIDAS</span>
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Gestion des documents certifiés, contrats de cession de code, diagrammes C4, PV de recette et rapports de pentest.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-cyan-300 bg-cyan-950 px-3 py-1.5 rounded-xl border border-cyan-500/30 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                    <span>{projectDocs.length} Documents Cryptés AES-256</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Document List */}
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-800">
+                {projectDocs.map((docItem) => (
+                  <div key={docItem.id} className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors">
+                    <div className="flex items-start space-x-3.5">
+                      <div className="p-2.5 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-black text-white">{docItem.title}</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-bold">
+                            {docItem.docRef}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            {docItem.category}
+                          </span>
+                          {docItem.clientSignature ? (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Signé eIDAS
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              En attente signature client
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400">{docItem.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 font-mono">
+                          <span>Version : {docItem.version}</span>
+                          <span>•</span>
+                          <span>Taille : {docItem.fileSize}</span>
+                          <span>•</span>
+                          <span>Date : {docItem.uploadedAt}</span>
+                          {docItem.sha256Hash && (
+                            <>
+                              <span>•</span>
+                              <span className="text-slate-400 truncate max-w-[200px]" title={docItem.sha256Hash}>
+                                SHA: {docItem.sha256Hash.slice(0, 16)}...
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                      <button
+                        onClick={() => setSelectedDocForPdfModal(docItem)}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900/80 text-cyan-300 text-xs font-bold flex items-center gap-1.5 border border-cyan-500/30 transition-all cursor-pointer shadow-sm"
+                        title="Lecture Rapide PDF Multi-Pages"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Lire PDF</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          downloadDocument(docItem);
+                          setSystemActionFeedback({
+                            type: 'success',
+                            message: `Document "${docItem.title}" téléchargé avec succès.`
+                          });
+                          setTimeout(() => setSystemActionFeedback(null), 3000);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                        title="Télécharger PDF Certifié"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Télécharger</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: JOURNAL D'AUDIT GLOBAL & CONFORMITÉ */}
+          {activeTab === 'audit' && (
+            <div className="space-y-6">
+              <AuditLogView 
+                projectId="proj-afripay-001"
+                onExportLog={(format) => {
+                  setSystemActionFeedback({
+                    type: 'success',
+                    message: `Exportation du journal d'audit au format ${format.toUpperCase()} effectuée.`
+                  });
+                  setTimeout(() => setSystemActionFeedback(null), 4000);
+                }}
+              />
+            </div>
+          )}
+
+          {/* TAB: DIFFUSION NOTIFICATIONS CLIENTS */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <Megaphone className="w-6 h-6 text-cyan-400" />
+                  <span>Centre de Diffusion des Notifications &amp; Alertes Client</span>
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Émettez des notifications en temps réel (Push Firestore + Web Event) sur le portail client pour les nouveaux documents, audits complétés, jalons validés et alertes de sécurité.
+                </p>
+              </div>
+
+              {notifFeedback && (
+                <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{notifFeedback}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Notification Form */}
+                <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <Send className="w-4 h-4 text-cyan-400" />
+                    <span>Nouvelle Notification Instantanée</span>
+                  </h3>
+
+                  <form 
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!notifTitle.trim() || !notifMessage.trim()) return;
+
+                      await sendClientNotification({
+                        projectId: 'proj-afripay-001',
+                        type: notifType,
+                        title: notifTitle.trim(),
+                        message: notifMessage.trim(),
+                        actionUrl: notifType === 'document_uploaded' ? 'vault' : notifType === 'audit_completed' ? 'audit-trail' : 'milestones',
+                        actionLabel: notifType === 'document_uploaded' ? 'Consulter le Document' : notifType === 'audit_completed' ? 'Voir le Journal d\'Audit' : 'Ouvrir les Jalons'
+                      });
+
+                      setNotifFeedback(`Notification diffusée en temps réel avec succès à l'équipe cliente.`);
+                      setNotifTitle('');
+                      setNotifMessage('');
+                      setTimeout(() => setNotifFeedback(null), 5000);
+                    }}
+                    className="space-y-4 text-xs"
+                  >
+                    <div>
+                      <label className="text-slate-300 block mb-1.5 font-bold">Type d'Événement :</label>
+                      <select
+                        value={notifType}
+                        onChange={(e) => setNotifType(e.target.value as NotificationType)}
+                        className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                      >
+                        <option value="document_uploaded">Nouveau Document Déposé (Contrat, Diagramme, PV)</option>
+                        <option value="audit_completed">Rapport d'Audit de Sécurité / Pentest Complété</option>
+                        <option value="milestone_updated">Jalon de Sprint Validé / Complété</option>
+                        <option value="signature_required">Signature Électronique eIDAS Requise</option>
+                        <option value="security_alert">Alerte de Sécurité &amp; Intégrité Cryptographique</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-slate-300 block mb-1.5 font-bold">Titre de la Notification :</label>
+                      <input
+                        type="text"
+                        required
+                        value={notifTitle}
+                        onChange={(e) => setNotifTitle(e.target.value)}
+                        placeholder="Ex: Nouveau PV de Recette Sprint 4 déposé par l'Architecte"
+                        className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-slate-300 block mb-1.5 font-bold">Message Détaillé :</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={notifMessage}
+                        onChange={(e) => setNotifMessage(e.target.value)}
+                        placeholder="Ex: Le procès-verbal de validation de la passerelle Mobile Money MTN/Orange a été généré avec empreinte SHA-256 certifiée."
+                        className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>Diffuser l'Alerte au Portail Client</span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* Notification Presets */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Modèles de Notification Rapides</span>
+                  </h3>
+                  
+                  <div className="space-y-2.5">
+                    <button
+                      onClick={() => {
+                        setNotifType('document_uploaded');
+                        setNotifTitle("Nouveau Contrat de Cession de Propriété Intellectuelle");
+                        setNotifMessage("L'avenant de cession légale conforme OHADA / eIDAS est disponible dans le coffre-fort pour revue et signature.");
+                      }}
+                      className="w-full p-3 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-left transition-all cursor-pointer space-y-1 group"
+                    >
+                      <p className="text-xs font-bold text-white group-hover:text-cyan-300">Dépôt Contrat Cession</p>
+                      <p className="text-[11px] text-slate-400 line-clamp-2">Alerte dépôt contrat avec demande de signature électronique.</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setNotifType('audit_completed');
+                        setNotifTitle("Audit de Sécurité OWASP & Pentest Complété (Score 99.4%)");
+                        setNotifMessage("Le rapport d'audit d'intégrité et de conformité financière a été certifié par l'équipe DevSecOps.");
+                      }}
+                      className="w-full p-3 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-left transition-all cursor-pointer space-y-1 group"
+                    >
+                      <p className="text-xs font-bold text-white group-hover:text-cyan-300">Audit de Sécurité Validé</p>
+                      <p className="text-[11px] text-slate-400 line-clamp-2">Alerte rapport de conformité prêt à l'exportation PDF/CSV.</p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setNotifType('milestone_updated');
+                        setNotifTitle("Jalon Sprint 4 validé à 100%");
+                        setNotifMessage("La passerelle de paiement multi-devises UEMOA/CEMAC a passé tous les tests de charge en staging.");
+                      }}
+                      className="w-full p-3 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-left transition-all cursor-pointer space-y-1 group"
+                    >
+                      <p className="text-xs font-bold text-white group-hover:text-cyan-300">Validation de Jalon Sprint</p>
+                      <p className="text-[11px] text-slate-400 line-clamp-2">Mise à jour en temps réel des graphiques de progression.</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
+
+      {/* PDF Quick-Reader Modal in Admin Portal */}
+      {selectedDocForPdfModal && (
+        <PdfViewerModal
+          document={selectedDocForPdfModal}
+          onClose={() => setSelectedDocForPdfModal(null)}
+          onDownloadSuccess={(docName) => {
+            setSystemActionFeedback({
+              type: 'success',
+              message: `Document "${docName}" téléchargé avec succès.`
+            });
+            setTimeout(() => setSystemActionFeedback(null), 3000);
+          }}
+        />
+      )}
 
     </div>
   );

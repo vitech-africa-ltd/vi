@@ -14,7 +14,7 @@ import {
   Heart,
   Award
 } from 'lucide-react';
-import { INITIAL_TEAM_MEMBERS } from '../data/teamData';
+import { useSiteData } from '../context/SiteDataContext';
 
 interface TeamPublicPageProps {
   onNavigateContact: () => void;
@@ -25,8 +25,18 @@ export const TeamPublicPage: React.FC<TeamPublicPageProps> = ({
   onNavigateContact,
   onNavigateScripts
 }) => {
-  const founders = INITIAL_TEAM_MEMBERS.filter(m => m.id.includes('founder'));
-  const leads = INITIAL_TEAM_MEMBERS.filter(m => !m.id.includes('founder'));
+  const { teamMembers } = useSiteData();
+
+  const founders = teamMembers.filter(m => 
+    m.id.toLowerCase().includes('founder') || 
+    m.role.toLowerCase().includes('founder') || 
+    m.role.toLowerCase().includes('cto') || 
+    m.role.toLowerCase().includes('ceo')
+  );
+
+  const leads = teamMembers.filter(m => 
+    !founders.some(f => f.id === m.id)
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-24">
@@ -57,150 +67,163 @@ export const TeamPublicPage: React.FC<TeamPublicPageProps> = ({
       </section>
 
       {/* FOUNDERS SHOWCASE */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-          <Award className="w-5 h-5 text-amber-400" />
-          <h2 className="text-xl sm:text-2xl font-black text-white">Les Co-Fondateurs (Founders)</h2>
-        </div>
+      {founders.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <Award className="w-5 h-5 text-amber-400" />
+            <h2 className="text-xl sm:text-2xl font-black text-white">Les Co-Fondateurs (Founders)</h2>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {founders.map((founder) => (
-            <div
-              key={founder.id}
-              className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-amber-500/30 relative overflow-hidden flex flex-col justify-between space-y-6 shadow-2xl group hover:border-amber-400 transition-all duration-300"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <img
-                      src={founder.avatar}
-                      alt={founder.name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400/50 shadow-lg"
-                    />
-                    <div className="absolute -bottom-2 -right-2 p-1.5 rounded-lg bg-slate-950 border border-amber-500/40 text-amber-400">
-                      <Sparkles className="w-3.5 h-3.5" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {founders.map((founder) => (
+              <div
+                key={founder.id}
+                className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-amber-500/30 relative overflow-hidden flex flex-col justify-between space-y-6 shadow-2xl group hover:border-amber-400 transition-all duration-300"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img
+                        src={founder.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80'}
+                        alt={founder.name}
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400/50 shadow-lg"
+                      />
+                      <div className="absolute -bottom-2 -right-2 p-1.5 rounded-lg bg-slate-950 border border-amber-500/40 text-amber-400">
+                        <Sparkles className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-black text-white">{founder.name}</h3>
+                      <span className="text-xs font-mono font-bold text-amber-400 block">{founder.role}</span>
+                      <span className="text-[11px] text-slate-400">{founder.location}</span>
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-2xl font-black text-white">{founder.name}</h3>
-                    <span className="text-xs font-mono font-bold text-amber-400 block">{founder.role}</span>
-                    <span className="text-[11px] text-slate-400">{founder.location}</span>
+                  {founder.highlightQuote && (
+                    <blockquote className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs italic text-slate-300 leading-relaxed">
+                      "{founder.highlightQuote}"
+                    </blockquote>
+                  )}
+
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    {founder.bio}
+                  </p>
+
+                  {/* Skills */}
+                  {founder.skills && founder.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {founder.skills.map((s, idx) => (
+                        <span key={idx} className="px-2.5 py-1 rounded-xl bg-slate-950 text-slate-200 border border-slate-800 text-xs font-mono font-medium">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Social Links */}
+                <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                  <span className="text-xs font-mono text-slate-500">Contact Direct :</span>
+                  <div className="flex items-center gap-2">
+                    {founder.socialLinks?.linkedin && (
+                      <a href={founder.socialLinks.linkedin} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    )}
+                    {founder.socialLinks?.github && (
+                      <a href={founder.socialLinks.github} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
+                        <Github className="w-4 h-4" />
+                      </a>
+                    )}
+                    {founder.socialLinks?.twitter && (
+                      <a href={founder.socialLinks.twitter} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
+                        <Twitter className="w-4 h-4" />
+                      </a>
+                    )}
+                    {founder.socialLinks?.email && (
+                      <a href={`mailto:${founder.socialLinks.email}`} className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition-colors">
+                        <Mail className="w-4 h-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
-                {founder.highlightQuote && (
-                  <blockquote className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs italic text-slate-300 leading-relaxed">
-                    "{founder.highlightQuote}"
-                  </blockquote>
-                )}
-
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  {founder.bio}
-                </p>
-
-                {/* Skills */}
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {founder.skills.map((s, idx) => (
-                    <span key={idx} className="px-2.5 py-1 rounded-xl bg-slate-950 text-slate-200 border border-slate-800 text-xs font-mono font-medium">
-                      {s}
-                    </span>
-                  ))}
-                </div>
               </div>
-
-              {/* Social Links */}
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-mono text-slate-500">Contact Direct :</span>
-                <div className="flex items-center gap-2">
-                  {founder.socialLinks.linkedin && (
-                    <a href={founder.socialLinks.linkedin} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                  )}
-                  {founder.socialLinks.github && (
-                    <a href={founder.socialLinks.github} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
-                      <Github className="w-4 h-4" />
-                    </a>
-                  )}
-                  {founder.socialLinks.twitter && (
-                    <a href={founder.socialLinks.twitter} target="_blank" rel="noreferrer" className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400 transition-colors">
-                      <Twitter className="w-4 h-4" />
-                    </a>
-                  )}
-                  {founder.socialLinks.email && (
-                    <a href={`mailto:${founder.socialLinks.email}`} className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition-colors">
-                      <Mail className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* LEAD ENGINEERS & EXPERTS */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-16">
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-          <Code2 className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl sm:text-2xl font-black text-white">Pôles d'Ingénierie &amp; DevSecOps</h2>
-        </div>
+      {leads.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-16">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <Code2 className="w-5 h-5 text-cyan-400" />
+            <h2 className="text-xl sm:text-2xl font-black text-white">Pôles d'Ingénierie &amp; DevSecOps</h2>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-          {leads.map((lead) => (
-            <div
-              key={lead.id}
-              className="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={lead.avatar}
-                    alt={lead.name}
-                    className="w-14 h-14 rounded-2xl object-cover border border-slate-700"
-                  />
-                  <div>
-                    <h3 className="text-base font-bold text-white">{lead.name}</h3>
-                    <span className="text-xs font-mono text-cyan-400 font-semibold block">{lead.role}</span>
-                    <span className="text-[10px] text-slate-500">{lead.location}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {leads.map((lead) => (
+              <div
+                key={lead.id}
+                className="p-6 rounded-3xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4 shadow-xl"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={lead.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80'}
+                      alt={lead.name}
+                      className="w-14 h-14 rounded-2xl object-cover border border-slate-700"
+                    />
+                    <div>
+                      <h3 className="text-base font-bold text-white">{lead.name}</h3>
+                      <span className="text-xs font-mono text-cyan-400 font-semibold block">{lead.role}</span>
+                      <span className="text-[10px] text-slate-500">{lead.location}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    {lead.bio}
+                  </p>
+
+                  {lead.skills && lead.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {lead.skills.map((s, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-lg bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-[11px] font-mono text-slate-500">{lead.department}</span>
+                  <div className="flex items-center gap-1.5">
+                    {lead.socialLinks?.linkedin && (
+                      <a href={lead.socialLinks.linkedin} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400">
+                        <Linkedin className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    {lead.socialLinks?.github && (
+                      <a href={lead.socialLinks.github} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400">
+                        <Github className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                    {lead.socialLinks?.email && (
+                      <a href={`mailto:${lead.socialLinks.email}`} className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-emerald-400">
+                        <Mail className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {lead.bio}
-                </p>
-
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {lead.skills.map((s, idx) => (
-                    <span key={idx} className="px-2 py-0.5 rounded-lg bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800">
-                      {s}
-                    </span>
-                  ))}
-                </div>
               </div>
-
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                <span className="text-[11px] font-mono text-slate-500">{lead.department}</span>
-                <div className="flex items-center gap-1.5">
-                  {lead.socialLinks.linkedin && (
-                    <a href={lead.socialLinks.linkedin} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400">
-                      <Linkedin className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                  {lead.socialLinks.github && (
-                    <a href={lead.socialLinks.github} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-cyan-400">
-                      <Github className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CTA Bottom Banner */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">

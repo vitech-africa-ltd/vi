@@ -23,9 +23,18 @@ import {
   Maximize2, 
   Minimize2, 
   RefreshCw,
-  ExternalLink,
   MapPin,
-  Calendar
+  Calendar,
+  Smartphone,
+  Server,
+  Terminal,
+  FileCode,
+  Shield,
+  Zap,
+  FolderGit2,
+  CheckCircle,
+  ExternalLink,
+  Laptop
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from '../context/LanguageContext';
@@ -34,10 +43,22 @@ import { useCountry } from '../context/CountryContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { OfficeHub } from '../types';
 
-interface FaqItem {
+export interface FaqItem {
   id: string;
-  category: 'all' | 'pricing' | 'payment' | 'dev' | 'ip' | 'method' | 'sla' | 'ai';
+  category: 
+    | 'all' 
+    | 'web-saas' 
+    | 'mobile' 
+    | 'csharp-desktop' 
+    | 'cloud-devops' 
+    | 'ai-automation' 
+    | 'cybersecurity' 
+    | 'pricing-payment' 
+    | 'ip-legal' 
+    | 'method-sla'
+    | 'scripts-store';
   categoryLabel: string;
+  serviceBadge?: string;
   icon: React.ElementType;
   question: string;
   isContextual?: boolean;
@@ -54,6 +75,10 @@ interface FaqItem {
     taxInfo: string;
     mvpPrice: string;
     sprintPrice: string;
+    desktopPrice: string;
+    cloudPrice: string;
+    aiPrice: string;
+    auditPrice: string;
   }) => {
     summary: string;
     paragraphs: string[];
@@ -62,7 +87,8 @@ interface FaqItem {
     actionCta?: {
       label: string;
       icon?: React.ElementType;
-      actionType: 'converter' | 'country' | 'estimator' | 'chat' | 'schedule';
+      actionType: 'converter' | 'country' | 'estimator' | 'chat' | 'schedule' | 'services' | 'scripts';
+      serviceId?: string;
     };
   };
 }
@@ -72,6 +98,9 @@ interface FaqSectionProps {
   onOpenEstimator?: () => void;
   onOpenScheduleModal?: (hub?: OfficeHub) => void;
   onNavigateToView?: (viewId: string) => void;
+  onSelectServiceForQuote?: (serviceId: string) => void;
+  initialCategory?: string;
+  className?: string;
 }
 
 export const FaqSection: React.FC<FaqSectionProps> = ({
@@ -79,17 +108,20 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
   onOpenEstimator,
   onOpenScheduleModal,
   onNavigateToView,
+  onSelectServiceForQuote,
+  initialCategory = 'all',
+  className = '',
 }) => {
   const { t } = useTranslation();
   const { currencyOption, openConverterModal, formatCurrency } = useCurrency();
   const { currentCountry, openCountryModal } = useCountry();
   const { companyInfo, techHubs } = useSiteData();
 
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({
     'faq-pricing-context': true,
-    'faq-payment-context': true,
+    'faq-web-saas': true,
   });
   const [helpfulVotes, setHelpfulVotes] = useState<Record<string, 'up' | 'down'>>({});
 
@@ -108,6 +140,10 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       taxInfo: currentCountry.taxInfo || 'Facturation certifiée conforme aux normes fiscales nationales',
       mvpPrice: formatCurrency(2500),
       sprintPrice: formatCurrency(600),
+      desktopPrice: formatCurrency(1800),
+      cloudPrice: formatCurrency(2800),
+      aiPrice: formatCurrency(4000),
+      auditPrice: formatCurrency(3500),
     };
   }, [currentCountry, currencyOption, formatCurrency]);
 
@@ -138,8 +174,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
     setOpenItems({});
   };
 
-  const handleCtaAction = (actionType: 'converter' | 'country' | 'estimator' | 'chat' | 'schedule') => {
-    switch (actionType) {
+  const handleCtaAction = (action: { actionType: string; serviceId?: string }) => {
+    switch (action.actionType) {
       case 'converter':
         openConverterModal(2500);
         break;
@@ -147,8 +183,13 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         openCountryModal();
         break;
       case 'estimator':
-        if (onOpenEstimator) onOpenEstimator();
-        else if (onNavigateToView) onNavigateToView('estimator');
+        if (action.serviceId && onSelectServiceForQuote) {
+          onSelectServiceForQuote(action.serviceId);
+        } else if (onOpenEstimator) {
+          onOpenEstimator();
+        } else if (onNavigateToView) {
+          onNavigateToView('estimator');
+        }
         break;
       case 'chat':
         if (onOpenChat) onOpenChat();
@@ -159,31 +200,225 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
           onOpenScheduleModal(matchedHub);
         }
         break;
+      case 'services':
+        if (onNavigateToView) onNavigateToView('services');
+        break;
+      case 'scripts':
+        if (onNavigateToView) onNavigateToView('scripts');
+        break;
     }
   };
 
-  const faqItems: FaqItem[] = [
+  // Comprehensive FAQ list covering all services, technical details & legal aspects of Vitech Africa
+  const faqItems: FaqItem[] = useMemo(() => [
+    // 1. SERVICES WEB & SAAS
     {
-      id: 'faq-pricing-context',
-      category: 'pricing',
-      categoryLabel: 'Tarification & Devises',
-      icon: Coins,
-      isContextual: true,
-      question: `Quels sont les tarifs, forfaits et modalités de facturation en ${contextData.currencyCode} (${contextData.currencySymbol}) pour un projet en ${contextData.countryName} ?`,
+      id: 'faq-web-saas',
+      category: 'web-saas',
+      categoryLabel: 'Web & SaaS',
+      serviceBadge: 'Pôle Web Élite',
+      icon: Globe2,
+      question: 'Quelles sont vos compétences sur le développement d’applications Web & SaaS haute performance ?',
       getDynamicAnswer: (ctx) => ({
-        summary: `Nos devis et contrats sont libellés directement dans votre devise locale (${ctx.currencyName} - ${ctx.currencyCode}) avec une politique tarifaire claire et échelonnée par sprints validés.`,
+        summary: 'Nous concevons des plateformes web complexes, des ERP d’entreprise et des SaaS scalables avec Next.js 15, React 19, TypeScript et NestJS.',
         paragraphs: [
-          `Pour vos projets en ${ctx.countryName} (${ctx.countryFlag}), nous adaptons la grille tarifaire à l'écosystème local. Un cadrage technique et MVP démarre généralement à partir de ${ctx.mvpPrice}, incluant l'architecture logicielle, le design UI/UX, le développement complet et le déploiement.`,
-          `Le règlement s'effectue en toute sécurité par jalons techniques : 30% d'acompte au cadrage, des versements intermédiaires conditionnés à la validation des démos bimensuelles en direct sur serveur de staging, et le solde de 20% à la livraison finale du code source.`,
-          `Les forfaits de Tierce Maintenance Applicative (TMA) et astreinte débutent à environ ${ctx.sprintPrice}/mois selon le périmètre applicatif.`
+          'Notre équipe d’ingénieurs seniors développe des architectures modernes en Server-Side Rendering (SSR) et Progressive Web Apps (PWA) garantissant des scores Core Web Vitals supérieurs à 95/100.',
+          `Pour vos projets en ${ctx.countryName}, nos architectures intègrent dès la conception le multi-tenant, la gestion fine des rôles (RBAC), des bases PostgreSQL partitionnées avec cache Redis ultra-rapide et l’intégration de paiements panafricains.`,
+          `Un projet Web/SaaS démarre à partir de ${ctx.mvpPrice} avec livraison en 4 à 10 semaines clés en main.`
         ],
         highlights: [
-          { label: `Devise Active`, value: `${ctx.currencyCode} (${ctx.currencySymbol})` },
-          { label: `Tarif MVP indicatif`, value: `Dès ${ctx.mvpPrice}` },
-          { label: `Échelonnement`, value: `30% / 50% / 20% par Sprint` },
-          { label: `Cadrage initial`, value: `100% Gratuit & Sans engagement` }
+          { label: 'Stack Frontend', value: 'Next.js 15 • React 19 • Tailwind CSS' },
+          { label: 'Stack Backend', value: 'Node.js (NestJS) • Python FastAPI • Go' },
+          { label: 'Base de données', value: 'PostgreSQL • Redis • Vector DB' },
+          { label: 'Performance', value: 'Temps de chargement < 800ms' }
         ],
-        tags: [ctx.currencyCode, ctx.countryName, 'Facturation par Sprints', 'Sans frais cachés'],
+        tags: ['Next.js 15', 'React 19', 'TypeScript', 'PostgreSQL', 'Multi-tenant', 'Microservices'],
+        actionCta: {
+          label: 'Simuler un devis Web / SaaS',
+          icon: Code2,
+          actionType: 'estimator',
+          serviceId: 'web-saas'
+        }
+      })
+    },
+
+    // 2. APPLICATIONS MOBILES & OFFLINE-FIRST
+    {
+      id: 'faq-mobile-apps',
+      category: 'mobile',
+      categoryLabel: 'Applications Mobiles',
+      serviceBadge: 'Pôle Mobile Multiplateforme',
+      icon: Smartphone,
+      question: 'Comment gérez-vous le mode hors-ligne (Offline-First) et les connexions réseau instables en Afrique ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Toutes nos applications mobiles Flutter & React Native intègrent une base de données locale (SQLite / WatermelonDB) avec synchronisation bidirectionnelle résiliente.',
+        paragraphs: [
+          'En Afrique, la connectivité peut fluctuer. Nos architectures permettent aux utilisateurs de créer des transactions, saisir des rapports et naviguer même sans connexion internet. Dès que le réseau est rétabli, un moteur de synchronisation en arrière-plan réconcilie les données sans conflit avec le serveur central.',
+          'Nous optimisons également la taille des binaires (APK < 25 Mo) et la consommation des données mobiles pour maximiser le taux d’adoption de vos utilisateurs sur iOS et Android.',
+          'Nous prenons en charge la publication complète et certifiée sur Google Play Store et Apple App Store.'
+        ],
+        highlights: [
+          { label: 'Technologies', value: 'Flutter 3 (Dart) • React Native' },
+          { label: 'Base locale', value: 'SQLite • WatermelonDB • Hive' },
+          { label: 'Gestion réseau', value: 'Mode Hors-Ligne 100% Fonctionnel' },
+          { label: 'Déploiement', value: 'App Store & Google Play certifié' }
+        ],
+        tags: ['Flutter 3', 'Offline-First', 'iOS & Android', 'Sync Background', 'Mobile Money'],
+        actionCta: {
+          label: 'Estimer mon application mobile',
+          icon: Smartphone,
+          actionType: 'estimator',
+          serviceId: 'mobile-apps'
+        }
+      })
+    },
+
+    // 3. SOLUTIONS C# .NET & WPF DESKTOP
+    {
+      id: 'faq-csharp-desktop',
+      category: 'csharp-desktop',
+      categoryLabel: 'C# .NET & Desktop',
+      serviceBadge: 'Pôle Desktop & Systèmes de Caisse',
+      icon: Laptop,
+      question: 'Proposez-vous des logiciels de gestion de caisse (POS), microfinance et ERP Desktop en C# .NET / WPF ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Oui, V&I Tech dispose d’une expertise historique en ingénierie logicielle Desktop C# .NET 8 / WPF / WinUI pour les commerces, cliniques et institutions financières.',
+        paragraphs: [
+          'Nos logiciels de bureau fonctionnent en totale autonomie sans connexion internet requise. Ils communiquent directement avec les périphériques matériels : imprimantes thermiques de reçus (Epson, Bixolon), scanners de codes-barres 1D/2D, tiroirs-caisses et terminaux de paiement.',
+          'Idéal pour les supermarchés, pharmacies, hôtels, stations-service et agences de microfinance nécessitant une vitesse d’exécution instantanée (zéro latence) et une robustesse à toute épreuve.',
+          `Tarifs indicatifs : Solution logicielle C# sur-mesure dès ${ctx.desktopPrice} avec licence illimitée et formation des caissiers/gestionnaires.`
+        ],
+        highlights: [
+          { label: 'Langage & Framework', value: 'C# .NET 8 • WPF • WinUI 3' },
+          { label: 'Périphériques', value: 'Imprimantes thermiques ESC/POS • Scanners' },
+          { label: 'Base de données', value: 'SQL Server • SQLite Local • PostgreSQL' },
+          { label: 'Fonctionnement', value: '100% Autonome / Hors-Ligne' }
+        ],
+        tags: ['C# .NET 8', 'WPF', 'Logiciel de Caisse', 'Microfinance', 'Périphériques POS', 'Hors-Ligne'],
+        actionCta: {
+          label: 'Demander un devis logiciel C# WPF',
+          icon: Laptop,
+          actionType: 'estimator',
+          serviceId: 'csharp-desktop'
+        }
+      })
+    },
+
+    // 4. CLOUD ARCHITECTURE, DEVOPS & FINOPS
+    {
+      id: 'faq-cloud-devops',
+      category: 'cloud-devops',
+      categoryLabel: 'Cloud & DevOps',
+      serviceBadge: 'Pôle Cloud & Éco-Conception',
+      icon: Server,
+      question: 'Comment optimisez-vous les coûts Cloud (FinOps) et la tolérance aux pannes sur AWS / GCP ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Nous réduisons vos factures d’hébergement de 30% à 50% grâce à des architectures serverless, conteneurs Docker/Kubernetes et instances réservées auto-scalables.',
+        paragraphs: [
+          'Nos ingénieurs certifiés AWS et Google Cloud mettent en place des pipelines CI/CD automatisés assurant des déploiements sans interruption de service (Zero-Downtime Blue/Green).',
+          'Chaque infrastructure inclut un monitoring proactif 24/7 (Prometheus, Grafana) avec alertes instantanées sur Telegram/Slack, des sauvegardes géoredistribuées et un plan de reprise d’activité (PRA) éprouvé.',
+          `De plus, notre approche Green Cloud optimise la consommation de calcul pour minimiser l’empreinte carbone des serveurs hébergeant vos utilisateurs en ${ctx.countryName}.`
+        ],
+        highlights: [
+          { label: 'Fournisseurs Cloud', value: 'AWS • Google Cloud Platform • Azure' },
+          { label: 'Conteneurs', value: 'Docker • Kubernetes (EKS / GKE)' },
+          { label: 'Économie constatée', value: '-30% à -50% sur facture mensuelle' },
+          { label: 'Disponibilité', value: 'SLA 99.99% avec redondance multi-région' }
+        ],
+        tags: ['AWS', 'GCP', 'Kubernetes', 'Terraform', 'FinOps', 'CI/CD Zero-Downtime'],
+        actionCta: {
+          label: 'Audit & Devis Cloud DevOps',
+          icon: Server,
+          actionType: 'estimator',
+          serviceId: 'cloud-devops'
+        }
+      })
+    },
+
+    // 5. INTELLIGENCE ARTIFICIELLE & AUTOMATISATION
+    {
+      id: 'faq-ai-automation',
+      category: 'ai-automation',
+      categoryLabel: 'IA & Automatisation',
+      serviceBadge: 'Pôle Intelligence Artificielle',
+      icon: Cpu,
+      question: 'Comment intégrez-vous l’IA générative (Google Gemini, RAG) et l’automatisation documentaire dans nos métiers ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Nous déployons des agents IA sécurisés connectés à vos données privées d’entreprise via des architectures RAG (Retrieval-Augmented Generation) et OCR intelligent.',
+        paragraphs: [
+          'Cas d’usage concrets développés par V&I Tech : Assistants conversationnels multilingues adaptés aux contextes panafricains (Français, Anglais, Swahili, Wolof, Arabe), extraction automatique de données sur cartes nationales d’identité, passeports et factures, scoring prédictif de risque crédit et automatisation des workflows administratifs.',
+          'Vos données d’entreprise restent strictement confidentielles et ne sont jamais utilisées pour réentraîner des modèles publics.',
+          `Projets IA sur-mesure à partir de ${ctx.aiPrice} avec API sécurisée et dashboard de supervision en temps réel.`
+        ],
+        highlights: [
+          { label: 'Modèles supportés', value: 'Google Gemini 3.7 / Flash • OpenAI GPT-4o • Mistral' },
+          { label: 'Architecture', value: 'RAG Vectoriel (Pinecone / pgvector)' },
+          { label: 'Confidentialité', value: '100% Chiffré & Cloisonné' },
+          { label: 'Multilingue', value: 'Français, Anglais, Swahili, Wolof, Arabe' }
+        ],
+        tags: ['Gemini AI', 'RAG Vectoriel', 'OCR Intelligent', 'Scoring Crédit', 'Agents Autonomes'],
+        actionCta: {
+          label: 'Tester & Estimer une solution IA',
+          icon: Sparkles,
+          actionType: 'estimator',
+          serviceId: 'ai-automation'
+        }
+      })
+    },
+
+    // 6. CYBERSÉCURITÉ, PENTEST & AUDIT
+    {
+      id: 'faq-cybersecurity',
+      category: 'cybersecurity',
+      categoryLabel: 'Cybersécurité & Audit',
+      serviceBadge: 'Pôle Sécurité Offensive & Défensive',
+      icon: ShieldCheck,
+      question: 'Comment protégez-vous nos systèmes contre les cyberattaques et respectez-vous les normes de sécurité bancaire ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Nos experts en sécurité offensive réalisent des tests d’intrusion (pentests) approfondis et durcissent vos applications selon les standards OWASP Top 10.',
+        paragraphs: [
+          'Nous auditons le code source (SAST/DAST), les API, les applications mobiles et les serveurs Cloud. Nous mettons en œuvre le chiffrement de bout en bout (AES-256 / TLS 1.3), l’authentification forte (MFA / 2FA / WebAuthn) et la gestion des clés secrètes via HashiCorp Vault.',
+          `À l’issue de chaque mission, nous délivrons un rapport complet d’audit exécutif et technique accompagné d’un certificat officiel de conformité de sécurité applicative pour vos partenaires financiers et régulateurs en ${ctx.countryName}.`
+        ],
+        highlights: [
+          { label: 'Méthodologie', value: 'OWASP Top 10 • Pentesting Boîte Noire/Blanche' },
+          { label: 'Chiffrement', value: 'AES-256 • TLS 1.3 • Clés KMS / Vault' },
+          { label: 'Livrables', value: 'Rapport certifié & Plan de remédiation' },
+          { label: 'Astreinte', value: 'Intervention d’urgence 24/7' }
+        ],
+        tags: ['Pentesting', 'OWASP Top 10', 'Chiffrement AES-256', 'MFA', 'Audit de Code'],
+        actionCta: {
+          label: 'Planifier un Pentest / Audit',
+          icon: Shield,
+          actionType: 'estimator',
+          serviceId: 'cybersecurity-audit'
+        }
+      })
+    },
+
+    // 7. TARIFICATION, DEVISES & MOYENS DE PAIEMENT
+    {
+      id: 'faq-pricing-context',
+      category: 'pricing-payment',
+      categoryLabel: 'Tarifs & Paiements',
+      serviceBadge: 'Transparence Financière',
+      icon: Coins,
+      isContextual: true,
+      question: `Quels sont vos tarifs en ${contextData.currencyCode} (${contextData.currencySymbol}) et les modes de paiement acceptés en ${contextData.countryName} ?`,
+      getDynamicAnswer: (ctx) => ({
+        summary: `Nos devis et contrats sont libellés directement en devises locales (${ctx.currencyCode}) ou internationales (EUR, USD) avec paiement échelonné par Sprints validés.`,
+        paragraphs: [
+          `Pour les clients et entreprises en ${ctx.countryName} (${ctx.countryFlag}), vous pouvez régler vos prestations via les méthodes suivantes : ${ctx.paymentMethods.join(', ')}.`,
+          `Grille tarifaire indicative : Cadrage technique & MVP dès ${ctx.mvpPrice}, TMA mensuelle dès ${ctx.sprintPrice}/mois. Chaque projet est réglé par jalons transparents : 30% d’acompte au démarrage, versements intermédiaires conditionnés à la validation des démos en staging, et solde de 20% à la livraison du code source.`,
+          `Chaque paiement donne lieu à l’émission d’une facture commerciale certifiée conforme : "${ctx.taxInfo}".`
+        ],
+        highlights: [
+          { label: 'Devise Active', value: `${ctx.currencyCode} (${ctx.currencySymbol})` },
+          { label: 'Paiement local', value: ctx.paymentMethods.slice(0, 3).join(' • ') },
+          { label: 'Échelonnement', value: '30% / 50% / 20% par Sprint' },
+          { label: 'Cadrage initial', value: '100% Gratuit & Sans engagement' }
+        ],
+        tags: [ctx.currencyCode, ctx.countryName, 'Mobile Money', 'Facturation par Sprints', 'Virement SWIFT/SEPA'],
         actionCta: {
           label: `Convertir & Simuler en ${ctx.currencyCode}`,
           icon: Coins,
@@ -191,186 +426,113 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         }
       })
     },
-    {
-      id: 'faq-payment-context',
-      category: 'payment',
-      categoryLabel: 'Moyens de Paiement Locaux',
-      icon: CreditCard,
-      isContextual: true,
-      question: `Quelles passerelles et moyens de paiement sont supportés pour ${ctxFallback => ctxFallback.countryName} (${contextData.countryFlag}) ?`,
-      getDynamicAnswer: (ctx) => ({
-        summary: `Nous acceptons l'ensemble des moyens de paiement institutionnels et mobiles opérant en ${ctx.countryName}.`,
-        paragraphs: [
-          `Pour vos règlements en ${ctx.countryName} (${ctx.countryFlag}), vous pouvez utiliser les méthodes suivantes : ${ctx.paymentMethods.join(', ')}.`,
-          `Nous prenons également en charge les virements bancaires internationaux (SWIFT / SEPA), les virements bancaires régionaux ainsi que les cartes bancaires internationales (Visa, Mastercard, American Express).`,
-          `Chaque transaction génère une facture commerciale certifiée avec mentions légales : "${ctx.taxInfo}".`
-        ],
-        highlights: [
-          { label: `Moyens locaux`, value: ctx.paymentMethods.slice(0, 3).join(' • ') },
-          { label: `Sécurité`, value: `Chiffrement bancaire TLS 1.3 & PCI-DSS` },
-          { label: `Conformité Fiscale`, value: ctx.taxInfo.split('(')[0] }
-        ],
-        tags: [...ctx.paymentMethods.slice(0, 3), 'Mobile Money', 'Virement SWIFT/SEPA'],
-        actionCta: {
-          label: `Changer de pays / Hub régional`,
-          icon: Globe2,
-          actionType: 'country'
-        }
-      })
-    },
+
+    // 8. PROPRIÉTÉ INTELLECTUELLE, CESSION DU CODE & NDA
     {
       id: 'faq-ip-context',
-      category: 'ip',
-      categoryLabel: 'Propriété Intellectuelle & Juridiction',
+      category: 'ip-legal',
+      categoryLabel: 'Propriété & Juridique',
+      serviceBadge: 'Garantie Juridique Totale',
       icon: Scale,
       isContextual: true,
-      question: `Qui possède la propriété intellectuelle du code et quelle est la juridiction légale compétente ?`,
+      question: 'Qui détient la propriété intellectuelle du code source et signez-vous un accord de confidentialité (NDA) ?',
       getDynamicAnswer: (ctx) => ({
-        summary: `Vous êtes le propriétaire exclusif à 100% de l'intégralité du code source, des designs et des assets dès la livraison.`,
+        summary: 'Vous devenez le propriétaire exclusif à 100% de l’intégralité du code source, des dépôts Git, des maquettes et des assets dès le règlement final.',
         paragraphs: [
-          `Nos contrats prévoient une clause de cession intégrale, exclusive et sans réserve de tous les droits de propriété intellectuelle et droits d'auteur afférents au projet. À la livraison finale, l'ensemble des dépôts Git privés (GitHub/GitLab), clés de chiffrement et documentations d'architecture vous sont intégralement transférés.`,
-          `Avant tout échange confidentiel ou transmission de cahier des charges, nous signons un Accord de Non-Divulgation (NDA) bilatéral strict. Pour vos contrats, la juridiction de référence est : ${ctx.ndaJurisdiction}.`
+          'Tous nos contrats intègrent une clause formelle de cession intégrale, irréversible et sans réserve de l’ensemble des droits patrimoniaux d’auteur et de propriété intellectuelle.',
+          `Avant le moindre échange sur votre cahier des charges, nous signons systématiquement un Accord de Non-Divulgation (NDA) bilatéral strict. Pour vos contrats avec V&I Tech, la juridiction de référence compétente est : ${ctx.ndaJurisdiction}.`,
+          'À la livraison, les dépôts privés GitHub/GitLab, les clés d’accès aux serveurs de production et toutes les documentations techniques vous sont intégralement transférés.'
         ],
         highlights: [
-          { label: `Propriété du Code`, value: `100% Client (Cession totale)` },
-          { label: `Accord préalable`, value: `NDA Bilatéral signé` },
-          { label: `Juridiction contractuelle`, value: ctx.ndaJurisdiction }
+          { label: 'Propriété du Code', value: '100% Client (Cession totale irréversible)' },
+          { label: 'Confidentialité', value: 'NDA Bilatéral préalable obligatoire' },
+          { label: 'Accès Git', value: 'Dépôts GitHub/GitLab Privés transférés' },
+          { label: 'Juridiction légale', value: ctx.ndaJurisdiction }
         ],
-        tags: ['Cession 100%', 'NDA Bilatéral', 'Dépôt Git Privé', 'Propriété Exclusive'],
+        tags: ['Cession 100% Code', 'NDA Bilatéral', 'Dépôt Git Privé', 'Droit OHADA / International'],
         actionCta: {
-          label: `Demander notre modèle de NDA`,
+          label: 'Demander un modèle de NDA',
           icon: ShieldCheck,
           actionType: 'chat'
         }
       })
     },
+
+    // 9. MÉTHODOLOGIE AGILE, SPRINTS & SLA POST-LANCEMENT
     {
-      id: 'faq-hub-presence',
-      category: 'method',
-      categoryLabel: 'Présence Locale & Hubs R&D',
-      icon: MapPin,
-      isContextual: true,
-      question: `Où sont situés vos ingénieurs et comment s'organise l'accompagnement pour ${contextData.countryName} ?`,
+      id: 'faq-method-sla',
+      category: 'method-sla',
+      categoryLabel: 'Méthodologie & SLA',
+      serviceBadge: 'Cadence & Qualité Certifiée',
+      icon: Clock,
+      question: 'Quelle est votre méthodologie de suivi de projet et quelles garanties offrez-vous après la mise en production ?',
       getDynamicAnswer: (ctx) => ({
-        summary: `Vous bénéficiez d'une équipe dédiée opérant depuis notre réseau panafricain avec ancrage local via notre ${ctx.localHub}.`,
+        summary: 'Nous appliquons la méthodologie Agile Scrum avec des sprints de 14 jours, un portail client dédié en temps réel et une garantie corrective de 6 mois incluse.',
         paragraphs: [
-          `Pour les clients et partenaires basés en ${ctx.countryName} (${ctx.countryFlag}), le suivi de votre projet est coordonné par les architectes de notre ${ctx.localHub} et nos centres d'excellence (Kigali, Dakar, Abidjan, Douala, Casablanca, Paris).`,
-          `Nous combinons la proximité relationnelle d'ingénieurs basés sur votre fuseau horaire avec la puissance de frappe de nos pôles de R&D spécialisés en Cloud, Mobile et Intelligence Artificielle. Vous pouvez organiser des ateliers de cadrage en visioconférence ou en présentiel selon vos besoins.`
+          'Chaque client dispose d’un accès 24/7 à son Portail Client V&I Tech pour suivre le tableau Kanban des tâches, valider les jalons, tester les versions sur serveur de staging et échanger en continu avec le Lead Developer.',
+          'Garantie & SLA : Tout projet bénéficie d’une garantie corrective de 6 mois sans surcoût post-lancement. Pour les environnements critiques, nous proposons des contrats de Tierce Maintenance Applicative (TMA) avec astreinte technique 24/7 et garantie de temps de rétablissement (GTR < 1h pour incidents bloquants).'
         ],
         highlights: [
-          { label: `Hub Régional`, value: ctx.localHub },
-          { label: `Fuseau Horaire`, value: `Temps réel (GMT / GMT+1 / GMT+2)` },
-          { label: `Temps de réponse`, value: `< 15 min en astreinte technique` }
+          { label: 'Cycle de développement', value: 'Sprints Agile Scrum de 2 semaines' },
+          { label: 'Garantie incluse', value: '6 Mois de maintenance corrective sans surcoût' },
+          { label: 'Disponibilité SLA', value: '99.99% d’Uptime garanti' },
+          { label: 'Suivi transparent', value: 'Portail Client & Staging bimensuel' }
         ],
-        tags: [ctx.localHub, 'Fuseau aligné', 'Ateliers Présentiel/Visio', 'Support 24/7'],
+        tags: ['Agile Scrum', 'Sprints 2 semaines', 'Garantie 6 mois', 'SLA 99.99%', 'Portail Client'],
         actionCta: {
-          label: `Prendre RDV avec un Lead Architecte`,
+          label: 'Prendre RDV avec un Lead Architecte',
           icon: Calendar,
           actionType: 'schedule'
         }
       })
     },
+
+    // 10. CATALOGUE DE SCRIPTS & MODULES PRÊTS À L'EMPLOI
     {
-      id: 'faq-tech-stack',
-      category: 'dev',
-      categoryLabel: 'Technologies & Architecture',
-      icon: Code2,
-      question: `Quelles sont les technologies et architectures logicielles utilisées par V&I Tech ?`,
-      getDynamicAnswer: () => ({
-        summary: `Nous développons exclusivement sur des technologies modernes, pérennes, hautement scalables et sécurisées.`,
+      id: 'faq-scripts-store',
+      category: 'scripts-store',
+      categoryLabel: 'Scripts & Marketplace',
+      serviceBadge: 'Accélérateur Technique',
+      icon: FileCode,
+      question: 'Que propose votre Catalogue de Scripts & Composants prêts à l’emploi pour développeurs et entreprises ?',
+      getDynamicAnswer: (ctx) => ({
+        summary: 'Notre catalogue rassemble des composants logiciels autonomes, des passerelles de paiement panafricaines et des modèles C# / React prêts à intégrer en quelques minutes.',
         paragraphs: [
-          `Frontend & Web : React 19, Next.js 15, TypeScript, Tailwind CSS, architectures Jamstack et Progressive Web Apps (PWA).`,
-          `Mobile Multiplateforme : Flutter et React Native avec synchronisation en mode Offline-First (idéal pour les environnements réseau à connectivité variable).`,
-          `Backend & APIs : Node.js (NestJS/Express), Python (FastAPI, Django), Go pour les microservices à haute fréquence. Bases de données PostgreSQL, Redis, Firestore et solutions d'indexation vectorielle (Pinecone, pgvector).`,
-          `Cloud & DevOps : Architectures serverless et conteneurisées Kubernetes/Docker déployées sur Google Cloud Platform (GCP), AWS ou serveurs souverains sécurisés.`
+          'Pour accélérer vos déploiements sans réinventer la roue, nous mettons à disposition des modules testés et documentés : passerelles Mobile Money (Wave, Orange Money, MTN MoMo), modules d’authentification biométrique, connecteurs d’imprimantes thermiques ESC/POS pour C# WPF, et templates SaaS complets.',
+          'Chaque script est fourni avec son code source complet, sa documentation pas-à-pas et bénéficie de mises à jour gratuites pendant 12 mois.'
         ],
         highlights: [
-          { label: `Mobile`, value: `Flutter & React Native (Offline-First)` },
-          { label: `Web & SaaS`, value: `Next.js 15 / React 19 / TypeScript` },
-          { label: `Backend`, value: `NestJS / FastAPI / PostgreSQL / Redis` },
-          { label: `Cloud`, value: `GCP / AWS / Docker / Kubernetes` }
+          { label: 'Disponibilité', value: 'Téléchargement instantané du code source' },
+          { label: 'Documentation', value: 'Guide d’installation & exemples concrets' },
+          { label: 'Compatibilité', value: 'React, Node.js, Flutter, C# .NET' },
+          { label: 'Support technique', value: 'Assistance par nos ingénieurs incluse' }
         ],
-        tags: ['Next.js 15', 'Flutter', 'TypeScript', 'PostgreSQL', 'Docker', 'GCP / AWS'],
+        tags: ['Marketplace Scripts', 'Passerelle Wave/Orange/MTN', 'Module C# POS', 'Code Source Prêt'],
         actionCta: {
-          label: `Consulter notre catalogue de services`,
-          icon: Layers,
-          actionType: 'estimator'
+          label: 'Explorer le Catalogue de Scripts',
+          icon: FileCode,
+          actionType: 'scripts'
         }
       })
-    },
-    {
-      id: 'faq-method-delais',
-      category: 'method',
-      categoryLabel: 'Méthodologie & Délais de Livraison',
-      icon: Clock,
-      question: `Quelle est votre méthode de gestion de projet et quels sont les délais moyens de livraison ?`,
-      getDynamicAnswer: () => ({
-        summary: `Nous appliquons la méthodologie Agile Scrum avec des sprints de 2 semaines et des livraisons continues.`,
-        paragraphs: [
-          `Chaque projet est découpé en Sprints itératifs de 14 jours. Vous disposez d'un accès personnel à votre Portail Client 24/7 avec tableau Kanban interactif, suivi des jalons en temps réel, accès direct aux versions de staging et démonstrations régulières.`,
-          `Délais indicatifs : Un MVP (Produit Minimum Viable) fonctionnel est généralement livré en 4 à 8 semaines. Les plateformes d'entreprise ou architectures SaaS complexes nécessitent entre 8 et 16 semaines.`
-        ],
-        highlights: [
-          { label: `Cadence`, value: `Sprints Agile de 2 semaines` },
-          { label: `MVP Rapide`, value: `4 à 8 semaines clés en main` },
-          { label: `Transparence`, value: `Portail Client & Staging 24/7` }
-        ],
-        tags: ['Agile Scrum', 'Sprints 2 semaines', 'Staging continu', 'Portail Dédié']
-      })
-    },
-    {
-      id: 'faq-ai-automation',
-      category: 'ai',
-      categoryLabel: 'Intelligence Artificielle & Automatisation',
-      icon: Cpu,
-      question: `Comment intégrez-vous l'Intelligence Artificielle générative et l'automatisation dans nos applications ?`,
-      getDynamicAnswer: () => ({
-        summary: `Nous concevons des solutions d'IA sur-mesure combinant modèles de langage (LLMs), RAG et vision par ordinateur.`,
-        paragraphs: [
-          `Nos ingénieurs intègrent les modèles de pointe (Google Gemini 2.5/Flash, OpenAI GPT-4o, Claude 3.5, Mistral AI) connectés à vos propres bases de connaissances grâce à des architectures RAG (Retrieval-Augmented Generation) hautement sécurisées.`,
-          `Cas d'usage concrets : Assistants conversationnels multilingues adaptés aux dialectes africains (Français, Anglais, Wolof, Swahili, Arabe), OCR intelligent de pièces d'identité et factures, scoring prédictif de crédit, analyse automatisée de documents juridiques et moteurs de recommandation e-commerce.`
-        ],
-        highlights: [
-          { label: `Modèles IA`, value: `Google Gemini / GPT-4o / Claude 3.5 / Mistral` },
-          { label: `Architecture`, value: `RAG Vectoriel sécurisé & Local` },
-          { label: `Multilingue`, value: `Français, Anglais, Wolof, Swahili, Arabe` }
-        ],
-        tags: ['Gemini AI', 'RAG & Vecteurs', 'OCR & Vision', 'Chatbots Métiers']
-      })
-    },
-    {
-      id: 'faq-sla-garantie',
-      category: 'sla',
-      categoryLabel: 'Garantie & Support Post-Lancement',
-      icon: ShieldCheck,
-      question: `Quels engagements de service (SLA) et garanties offrez-vous après la mise en production ?`,
-      getDynamicAnswer: () => ({
-        summary: `Tout projet livré bénéficie contractuellement d'une garantie corrective de 3 à 6 mois et d'un SLA jusqu'à 99.99%.`,
-        paragraphs: [
-          `Durant la période de garantie, toute anomalie ou bug technique est corrigé immédiatement et sans surcoût par nos équipes.`,
-          `Au-delà, nos contrats de Tierce Maintenance Applicative (TMA) incluent le monitoring d'infrastructure 24h/24 et 7j/7, la gestion proactive des mises à jour de sécurité (correctifs OWASP), les sauvegardes automatiques journalières géodistribuées et une astreinte d'ingénieurs avec un temps de réponse garanti (GTR < 1h pour incidents critiques).`
-        ],
-        highlights: [
-          { label: `Garantie Incluse`, value: `3 à 6 mois de garantie intégrale` },
-          { label: `Disponibilité SLA`, value: `Jusqu'à 99.99% d'Uptime garanti` },
-          { label: `Temps de Réaction`, value: `< 1h sur incidents critiques` }
-        ],
-        tags: ['Garantie 6 mois', 'SLA 99.99%', 'Monitoring 24/7', 'TMA Proactive']
-      })
     }
-  ];
+  ], [contextData]);
 
-  const categories = [
+  // Categories config for filters
+  const categories = useMemo(() => [
     { id: 'all', label: 'Toutes les Questions', count: faqItems.length },
-    { id: 'pricing', label: `Tarifs & ${contextData.currencyCode}`, count: faqItems.filter(i => i.category === 'pricing').length },
-    { id: 'payment', label: `Paiements ${contextData.countryName}`, count: faqItems.filter(i => i.category === 'payment').length },
-    { id: 'ip', label: 'Propriété & Juridique', count: faqItems.filter(i => i.category === 'ip').length },
-    { id: 'dev', label: 'Technologies & Stacks', count: faqItems.filter(i => i.category === 'dev').length },
-    { id: 'method', label: 'Méthodologie & Délais', count: faqItems.filter(i => i.category === 'method').length },
-    { id: 'ai', label: 'IA & Automatisation', count: faqItems.filter(i => i.category === 'ai').length },
-    { id: 'sla', label: 'Garanties & SLA', count: faqItems.filter(i => i.category === 'sla').length },
-  ];
+    { id: 'web-saas', label: 'Web & SaaS', count: faqItems.filter(i => i.category === 'web-saas').length },
+    { id: 'mobile', label: 'Applications Mobiles', count: faqItems.filter(i => i.category === 'mobile').length },
+    { id: 'csharp-desktop', label: 'C# .NET & Desktop', count: faqItems.filter(i => i.category === 'csharp-desktop').length },
+    { id: 'cloud-devops', label: 'Cloud & DevOps', count: faqItems.filter(i => i.category === 'cloud-devops').length },
+    { id: 'ai-automation', label: 'IA & Automatisation', count: faqItems.filter(i => i.category === 'ai-automation').length },
+    { id: 'cybersecurity', label: 'Cybersécurité', count: faqItems.filter(i => i.category === 'cybersecurity').length },
+    { id: 'pricing-payment', label: `Tarifs & ${contextData.currencyCode}`, count: faqItems.filter(i => i.category === 'pricing-payment').length },
+    { id: 'ip-legal', label: 'Propriété & NDA', count: faqItems.filter(i => i.category === 'ip-legal').length },
+    { id: 'method-sla', label: 'Méthode & SLA', count: faqItems.filter(i => i.category === 'method-sla').length },
+    { id: 'scripts-store', label: 'Scripts & Modules', count: faqItems.filter(i => i.category === 'scripts-store').length },
+  ], [faqItems, contextData.currencyCode]);
 
+  // Real-time search and category filtering
   const filteredFaqs = useMemo(() => {
     return faqItems.filter(item => {
       const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
@@ -379,23 +541,23 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       if (!searchQuery.trim()) return true;
 
       const query = searchQuery.toLowerCase();
-      const questionText = typeof item.question === 'function' ? (item.question as any)(contextData) : item.question;
       const answerObj = item.getDynamicAnswer(contextData);
 
-      const inQuestion = questionText.toLowerCase().includes(query);
+      const inQuestion = item.question.toLowerCase().includes(query);
       const inSummary = answerObj.summary.toLowerCase().includes(query);
       const inParagraphs = answerObj.paragraphs.some(p => p.toLowerCase().includes(query));
       const inTags = answerObj.tags.some(t => t.toLowerCase().includes(query));
       const inCat = item.categoryLabel.toLowerCase().includes(query);
+      const inBadge = (item.serviceBadge || '').toLowerCase().includes(query);
 
-      return inQuestion || inSummary || inParagraphs || inTags || inCat;
+      return inQuestion || inSummary || inParagraphs || inTags || inCat || inBadge;
     });
   }, [faqItems, activeCategory, searchQuery, contextData]);
 
   return (
-    <section id="faq" className="py-24 bg-slate-950 text-slate-100 relative border-t border-slate-800/80 overflow-hidden">
+    <section id="faq" className={`py-20 bg-slate-950 text-slate-100 relative border-t border-slate-800/80 overflow-hidden ${className}`}>
       
-      {/* Dynamic Background Light Effects */}
+      {/* Decorative ambient glows */}
       <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-cyan-500/5 rounded-full blur-[140px] pointer-events-none" />
@@ -412,12 +574,15 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             <span>{t('faq.badge', 'Centre de Connaissances & Transparence')}</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-            {t('faq.title', 'Tout Ce Que Vous Devez Savoir')}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+            Questions Fréquentes sur nos <br className="hidden sm:inline" />
+            <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+              Services &amp; Architectures
+            </span>
           </h2>
 
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            {t('faq.subtitle', 'Propriété du code à 100%, modalités de paiement en devises locales, méthodologie Agile Scrum et garanties contractuelles : des réponses claires adaptées à votre contexte.')}
+            {t('faq.subtitle', 'Propriété du code à 100%, modalités de paiement en devises locales, méthodologie Agile Scrum et garanties contractuelles : des réponses directes et sans ambiguïté.')}
           </p>
 
           {/* DYNAMIC CONTEXTUAL BANNER BAR */}
@@ -454,7 +619,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
               {/* Context Tag: Legal / NDA */}
               <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-300">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="text-[11px]">NDA & Cession 100% Garantie</span>
+                <span className="text-[11px]">Cession 100% &amp; NDA Garanti</span>
               </div>
             </div>
           </div>
@@ -474,7 +639,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Rechercher une question (ex: ${contextData.currencyCode}, propriété du code, délais, Mobile Money)...`}
+                placeholder={`Rechercher une question (ex: ${contextData.currencyCode}, Flutter, C# WPF, propriété du code, délais, Mobile Money)...`}
                 className="w-full bg-slate-900/90 border border-slate-700 hover:border-slate-600 focus:border-cyan-400 rounded-2xl py-3 pl-11 pr-10 text-xs sm:text-sm text-white placeholder-slate-400 shadow-md focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-md"
               />
               {searchQuery && (
@@ -518,7 +683,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
                   className={`
-                    flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer
+                    flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer
                     ${isActive
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-1 ring-blue-400'
                       : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
@@ -586,6 +751,11 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                           <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
                             {faq.categoryLabel}
                           </span>
+                          {faq.serviceBadge && (
+                            <span className="text-[10px] font-semibold text-blue-300 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/30">
+                              {faq.serviceBadge}
+                            </span>
+                          )}
                           {faq.isContextual && (
                             <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
                               <span>{contextData.countryFlag}</span>
@@ -672,7 +842,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                           {answer.actionCta && (
                             <div className="pt-2">
                               <button
-                                onClick={() => answer.actionCta && handleCtaAction(answer.actionCta.actionType)}
+                                onClick={() => answer.actionCta && handleCtaAction(answer.actionCta)}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 hover:text-cyan-200 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
                               >
                                 {answer.actionCta.icon && <answer.actionCta.icon className="w-3.5 h-3.5" />}
@@ -781,15 +951,15 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             <div className="space-y-2.5 text-center md:text-left">
               <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-black uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Support & Architecture Live</span>
+                <span>Support &amp; Cadrage Live</span>
               </div>
 
               <h4 className="text-xl sm:text-2xl font-black text-white">
-                Une question technique non listée sur votre projet ?
+                Une question technique spécifique sur votre projet ?
               </h4>
 
               <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed">
-                Nos directeurs techniques et lead developers analysent votre cahier des charges et répondent en moins de 15 minutes sur WhatsApp ou par Live Chat.
+                Nos directeurs techniques et lead developers analysent votre cahier des charges et répondent en direct sur WhatsApp ou par Live Chat.
               </p>
             </div>
 

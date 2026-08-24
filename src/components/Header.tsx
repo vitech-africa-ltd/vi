@@ -29,6 +29,8 @@ import {
   CheckCircle2,
   Zap,
   Search,
+  HelpCircle,
+  Users,
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -41,6 +43,7 @@ import { VitechLogo } from './VitechLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { MobileMenuBurger } from './MobileMenuBurger';
+import { LiveAnnouncementBanner } from './LiveAnnouncementBanner';
 
 interface HeaderProps {
   activeView?: string;
@@ -89,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const { user, signInWithGoogle, signOut, isAuthenticated } = useAuth();
-  const { mode, toggleTheme } = useTheme();
+  const { mode, toggleTheme, setMode } = useTheme();
   const { t } = useTranslation();
   const { companyInfo } = useSiteData();
   const { currencyOption, openConverterModal } = useCurrency();
@@ -231,12 +234,6 @@ export const Header: React.FC<HeaderProps> = ({
     },
 
     {
-      id: 'team',
-      labelKey: 'nav.team',
-      defaultLabel: 'Notre Équipe',
-    },
-
-    {
       id: 'contact',
       labelKey: 'nav.contact',
       defaultLabel: 'Contact',
@@ -249,26 +246,47 @@ export const Header: React.FC<HeaderProps> = ({
       isMoreMenu: true,
       submenu: [
         {
-          label: 'Online Estimate',
-          description: 'Simulateur budgétaire & chiffrage instantané personnalisé',
+          label: 'FAQ & Help Center',
+          description: 'Questions techniques, devises, propriété intellectuelle & garanties SLA',
+          icon: HelpCircle,
+          view: 'faq',
+          badge: 'SUPPORT',
+        },
+        {
+          label: 'Notre Équipe & Direction',
+          description: 'Architectes logiciels, ingénieurs Cloud/IA et directeurs de projets',
+          icon: Users,
+          view: 'team',
+          badge: 'EXPERTS',
+        },
+        {
+          label: 'Simulateur de Devis en Ligne',
+          description: 'Chiffrage budgétaire instantané & sélection de stack personnalisée',
           icon: Calculator,
           view: 'estimator',
           badge: 'POPULAIRE',
         },
         {
-          label: 'Pan-African Hubs',
-          description: 'Centres régionaux : Rwanda (Kigali), Sénégal, Côte d’Ivoire',
+          label: 'Lab R&D & Démonstrateurs IA',
+          description: 'Matrices d’ingénierie, démonstrations vidéos & grille Banque Mondiale',
+          icon: Sparkles,
+          view: 'tech-lab',
+          badge: 'NOUVEAU',
+        },
+        {
+          label: 'Hubs Panafricains & Présence',
+          description: 'Centres régionaux : Rwanda (Kigali HQ), Sénégal, Côte d’Ivoire',
           icon: MapPin,
           view: 'tech-hubs',
         },
         {
-          label: 'Client Portal',
-          description: 'Suivi des projets, livrables chiffrés et support technique',
+          label: 'Portail Client Sécurisé',
+          description: 'Suivi des sprints, livrables chiffrés et support technique prioritaire',
           icon: Shield,
           view: 'client-portal',
         },
         {
-          label: 'Expertise & Tarifs',
+          label: 'Expertise & Grille Tarifaire',
           description: 'Normes Banque Mondiale 2026 & Stack technique d’ingénierie',
           icon: Globe2,
           view: 'profile',
@@ -442,13 +460,16 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="main-header"
-      className="fixed inset-x-0 top-0 z-50"
+      className="fixed inset-x-0 top-0 z-[140]"
     >
+      {/* Live Real-time Announcement Banner */}
+      <LiveAnnouncementBanner onNavigate={(view) => handleNavClick(view)} />
+
       {/* ========================================================
           TOP UTILITY BAR
       ======================================================== */}
 
-      <div className="hidden border-b border-slate-800/80 bg-slate-950 md:block">
+      <div className="relative z-20 hidden border-b border-slate-800/80 bg-slate-950 md:block">
         <div className="mx-auto flex h-8 max-w-[1500px] items-center justify-between px-4 xl:px-6 2xl:px-8">
           {/* LEFT */}
 
@@ -603,6 +624,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       <div
         className={`
+          relative z-10
           border-b
           transition-all duration-300
           ${
@@ -828,14 +850,19 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {openDesktopMenu === link.id && (
                       <div
-                        className="
+                        className={`
                           absolute
-                          right-0
                           top-full
-                          z-[70]
-                          w-[380px]
+                          z-[150]
+                          ${link.id === 'more' ? 'w-[400px]' : 'w-[380px]'}
+                          max-w-[calc(100vw-32px)]
                           pt-3
-                        "
+                          ${
+                            link.id === 'services' || link.id === 'portfolio'
+                              ? 'left-0'
+                              : 'right-0'
+                          }
+                        `}
                         onMouseEnter={() =>
                           setOpenDesktopMenu(link.id)
                         }
@@ -887,7 +914,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                                 <p className="mt-0.5 text-[10px] text-slate-400">
                                   {link.id === 'more'
-                                    ? 'Outils stratégiques, hubs régionaux & espaces'
+                                    ? 'FAQ & Support, Équipe d’ingénierie, Hubs & Outils'
                                     : link.id === 'services'
                                     ? 'Nos pôles d’ingénierie logicielle & cloud'
                                     : link.id === 'portfolio'
@@ -914,6 +941,87 @@ export const Header: React.FC<HeaderProps> = ({
                               </div>
                             </div>
                           </div>
+
+                          {/* THEME MODE TOGGLE (Specific to 'More' / Plus Menu) */}
+                          {link.id === 'more' && (
+                            <div className="mx-2 mt-2 mb-1 p-2.5 rounded-xl border border-slate-800 bg-slate-900/90 backdrop-blur-md shadow-xs">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div
+                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-all ${
+                                      mode === 'dark'
+                                        ? 'border-cyan-500/40 bg-cyan-500/15 text-cyan-300'
+                                        : 'border-amber-500/40 bg-amber-500/15 text-amber-400'
+                                    }`}
+                                  >
+                                    {mode === 'dark' ? (
+                                      <Moon className="h-4 w-4" />
+                                    ) : (
+                                      <Sun className="h-4 w-4" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-xs font-bold text-slate-100">
+                                        Thème Visuel
+                                      </span>
+                                      <span
+                                        className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${
+                                          mode === 'dark'
+                                            ? 'bg-slate-800 text-cyan-300 border-slate-700'
+                                            : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                                        }`}
+                                      >
+                                        {mode === 'dark' ? 'Sombre' : 'Clair'}
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 truncate">
+                                      {mode === 'dark'
+                                        ? 'Mode haute technologie actif'
+                                        : 'Mode contrasté jour actif'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Segmented Toggle Buttons */}
+                                <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setMode('dark');
+                                    }}
+                                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                      mode === 'dark'
+                                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-xs'
+                                        : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                                    }`}
+                                    title="Basculer en mode sombre"
+                                    aria-pressed={mode === 'dark'}
+                                  >
+                                    <Moon className="h-3 w-3 text-cyan-400" />
+                                    <span>Sombre</span>
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setMode('light');
+                                    }}
+                                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                                      mode === 'light'
+                                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+                                        : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                                    }`}
+                                    title="Basculer en mode clair"
+                                    aria-pressed={mode === 'light'}
+                                  >
+                                    <Sun className="h-3 w-3 text-amber-400" />
+                                    <span>Clair</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           {/* ITEMS */}
 
@@ -1122,7 +1230,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                 {mobileQuickActionsOpen && (
                   <div
-                    className="absolute right-0 top-full z-[85] mt-2 w-56 rounded-2xl border border-slate-700/90 bg-slate-950 p-2 shadow-2xl shadow-black/60 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
+                    className="absolute right-0 top-full z-[150] mt-2 w-56 max-w-[calc(100vw-24px)] rounded-2xl border border-slate-700/90 bg-slate-950 p-2 shadow-2xl shadow-black/60 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="px-2.5 py-1.5 border-b border-slate-800/80 mb-1 flex items-center justify-between">
@@ -1239,7 +1347,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                   {userDropdownOpen && (
                     <div
-                      className="absolute right-0 top-full z-[80] mt-2 w-64 rounded-2xl border border-slate-700 bg-slate-950 p-2 shadow-2xl shadow-black/40"
+                      className="absolute right-0 top-full z-[150] mt-2 w-64 max-w-[calc(100vw-24px)] rounded-2xl border border-slate-700 bg-slate-950 p-2 shadow-2xl shadow-black/40"
                       onClick={(event) => event.stopPropagation()}
                     >
                       <div className="mb-1 border-b border-slate-800 px-3 py-3">

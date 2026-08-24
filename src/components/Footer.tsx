@@ -11,7 +11,8 @@ import {
   Coins,
   Sparkles,
   Code2,
-  Users
+  Users,
+  HelpCircle
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
@@ -20,6 +21,7 @@ import { VitechLogo } from './VitechLogo';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { CurrencySwitcher } from './CurrencySwitcher';
 import { Newsletter } from './Newsletter';
+import { VisitorCounterBadge } from './VisitorCounterBadge';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -154,6 +156,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigate('tech-lab')} className="text-purple-400 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Lab R&amp;D &amp; Écosystème</span>
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigate('services')} className="hover:text-cyan-400 transition-colors cursor-pointer">
                   {t('nav.services', 'Services')}
                 </button>
@@ -184,6 +192,12 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigate('faq')} className="text-cyan-300 font-semibold hover:text-cyan-200 transition-colors cursor-pointer flex items-center gap-1">
+                  <HelpCircle className="w-3 h-3 text-cyan-400" />
+                  <span>{t('nav.faq', 'Foire Aux Questions (FAQ)')}</span>
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigate('contact')} className="hover:text-cyan-400 transition-colors cursor-pointer">
                   {t('nav.contact', 'Contact')}
                 </button>
@@ -208,6 +222,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
               </span>
               <p className="text-[11px] text-slate-400">Audit de code continu, chiffrement AES-256 et MFA WebAuthn.</p>
             </div>
+
+            {/* Live Visitor Counter Widget in Footer */}
+            <VisitorCounterBadge variant="footer" className="w-full" />
 
             {/* Social Icons */}
             <div className="flex items-center space-x-2 pt-1">
@@ -273,7 +290,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenScheduleModal 
 
       {/* Modal for Legal / RGPD */}
       {legalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold text-base text-slate-100">

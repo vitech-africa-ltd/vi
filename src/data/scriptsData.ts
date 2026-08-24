@@ -29,6 +29,7 @@ export interface ScriptAnalysis {
   securityScore: number; // e.g. 99/100
   qualityScore: number;  // e.g. 98/100
   owaspCompliance: 'Certified A+' | 'A' | 'Compliant';
+  owaspScore?: number | string;
   testedPHPVersion?: string;
   testedNodeVersion?: string;
 }
@@ -44,6 +45,7 @@ export interface ScriptProduct {
   categoryLabel: string;
   priceUSD: number;
   priceRWF: number; // Rwandan Francs for MTN / Airtel MoMo
+  version?: string;
   isFree: boolean;
   isPopular: boolean;
   isNew: boolean;

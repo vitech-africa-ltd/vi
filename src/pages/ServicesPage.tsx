@@ -10,11 +10,13 @@ import {
   CheckCircle2, 
   Calendar,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  Leaf
 } from 'lucide-react';
 import { ServicesSection } from '../components/ServicesSection';
 import { InternationalPricingSection } from '../components/InternationalPricingSection';
 import { FounderSkillsSection } from '../components/FounderSkillsSection';
+import { GreenCloudEcoEstimator } from '../components/GreenCloudEcoEstimator';
 import { FaqSection } from '../components/FaqSection';
 import { useTranslation } from '../context/LanguageContext';
 
@@ -31,8 +33,15 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const scrollToEcoEstimator = () => {
+    const el = document.getElementById('eco-estimator');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="pt-24 pb-16 bg-slate-50 animate-in fade-in duration-300">
+    <div className="pt-24 pb-16 bg-slate-50 dark:bg-slate-900/50 animate-in fade-in duration-300">
       
       {/* Dedicated Page Hero Banner */}
       <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white py-16 sm:py-20 border-b border-slate-800 relative overflow-hidden">
@@ -67,6 +76,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
               </button>
 
               <button
+                onClick={scrollToEcoEstimator}
+                className="px-6 py-3 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 text-xs font-bold border border-emerald-500/40 transition-all flex items-center gap-2 cursor-pointer shadow-md"
+              >
+                <Leaf className="w-4 h-4 text-emerald-400" />
+                <span>Estimateur d'Impact Écologique &amp; Green Cloud</span>
+              </button>
+
+              <button
                 onClick={onOpenScheduleModal}
                 className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-all flex items-center gap-2 cursor-pointer"
               >
@@ -80,6 +97,16 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({
 
       {/* Main Interactive Services Component */}
       <ServicesSection onSelectServiceForQuote={onSelectServiceForQuote} />
+
+      {/* Ecological Impact Estimator Widget for Cloud Services */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <GreenCloudEcoEstimator 
+          onNavigateToEstimator={(context) => {
+            onSelectServiceForQuote('cloud-infrastructure');
+          }}
+          onOpenScheduleModal={onOpenScheduleModal}
+        />
+      </div>
 
       {/* International 4-Tier Pricing Grid */}
       <InternationalPricingSection

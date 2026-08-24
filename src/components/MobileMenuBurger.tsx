@@ -180,7 +180,7 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
       {isOpen && (
         <div
           id="mobile-menu-drawer"
-          className="fixed inset-0 z-[100] flex flex-col bg-slate-950 text-slate-100 lg:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 z-[180] flex flex-col bg-slate-950 text-slate-100 lg:hidden animate-in fade-in duration-200"
         >
           {/* DRAWER TOP BAR (FIXED HEIGHT 56px) */}
           <div className="flex h-14 items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 sm:px-6 shrink-0 backdrop-blur-xl">
@@ -206,7 +206,7 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
           </div>
 
           {/* DRAWER SCROLLABLE BODY */}
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 space-y-4">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 space-y-4 pb-28">
             {/* SEARCH INPUT */}
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -436,6 +436,56 @@ export const MobileMenuBurger: React.FC<MobileMenuBurgerProps> = ({
                       {/* SUBMENU ITEMS */}
                       {hasSubmenu && isOpen && (
                         <div className="border-t border-slate-800 bg-slate-950/70 p-2 space-y-1 animate-in fade-in duration-150">
+                          {/* Dedicated Theme Quick Switcher in 'Plus' Submenu */}
+                          {link.id === 'more' && (
+                            <div className="mb-2 p-2.5 rounded-xl border border-slate-800 bg-slate-900/90 flex items-center justify-between gap-2 shadow-xs">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div
+                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                                    mode === 'dark'
+                                      ? 'border-cyan-500/40 bg-cyan-500/15 text-cyan-400'
+                                      : 'border-amber-500/40 bg-amber-500/15 text-amber-400'
+                                  }`}
+                                >
+                                  {mode === 'dark' ? (
+                                    <Moon className="h-4 w-4" />
+                                  ) : (
+                                    <Sun className="h-4 w-4" />
+                                  )}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-100">
+                                    Thème Visuel
+                                  </p>
+                                  <p className="text-[10px] text-slate-400">
+                                    {mode === 'dark' ? 'Mode Sombre actif' : 'Mode Clair actif'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={toggleTheme}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border cursor-pointer ${
+                                  mode === 'dark'
+                                    ? 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300'
+                                    : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                                }`}
+                              >
+                                {mode === 'dark' ? (
+                                  <>
+                                    <Sun className="h-3 w-3 text-amber-400" />
+                                    <span>Passer en Clair</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Moon className="h-3 w-3 text-cyan-400" />
+                                    <span>Passer en Sombre</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
+
                           {link.submenu?.map((item) => {
                             const Icon = item.icon;
                             const itemActive = activeView === item.view;

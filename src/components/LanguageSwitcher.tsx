@@ -43,7 +43,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in">
+          <div className="absolute bottom-full left-0 mb-2 w-56 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 z-[150] animate-in fade-in">
             <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 mb-1 flex items-center justify-between">
               <span>Langue / Language</span>
               {isAutoDetected && (
@@ -136,15 +136,15 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50 animate-in fade-in slide-in-from-top-2">
-          <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-100 mb-1 flex items-center justify-between">
-            <span className="flex items-center gap-1">
-              <Globe className="w-3 h-3 text-blue-600" />
+        <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-[150] animate-in fade-in slide-in-from-top-2 text-white">
+          <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1 text-cyan-400">
+              <Globe className="w-3 h-3 text-cyan-400" />
               <span>Traduction Automatique</span>
             </span>
             {isAutoDetected && (
-              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[9px] font-extrabold">
-                Environnement détecté
+              <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[9px] font-extrabold">
+                Auto
               </span>
             )}
           </div>
@@ -157,18 +157,18 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   onClick={() => handleSelectLanguage(lang.code)}
                   className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition-colors text-left cursor-pointer ${
                     isSelected
-                      ? 'bg-blue-50 text-blue-800 font-bold border border-blue-100'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'bg-blue-600/30 text-cyan-300 font-bold border border-blue-500/30'
+                      : 'text-slate-300 hover:bg-slate-800'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="text-lg leading-none">{lang.flag}</span>
                     <div>
                       <div className="leading-tight font-bold">{lang.name}</div>
-                      <div className="text-[10px] text-slate-500">{lang.region}</div>
+                      <div className="text-[10px] text-slate-400">{lang.region}</div>
                     </div>
                   </div>
-                  {isSelected && <Check className="w-4 h-4 text-blue-600 shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0" />}
                 </button>
               );
             })}

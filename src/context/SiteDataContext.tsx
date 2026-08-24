@@ -8,9 +8,30 @@ import {
   BLOG_POSTS_DATA as defaultBlogPosts,
   DEFAULT_AI_CONFIG,
 } from '../data/companyData';
-import { ServiceItem, CaseStudy, BlogPost, Testimonial, OfficeHub, AIAssistantConfig } from '../types';
+import { INITIAL_TEAM_MEMBERS, TeamMember } from '../data/teamData';
+import { INITIAL_SCRIPTS, ScriptProduct } from '../data/scriptsData';
+import { 
+  ServiceItem, 
+  CaseStudy, 
+  BlogPost, 
+  Testimonial, 
+  OfficeHub, 
+  AIAssistantConfig,
+  LiveAnnouncementConfig
+} from '../types';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+
+export const DEFAULT_ANNOUNCEMENT: LiveAnnouncementConfig = {
+  enabled: true,
+  badge: '🚀 VITECH 2026',
+  message: 'Nouvelle suite Vitech Scripts & Passerelles Mobile Money Rwanda (MTN & Airtel) en ligne !',
+  couponCode: 'KIGALI2026',
+  linkText: 'Découvrir la Marketplace',
+  targetView: 'scripts',
+  theme: 'emerald',
+  updatedAt: new Date().toISOString(),
+};
 
 interface SiteDataContextType {
   companyInfo: typeof defaultCompanyInfo;
@@ -20,6 +41,9 @@ interface SiteDataContextType {
   techHubs: OfficeHub[];
   testimonials: Testimonial[];
   aiConfig: AIAssistantConfig;
+  teamMembers: TeamMember[];
+  scriptProducts: ScriptProduct[];
+  liveAnnouncement: LiveAnnouncementConfig;
   isLoading: boolean;
   isSaving: boolean;
   saveStatus: string | null;
@@ -55,6 +79,19 @@ interface SiteDataContextType {
   addTestimonial: (testimonial: Testimonial) => Promise<boolean>;
   updateTestimonial: (testimonial: Testimonial) => Promise<boolean>;
   deleteTestimonial: (id: string) => Promise<boolean>;
+
+  // Team Members (Founders & Leads)
+  addTeamMember: (member: TeamMember) => Promise<boolean>;
+  updateTeamMember: (member: TeamMember) => Promise<boolean>;
+  deleteTeamMember: (id: string) => Promise<boolean>;
+
+  // Script Products (Marketplace)
+  addScriptProduct: (product: ScriptProduct) => Promise<boolean>;
+  updateScriptProduct: (product: ScriptProduct) => Promise<boolean>;
+  deleteScriptProduct: (id: string) => Promise<boolean>;
+
+  // Live Visitor Announcement Banner
+  updateLiveAnnouncement: (announcement: Partial<LiveAnnouncementConfig>) => Promise<boolean>;
 
   // Reset to default factory data
   resetAllToFactoryDefaults: () => Promise<boolean>;
@@ -100,6 +137,15 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [aiConfig, setAiConfig] = useState<AIAssistantConfig>(() => 
     getInitialCmsData('ai_config', DEFAULT_AI_CONFIG)
   );
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() =>
+    getInitialCmsData('team_members', INITIAL_TEAM_MEMBERS)
+  );
+  const [scriptProducts, setScriptProducts] = useState<ScriptProduct[]>(() =>
+    getInitialCmsData('script_products', INITIAL_SCRIPTS)
+  );
+  const [liveAnnouncement, setLiveAnnouncement] = useState<LiveAnnouncementConfig>(() =>
+    getInitialCmsData('live_announcement', DEFAULT_ANNOUNCEMENT)
+  );
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -123,6 +169,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (documentId === 'tech_hubs' && Array.isArray(data)) setTechHubs(data);
       if (documentId === 'testimonials' && Array.isArray(data)) setTestimonials(data);
       if (documentId === 'ai_config') setAiConfig((prev) => ({ ...prev, ...data }));
+      if (documentId === 'team_members' && Array.isArray(data)) setTeamMembers(data);
+      if (documentId === 'script_products' && Array.isArray(data)) setScriptProducts(data);
+      if (documentId === 'live_announcement') setLiveAnnouncement((prev) => ({ ...prev, ...data }));
     };
 
     const handleStorageEvent = (e: StorageEvent) => {
@@ -136,6 +185,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (e.key === 'vitech_cms_tech_hubs' && Array.isArray(parsed)) setTechHubs(parsed);
         if (e.key === 'vitech_cms_testimonials' && Array.isArray(parsed)) setTestimonials(parsed);
         if (e.key === 'vitech_cms_ai_config') setAiConfig((prev) => ({ ...prev, ...parsed }));
+        if (e.key === 'vitech_cms_team_members' && Array.isArray(parsed)) setTeamMembers(parsed);
+        if (e.key === 'vitech_cms_script_products' && Array.isArray(parsed)) setScriptProducts(parsed);
+        if (e.key === 'vitech_cms_live_announcement') setLiveAnnouncement((prev) => ({ ...prev, ...parsed }));
       } catch (err) {
         console.warn('Error syncing storage event:', err);
       }
@@ -241,6 +293,45 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }, (err) => console.warn('AI config listener:', err));
         unsubscribes.push(unsubAi);
+
+        // Load Team Members
+        const teamRef = doc(db, 'site_content', 'team_members');
+        const unsubTeam = onSnapshot(teamRef, (snap) => {
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setTeamMembers(data);
+            try { localStorage.setItem('vitech_cms_team_members', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(teamRef, { data: INITIAL_TEAM_MEMBERS, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+          }
+        }, (err) => console.warn('Team members listener:', err));
+        unsubscribes.push(unsubTeam);
+
+        // Load Script Products
+        const scriptsRef = doc(db, 'site_content', 'script_products');
+        const unsubScripts = onSnapshot(scriptsRef, (snap) => {
+          if (snap.exists() && Array.isArray(snap.data()?.data)) {
+            const data = snap.data()?.data;
+            setScriptProducts(data);
+            try { localStorage.setItem('vitech_cms_script_products', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(scriptsRef, { data: INITIAL_SCRIPTS, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+          }
+        }, (err) => console.warn('Script products listener:', err));
+        unsubscribes.push(unsubScripts);
+
+        // Load Live Announcement
+        const annRef = doc(db, 'site_content', 'live_announcement');
+        const unsubAnn = onSnapshot(annRef, (snap) => {
+          if (snap.exists() && snap.data()?.data) {
+            const data = snap.data()?.data;
+            setLiveAnnouncement((prev) => ({ ...prev, ...data }));
+            try { localStorage.setItem('vitech_cms_live_announcement', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(annRef, { data: DEFAULT_ANNOUNCEMENT, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+          }
+        }, (err) => console.warn('Live announcement listener:', err));
+        unsubscribes.push(unsubAnn);
 
         setIsLoading(false);
       } catch (err) {
@@ -397,6 +488,55 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return await saveToFirestore('testimonials', updated);
   };
 
+  // Team Members Actions
+  const addTeamMember = async (member: TeamMember) => {
+    const updated = [...teamMembers, member];
+    setTeamMembers(updated);
+    return await saveToFirestore('team_members', updated);
+  };
+
+  const updateTeamMember = async (member: TeamMember) => {
+    const updated = teamMembers.map((m) => (m.id === member.id ? member : m));
+    setTeamMembers(updated);
+    return await saveToFirestore('team_members', updated);
+  };
+
+  const deleteTeamMember = async (id: string) => {
+    const updated = teamMembers.filter((m) => m.id !== id);
+    setTeamMembers(updated);
+    return await saveToFirestore('team_members', updated);
+  };
+
+  // Script Products Actions
+  const addScriptProduct = async (product: ScriptProduct) => {
+    const updated = [product, ...scriptProducts];
+    setScriptProducts(updated);
+    return await saveToFirestore('script_products', updated);
+  };
+
+  const updateScriptProduct = async (product: ScriptProduct) => {
+    const updated = scriptProducts.map((p) => (p.id === product.id ? product : p));
+    setScriptProducts(updated);
+    return await saveToFirestore('script_products', updated);
+  };
+
+  const deleteScriptProduct = async (id: string) => {
+    const updated = scriptProducts.filter((p) => p.id !== id);
+    setScriptProducts(updated);
+    return await saveToFirestore('script_products', updated);
+  };
+
+  // Live Announcement Actions
+  const updateLiveAnnouncement = async (announcement: Partial<LiveAnnouncementConfig>) => {
+    const updated: LiveAnnouncementConfig = {
+      ...liveAnnouncement,
+      ...announcement,
+      updatedAt: new Date().toISOString()
+    };
+    setLiveAnnouncement(updated);
+    return await saveToFirestore('live_announcement', updated);
+  };
+
   // AI Assistant CMS Actions
   const updateAiConfig = async (data: Partial<AIAssistantConfig>) => {
     const updated = { ...aiConfig, ...data, updatedAt: new Date().toISOString() };
@@ -418,6 +558,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setTechHubs(defaultTechHubs);
     setTestimonials(defaultTestimonials);
     setAiConfig(DEFAULT_AI_CONFIG);
+    setTeamMembers(INITIAL_TEAM_MEMBERS);
+    setScriptProducts(INITIAL_SCRIPTS);
+    setLiveAnnouncement(DEFAULT_ANNOUNCEMENT);
 
     await Promise.all([
       saveToFirestore('company_info', defaultCompanyInfo),
@@ -427,6 +570,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       saveToFirestore('tech_hubs', defaultTechHubs),
       saveToFirestore('testimonials', defaultTestimonials),
       saveToFirestore('ai_config', DEFAULT_AI_CONFIG),
+      saveToFirestore('team_members', INITIAL_TEAM_MEMBERS),
+      saveToFirestore('script_products', INITIAL_SCRIPTS),
+      saveToFirestore('live_announcement', DEFAULT_ANNOUNCEMENT),
     ]);
     return true;
   };
@@ -441,6 +587,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         techHubs,
         testimonials,
         aiConfig,
+        teamMembers,
+        scriptProducts,
+        liveAnnouncement,
         isLoading,
         isSaving,
         saveStatus,
@@ -462,6 +611,13 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addTestimonial,
         updateTestimonial,
         deleteTestimonial,
+        addTeamMember,
+        updateTeamMember,
+        deleteTeamMember,
+        addScriptProduct,
+        updateScriptProduct,
+        deleteScriptProduct,
+        updateLiveAnnouncement,
         resetAllToFactoryDefaults,
       }}
     >

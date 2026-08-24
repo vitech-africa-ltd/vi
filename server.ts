@@ -273,6 +273,172 @@ ${contextText}`;
     }
   });
 
+  // ==========================================================================
+  // CLIENT PORTAL DYNAMIC TECHNICAL FAQ AI ENDPOINT (RAG-GROUNDED)
+  // ==========================================================================
+  app.post("/api/client-faq/ask", async (req, res) => {
+    try {
+      const {
+        question,
+        projectId,
+        projectCategory,
+        language = "fr",
+      } = req.body;
+
+      if (!question || typeof question !== "string" || !question.trim()) {
+        return res.status(400).json({ error: "Question requise" });
+      }
+
+      // 1. Rate Limiting Protection
+      const clientIp = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "client-portal";
+      const allowed = checkRateLimit(clientIp, 30);
+      if (!allowed) {
+        return res.status(429).json({
+          reply: "Limite de requêtes atteinte. Veuillez patienter 30 secondes avant de poser une nouvelle question.",
+          error: "Rate limit exceeded",
+        });
+      }
+
+      // 2. Sanitization
+      const check = sanitizeAndCheckInput(question);
+      if (!check.safe) {
+        return res.status(400).json({
+          reply: check.reason || "Directive non autorisée.",
+          blocked: true,
+        });
+      }
+      const sanitizedQuestion = check.sanitized;
+
+      // 3. RAG Retrieval Step
+      const retrievedItems = retrieveRelevantDocuments(sanitizedQuestion, 5);
+      const contextText = retrievedItems
+        .map(
+          (item, idx) =>
+            `--- [DOCUMENT ${idx + 1} : ${item.doc.title} (Catégorie: ${item.doc.category})] ---\n${item.doc.content}`
+        )
+        .join("\n\n");
+
+      const sourcesUsed = retrievedItems.map((item) => item.doc.title);
+      const wantsHuman = /(parler à un humain|contact humain|lead dev|directeur|téléphoner|whatsapp|numéro|ingénieur)/i.test(
+        sanitizedQuestion
+      );
+
+      const ai = getAI();
+      if (!ai) {
+        // High quality fallback based on retrieved documents
+        const fallbackSnippet = retrievedItems[0]?.snippet || "Architecture certifiée VITECH AFRICA.";
+        const fallbackReply = `Selon la documentation technique officielle de V&I TECH AFRICA LTD :\n\n${fallbackSnippet}\n\nToutes nos réalisations incluent la garantie corrective de 6 mois, la cession intégrale du code source (100% IP) et un SLA de disponibilité 99.99%. Pour une analyse spécifique liée à votre projet ${projectId || "actuel"}, contactez l'équipe d'ingénierie par WhatsApp (+250 795 507 001).`;
+
+        return res.json({
+          reply: fallbackReply,
+          keyPoints: [
+            "Cession 100% de la propriété intellectuelle et du code source.",
+            "Garantie corrective de 6 mois sans surcoût post-recette.",
+            "Disponibilité SLA 99.99% avec télémétrie continue.",
+          ],
+          sources: sourcesUsed,
+          category: "Architecture & Standards VITECH",
+          confidenceScore: 94,
+          suggestedFollowUps: [
+            "Comment fonctionne la synchronisation SQLite hors-ligne ?",
+            "Quels sont les délais d'intervention en cas d'incident P1 ?",
+            "Comment s'effectue le transfert des dépôts Git privés ?",
+          ],
+          escalatedToHuman: wantsHuman,
+          isFallback: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const systemInstruction = `Tu es l'Architecte Logiciel Senior & Moteur FAQ Technique officiel du Portail Client de "V&I TECH AFRICA LTD" (VITECH AFRICA).
+
+🎯 OBJECTIF : Répondre aux questions techniques, architecturales, contractuelles et opérationnelles posées par les clients et partenaires de VITECH AFRICA.
+
+🎯 RÈGLES STRICTES DE RÉPONSE :
+1. VÉRACITÉ ABSOLUE : Base TOUTES tes affirmations sur la "BASE DE CONNAISSANCES OFFICIELLE" ci-dessous.
+2. NE JAMAIS INVENTER : Si une spécificité technique n'est pas dans la base, dis-le clairement et oriente vers le Lead Architecte (+250 795 507 001).
+3. TON & STRUCTURE : Professionnel, rigoureux, pédagogique et structuré (utilise des paragraphes clairs, des points d'attention ou des listes à puces si pertinent).
+4. FORMAT DE SORTIE : Tu DOIS répondre en JSON STRICT avec le schéma suivant :
+{
+  "reply": "Explication technique détaillée, claire et complète (format texte avec sauts de lignes).",
+  "keyPoints": ["Point clé 1", "Point clé 2", "Point clé 3"],
+  "category": "Nom de la catégorie (ex: Architecture & Stack, Sécurité & Chiffrement, SLA & Support, Mobile Money & API, Propriété Intellectuelle & Garantie)",
+  "confidenceScore": 98,
+  "suggestedFollowUps": ["Question technique suivante 1", "Question technique suivante 2"]
+}
+
+${projectCategory ? `Contexte du projet client : Catégorie "${projectCategory}".` : ""}
+Langue souhaitée : ${language === "en" ? "Anglais" : "Français"}.
+
+📚 BASE DE CONNAISSANCES OFFICIELLE (EXTRAITS RAG) :
+${contextText}`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.7-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: `Question technique du client : "${sanitizedQuestion}"` }],
+          },
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          responseMimeType: "application/json",
+          temperature: 0.2, // Deterministic and strictly grounded
+        },
+      });
+
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(response.text || "{}");
+      } catch (parseErr) {
+        parsed = {
+          reply: response.text || "Réponse technique générée par l'Assistant IA VITECH.",
+          keyPoints: ["Conformité aux spécifications officielles VITECH AFRICA."],
+          category: "Support & Architecture",
+          confidenceScore: 90,
+          suggestedFollowUps: [
+            "Quelle est la politique de sauvegarde des bases de données ?",
+            "Comment fonctionne la garantie de 6 mois ?",
+          ],
+        };
+      }
+
+      logChatMessage({
+        userMessage: `[PORTAIL CLIENT FAQ] ${sanitizedQuestion}`,
+        botReply: parsed.reply || "",
+        sourcesUsed: sourcesUsed,
+        escalatedToHuman: wantsHuman,
+        languageDetected: language,
+        model: "gemini-3.7-flash",
+      });
+
+      return res.json({
+        reply: parsed.reply || "Réponse traitée.",
+        keyPoints: parsed.keyPoints || [],
+        category: parsed.category || "Architecture & Standards VITECH",
+        confidenceScore: parsed.confidenceScore || 96,
+        suggestedFollowUps: parsed.suggestedFollowUps || [],
+        sources: sourcesUsed,
+        escalatedToHuman: wantsHuman,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error("Client FAQ Ask API error:", err);
+      return res.json({
+        reply:
+          "Une erreur temporaire est survenue lors de l'analyse IA. Nos ingénieurs sont joignables directement au +250 795 507 001 (WhatsApp) ou par email à contact.vitechdev@gmail.com.",
+        fallback: true,
+        sources: ["V&I TECH AFRICA LTD Overview"],
+        keyPoints: ["Support d'astreinte disponible pour assistance directe."],
+        category: "Support Technique",
+        confidenceScore: 80,
+        suggestedFollowUps: [],
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
   // AI Project Architect Recommendation (Scope generator)
   app.post("/api/ai-scope", async (req, res) => {
     try {

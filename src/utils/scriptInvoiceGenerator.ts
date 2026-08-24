@@ -12,7 +12,7 @@ export interface ScriptInvoiceData {
   transactionRef: string;
   product: ScriptProduct;
   licenseKey: string;
-  licenseType: 'Commerciale Standard' | 'Multi-Domaines' | 'Entreprise Extended';
+  licenseType: string;
   amountUSD: number;
   amountRWF: number;
   amountXOF?: number;
@@ -146,7 +146,7 @@ export function generateScriptInvoicePDF(data: ScriptInvoiceData): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Version : ${data.product.version} | Stack : ${data.product.analysis.language} (${data.product.analysis.framework})`, margin + 4, currentY + 12);
+  doc.text(`Version : ${data.product.version || data.product.analysis?.version || 'v1.0.0'} | Stack : ${data.product.analysis.language} (${data.product.analysis.framework})`, margin + 4, currentY + 12);
 
   doc.setFontSize(8);
   doc.setTextColor(51, 65, 85);

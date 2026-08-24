@@ -4,16 +4,24 @@ export interface ZipScanResult {
   fileName: string;
   fileSizeBytes: number;
   formattedFileSize: string;
+  fileSize: string; // Alias
   filesCount: number;
   foldersCount: number;
   linesOfCode: number;
   
   // Detection
   detectedLanguage: string;
+  language: string; // Alias
   detectedFramework: string;
+  framework: string; // Alias
   detectedVersion: string;
+  version: string; // Alias
   architectureType: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced' | 'Enterprise';
+  suggestedTitle: string;
+  suggestedCategory: 'php-laravel' | 'node-react' | 'mobile-flutter' | 'python-django' | 'wordpress-plugins' | 'ui-templates' | 'fullstack-saas';
+  suggestedPriceUSD: number;
+  suggestedPriceRWF: number;
   
   // Dependencies & Structure
   manifestFound: string | null;
@@ -25,10 +33,12 @@ export interface ZipScanResult {
   qualityScore: number;
   securityScore: number;
   owaspGrade: 'A+' | 'A' | 'B' | 'C' | 'F';
+  owaspCompliance: 'Certified A+' | 'A' | 'Compliant';
   
   // Audit Breakdown
   securityChecks: Array<{
-    category: string;
+    category?: string;
+    rule?: string;
     label: string;
     passed: boolean;
     severity: 'low' | 'medium' | 'high' | 'critical';
@@ -351,18 +361,56 @@ export async function scanZipArchive(file: File | Blob, fileName = 'uploaded_scr
   if (dependencies.length === 0) recommendations.push('Fournir un gestionnaire de paquets explicite (composer.json, package.json ou pubspec.yaml).');
   recommendations.push('Archivage vérifié : Watermark cryptographique prêt pour l injection lors du téléchargement client.');
 
+  // Suggest metadata based on analysis
+  let suggestedTitle = 'Nouveau Script Vitech';
+  let suggestedCategory: 'php-laravel' | 'node-react' | 'mobile-flutter' | 'python-django' | 'wordpress-plugins' | 'ui-templates' | 'fullstack-saas' = 'php-laravel';
+  let suggestedPriceUSD = 49;
+  let suggestedPriceRWF = 65000;
+
+  if (detectedFramework.toLowerCase().includes('flutter')) {
+    suggestedTitle = 'AfriRide Flutter VTC & MoMo App';
+    suggestedCategory = 'mobile-flutter';
+    suggestedPriceUSD = 89;
+    suggestedPriceRWF = 118000;
+  } else if (detectedFramework.toLowerCase().includes('laravel') || primaryLang.includes('PHP')) {
+    suggestedTitle = 'VitechPay Multi-Gateway Suite';
+    suggestedCategory = 'php-laravel';
+    suggestedPriceUSD = 49;
+    suggestedPriceRWF = 65000;
+  } else if (detectedFramework.toLowerCase().includes('fastapi') || primaryLang.includes('Python')) {
+    suggestedTitle = 'FinGuard AI Anti-Fraud Microservice';
+    suggestedCategory = 'python-django';
+    suggestedPriceUSD = 129;
+    suggestedPriceRWF = 172000;
+  } else if (detectedFramework.toLowerCase().includes('react') || detectedFramework.toLowerCase().includes('next')) {
+    suggestedTitle = 'AfriCloud SaaS Dashboard & Billing';
+    suggestedCategory = 'node-react';
+    suggestedPriceUSD = 79;
+    suggestedPriceRWF = 105000;
+  }
+
+  const owaspCompliance = owaspGrade === 'A+' ? 'Certified A+' : owaspGrade === 'A' ? 'A' : 'Compliant';
+
   return {
     fileName,
     fileSizeBytes,
     formattedFileSize,
+    fileSize: formattedFileSize,
     filesCount,
     foldersCount,
     linesOfCode: totalLinesOfCode,
     detectedLanguage: primaryLang,
+    language: primaryLang,
     detectedFramework,
+    framework: detectedFramework,
     detectedVersion,
+    version: detectedVersion,
     architectureType,
     difficulty,
+    suggestedTitle,
+    suggestedCategory,
+    suggestedPriceUSD,
+    suggestedPriceRWF,
     manifestFound,
     dependencies: dependencies.slice(0, 20),
     entryFiles,
@@ -370,7 +418,11 @@ export async function scanZipArchive(file: File | Blob, fileName = 'uploaded_scr
     qualityScore,
     securityScore,
     owaspGrade,
-    securityChecks,
+    owaspCompliance,
+    securityChecks: securityChecks.map(c => ({
+      ...c,
+      rule: c.category
+    })),
     qualityMetrics: {
       modularArchitecture: foldersCount >= 3,
       hasDocumentation: readmeContent.length > 50,
@@ -389,4 +441,44 @@ function formatBytes(bytes: number, decimals = 2): string {
   const sizes = ['Octets', 'Ko', 'Mo', 'Go'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * Generates an in-memory JSZip archive for automated testing or live demonstration
+ */
+export async function generateMockZipForTesting(preset: 'laravel' | 'flutter' | 'fastapi'): Promise<Blob> {
+  const zip = new JSZip();
+
+  if (preset === 'laravel') {
+    zip.file('composer.json', JSON.stringify({
+      name: 'vitech/fintech-gateway',
+      description: 'VitechPay Multi-Gateway Suite for Rwanda & East Africa',
+      version: '3.2.0',
+      require: {
+        'php': '^8.2',
+        'laravel/framework': '^11.0',
+        'guzzlehttp/guzzle': '^7.8',
+        'stripe/stripe-php': '^13.0',
+        'firebase/php-jwt': '^6.10',
+        'mpdf/mpdf': '^8.2'
+      }
+    }, null, 2));
+
+    zip.file('.env.example', `APP_NAME="VitechPay Enterprise"\nAPP_ENV=production\nAPP_KEY=\nDB_CONNECTION=mysql\nMTN_MOMO_API_KEY=\nAIRTEL_MONEY_CLIENT_ID=\n`);
+    zip.file('README.md', `# VitechPay Fintech Gateway Suite\n\nProduction-ready gateway supporting MTN Mobile Money and Airtel Money Rwanda.`);
+    zip.file('artisan', `#!/usr/bin/env php\n<?php\ndefine('LARAVEL_START', microtime(true));\n`);
+    zip.file('app/Http/Controllers/PaymentController.php', `<?php\nnamespace App\\Http\\Controllers;\n\nclass PaymentController {\n    public function initiateMoMo() {\n        return response()->json(['status' => 'initiated']);\n    }\n}\n`);
+    zip.file('routes/api.php', `<?php\nuse Illuminate\\Support\\Facades\\Route;\nRoute::post('/momo/push', [PaymentController::class, 'initiateMoMo']);\n`);
+  } else if (preset === 'flutter') {
+    zip.file('pubspec.yaml', `name: afriride_flutter\ndescription: Pan-African Ride Hailing & Courier App\nversion: 4.0.1+1\nenvironment:\n  sdk: ">=3.0.0 <4.0.0"\ndependencies:\n  flutter:\n    sdk: flutter\n  flutter_bloc: ^8.1.3\n  google_maps_flutter: ^2.5.3\n  socket_io_client: ^2.0.3+1\n  geolocator: ^10.1.0\n  http: ^1.2.0\n`);
+    zip.file('README.md', `# AfriRide Flutter\n\nCross-platform VTC application for Android and iOS with native MTN & Airtel Rwanda SDKs.`);
+    zip.file('lib/main.dart', `import 'package:flutter/material.dart';\nvoid main() => runApp(const AfriRideApp());\nclass AfriRideApp extends StatelessWidget {\n  const AfriRideApp({super.key});\n  @override\n  Widget build(BuildContext context) => const MaterialApp(home: Scaffold(body: Center(child: Text('AfriRide 2026'))));\n}\n`);
+  } else {
+    zip.file('requirements.txt', `fastapi>=0.115.0\nuvicorn>=0.30.0\ntorch>=2.4.0\nscikit-learn>=1.5.0\nredis>=5.0.0\npydantic>=2.8.0\n`);
+    zip.file('README.md', `# FinGuard AI Anti-Fraud Microservice\n\nReal-time fraud scoring API built with PyTorch and FastAPI.`);
+    zip.file('.env.example', `ENV=production\nREDIS_HOST=localhost\nMODEL_CHECKPOINT=models/v1.pt\n`);
+    zip.file('main.py', `from fastapi import FastAPI\napp = FastAPI(title="FinGuard AI", version="1.5.0")\n@app.get("/health")\ndef health(): return {"status": "ok"}\n`);
+  }
+
+  return await zip.generateAsync({ type: 'blob' });
 }

@@ -289,7 +289,7 @@ export const ScriptProductDetailModal: React.FC<ScriptProductDetailModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
       <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative text-slate-100">
         
         {/* Top Modal Header */}
@@ -812,7 +812,7 @@ export const ScriptProductDetailModal: React.FC<ScriptProductDetailModalProps> =
 
       {/* CHECKOUT & PAYMENT MODAL (MTN MoMo, Airtel Money, Stripe) */}
       {checkoutModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
             
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">

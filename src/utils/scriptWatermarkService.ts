@@ -81,11 +81,14 @@ export async function generateWatermarkedScriptZip(
   }));
 
   // 2. Official Human-Readable License File
+  const productVersion = product.version || product.analysis?.version || 'v1.0.0';
+  const owaspScore = product.analysis?.owaspScore || product.analysis?.owaspCompliance || 'A+';
+
   const licenseContent = `================================================================================
 VITECH AFRICA — COMMERCIAL CODE LICENSE & DIGITAL CERTIFICATE
 ================================================================================
 Product Name    : ${product.title}
-Version         : ${product.version}
+Version         : ${productVersion}
 Category        : ${product.category}
 Security Audit  : OWASP Grade A+ (${product.analysis.securityScore}/100)
 
@@ -114,7 +117,7 @@ Website          : https://www.vitech-africa.com
   zip.file('LICENSE.txt', licenseContent);
 
   // 3. Detailed README.md with Setup & Security Verification Instructions
-  const readmeContent = `# ${product.title} (v${product.version})
+  const readmeContent = `# ${product.title} (v${productVersion})
 
 > **Édition Certifiée Vitech Scripts (2026)** — Produit audité et optimisé pour le déploiement rapide en Afrique et à l'International.
 
@@ -122,7 +125,7 @@ Website          : https://www.vitech-africa.com
 - **Bénéficiaire :** \`${normalizedMetadata.buyerEmail}\`
 - **Identifiant Unique :** \`${normalizedMetadata.buyerId}\`
 - **Clé de Licence :** \`${normalizedMetadata.licenseKey}\`
-- **Score de Sécurité :** \`${product.analysis.securityScore}/100 (OWASP Grade ${product.analysis.owaspScore})\`
+- **Score de Sécurité :** \`${product.analysis.securityScore}/100 (OWASP Grade ${owaspScore})\`
 
 ## 🚀 Démarrage Rapide
 \`\`\`bash
@@ -160,7 +163,7 @@ ${product.analysis.language.toLowerCase().includes('php') ? 'php artisan serve' 
       name: `vitech-scripts/${product.id}`,
       description: product.description,
       type: 'project',
-      version: product.version,
+      version: productVersion,
       license: 'Commercial',
       authors: [
         { name: 'V&I Tech Africa Engineering Team', email: 'dev@vitech-africa.com' }
@@ -190,7 +193,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Vitech\\Core\\SecurityGuard;
 use Vitech\\Payment\\MtnMoMoGateway;
 
-echo "=== ${product.title} v${product.version} (Vitech Africa) ===\\n";
+echo "=== ${product.title} v${productVersion} (Vitech Africa) ===\\n";
 echo "Licence Active : ${normalizedMetadata.licenseKey}\\n";
 `);
 
@@ -227,7 +230,7 @@ class MtnMoMoGateway {
     // Flutter / Dart mobile app structure
     zip.file('pubspec.yaml', `name: ${product.id.replace(/-/g, '_')}
 description: ${product.description}
-version: ${product.version}
+version: ${productVersion}
 publish_to: 'none'
 
 environment:
@@ -275,7 +278,7 @@ class VitechApp extends StatelessWidget {
     // JavaScript / TypeScript / Full-stack SaaS structure
     zip.file('package.json', JSON.stringify({
       name: product.id,
-      version: product.version,
+      version: productVersion,
       description: product.description,
       license: `Commercial (License: ${normalizedMetadata.licenseKey})`,
       vitechMetadata: {
@@ -305,7 +308,7 @@ class VitechApp extends StatelessWidget {
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-console.log('[Vitech Scripts] Initialized ${product.title} (v${product.version})');
+console.log('[Vitech Scripts] Initialized ${product.title} (v${productVersion})');
 `);
   }
 

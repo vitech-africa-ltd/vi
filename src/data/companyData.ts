@@ -303,9 +303,10 @@ export const CASE_STUDIES_DATA: CaseStudy[] = [
 ];
 
 export const BLOG_POSTS_DATA: BlogPost[] = [
+  // --- CLOUD CATEGORY ---
   {
     id: "fintech-security-africa-2026",
-    title: "Construire des Systèmes Fintech Résilients en Afrique : Architecture & Sécurité",
+    title: "Construire des Systèmes Fintech Résilients en Afrique : Architecture Cloud & Sécurité",
     slug: "fintech-security-africa-2026",
     excerpt: "Comment concevoir des passerelles de paiement capables d'encaisser les micro-coupures réseau et d'atteindre 99.99% de disponibilité avec Go, Kafka et PostgreSQL.",
     content: `
@@ -321,6 +322,7 @@ Lors d'un échange entre deux opérateurs Mobile Money différents (ex: Orange M
 Surveiller la latence P99 et P95 plutôt que la moyenne est crucial pour détecter les dégradations silencieuses des passerelles bancaires partenaires.
     `,
     category: "Architecture & Fintech",
+    techCategory: "Cloud",
     readTime: "6 min de lecture",
     date: "14 Août 2026",
     author: {
@@ -328,10 +330,166 @@ Surveiller la latence P99 et P95 plutôt que la moyenne est crucial pour détect
       role: "Lead Software Architect @ Vitech",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
     },
-    tags: ["Fintech", "Microservices", "Kafka", "PostgreSQL", "Sécurité"],
+    tags: ["Cloud", "Microservices", "Kafka", "PostgreSQL", "Sécurité", "DevOps"],
     image: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=800&q=80",
     likes: 142,
   },
+  {
+    id: "kubernetes-multi-region-finops",
+    title: "Déploiement Multi-Régions Kubernetes & Optimisation FinOps sur AWS / GCP",
+    slug: "kubernetes-multi-region-finops",
+    excerpt: "Retour d'expérience sur la réduction de 42% des coûts cloud d'une plateforme logistique panafricaine grâce aux Spot Instances et au dimensionnement horizontal automatique (HPA).",
+    content: `
+L'infrastructure cloud des entreprises en forte croissance en Afrique peut vite devenir un gouffre financier sans une gouvernance FinOps rigoureuse et une orchestration automatisée des conteneurs.
+
+### 1. Stratégie Multi-Cluster Kubernetes
+Nous déployons des clusters EKS / GKE avec un plan de contrôle distribué et une gestion des secrets via HashiCorp Vault. Le trafic est acheminé au plus près des utilisateurs via Cloudflare Edge et des points de présence locaux (PoP).
+
+### 2. Auto-scaling agressif et Spot Instances
+En combinant Karpenter pour le provisionnement d'instances et KEDA pour le scaling piloté par les files d'attente SQS/RabbitMQ, nous exploitons des instances de calcul temporaires (Spot) pour les batchs de traitement asynchrones, sans impact sur les SLAs utilisateurs.
+
+### 3. Infrastructure as Code (IaC) avec Terraform
+Toute la stack est versionnée sous Terraform avec pipelines CI/CD GitLab et tests de régression de sécurité conformes CIS Benchmarks.
+    `,
+    category: "Cloud & DevOps",
+    techCategory: "Cloud",
+    readTime: "8 min de lecture",
+    date: "08 Août 2026",
+    author: {
+      name: "Marcelle Ndiaye",
+      role: "Cloud DevOps & FinOps Lead @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=150&q=80",
+    },
+    tags: ["Cloud", "Kubernetes", "DevOps", "Terraform", "FinOps", "AWS", "GCP"],
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
+    likes: 119,
+  },
+
+  // --- AI CATEGORY ---
+  {
+    id: "ai-llm-enterprise-integration",
+    title: "Déployer des Agents IA et Systèmes RAG en Entreprise sans Faille de Sécurité",
+    slug: "ai-llm-enterprise-integration",
+    excerpt: "Comment connecter les modèles de fondation comme Gemini à vos bases de données internes en garantissant la confidentialité absolue des données.",
+    content: `
+L'adoption de l'IA générative dans les entreprises africaines s'accélère. Cependant, envoyer des documents confidentiels sans contrôle de gouvernance expose à des risques majeurs.
+
+### Architecture RAG Sécurisée (Retrieval-Augmented Generation) :
+- **Filtrage des données personnelles (DLP)** en amont avant toute vectorisation.
+- **Stockage vectoriel chiffré** avec cloisonnement strict par utilisateur (Row-Level Security) via pgvector et Pinecone.
+- **Audit de prompt injection & Guardrails** pour empêcher l'extraction non autorisée de données système sensibles.
+- **Modèles hybrides** : exécution de modèles open-source souverains (Llama 3 / Mistral) en local pour les données ultra-sensibles, et Gemini 1.5 Pro pour le raisonnement complexe multimodal.
+    `,
+    category: "Intelligence Artificielle",
+    techCategory: "AI",
+    readTime: "7 min de lecture",
+    date: "22 Juillet 2026",
+    author: {
+      name: "Dr. Ousmane Sow",
+      role: "Head of AI & Data Science @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    },
+    tags: ["AI", "Gemini", "RAG", "LLM", "Cybersécurité", "Python", "Pgvector"],
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+    likes: 187,
+  },
+  {
+    id: "ai-computer-vision-kyc-fraud",
+    title: "Vision par Ordinateur & OCR Intelligent pour la Vérification d'Identité KYC Bancaire",
+    slug: "ai-computer-vision-kyc-fraud",
+    excerpt: "Mise en place d'un pipeline de reconnaissance faciale anti-spoofing (liveness detection) et extraction OCR de pièces d'identité CEDEAO & EAC à 99.4% de précision.",
+    content: `
+L'onboarding à distance dans les applications bancaires nécessite une vérification biométrique infaillible capable de résister aux attaques par rejeu vidéo ou photos imprimées.
+
+### 1. Détection de vivacité (Passive & Active Liveness)
+Notre pipeline analyse les micros-mouvements, les réflexions de la lumière sur la rétine et les gradients de profondeur 3D pour s'assurer de la présence physique réelle de l'utilisateur.
+
+### 2. OCR Hybride adapté aux pièces d'identité régionales
+Les documents d'identité africains (Passeports CEDEAO, Cartes Nationales d'Identité, Permis) présentent une grande variété de typographies et d'usures physiques. Notre modèle combine YOLOv8 pour la localisation des zones MRZ et un Transformer OCR entraîné sur des corpus multilingues.
+
+### 3. Latence ultra-faible en périphérie (Edge AI)
+Le pré-traitement s'exécute directement sur l'appareil mobile (TensorFlow Lite / ONNX Runtime) avant l'envoi de signatures cryptographiques au serveur central.
+    `,
+    category: "Intelligence Artificielle",
+    techCategory: "AI",
+    readTime: "6 min de lecture",
+    date: "18 Juillet 2026",
+    author: {
+      name: "Élise Tchikaya",
+      role: "Senior AI Vision Engineer @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=150&q=80",
+    },
+    tags: ["AI", "Computer Vision", "OCR", "Deep Learning", "Biométrie", "Python", "KYC"],
+    image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=800&q=80",
+    likes: 164,
+  },
+
+  // --- WEB CATEGORY ---
+  {
+    id: "web-modern-saas-architectures",
+    title: "Architectures Web SaaS Haute Performance : SSR, Micro-Frontends & Edge Computing",
+    slug: "web-modern-saas-architectures",
+    excerpt: "Comment architecturer des applications web d'entreprise avec Next.js 15, TypeScript, Tailwind CSS et backend distribué Go pour supporter des millions de requêtes quotidiennes.",
+    content: `
+Le développement web moderne a dépassé le stade du simple SPA. Pour offrir des temps de chargement sous les 300 millisecondes et un SEO irréprochable, l'architecture doit tirer parti du rendu hybride.
+
+### 1. Server-Side Rendering (SSR) et React Server Components
+En déportant les requêtes de données lourdes directement sur le serveur proche de la base de données, la quantité de JavaScript envoyée au client est divisée par 4, garantissant une réactivité maximale même sur les ordinateurs portables modestes.
+
+### 2. Architecture Micro-Frontends par Domaines
+Pour les plateformes modulaires (ERP, CRM, Plateforme d'Enchères), nous isolons les modules en micro-applications autonomes déployées indépendamment via Module Federation.
+
+### 3. Gestion de l'état et Caching Distribué
+Utilisation de TanStack Query combiné à des couches de cache HTTP stale-while-revalidate pour des navigations instantanées sans spinner intrusif.
+    `,
+    category: "Ingénierie Web & SaaS",
+    techCategory: "Web",
+    readTime: "7 min de lecture",
+    date: "29 Juillet 2026",
+    author: {
+      name: "Ibrahima Diallo",
+      role: "Lead Software Architect @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    },
+    tags: ["Web", "Next.js", "React", "TypeScript", "Tailwind", "SaaS", "Full-Stack"],
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+    likes: 135,
+  },
+  {
+    id: "web-performance-pwa-low-bandwidth",
+    title: "Optimisation Web & PWA pour Réseaux à Faible Connectivité (3G/4G)",
+    slug: "web-performance-pwa-low-bandwidth",
+    excerpt: "Guide pratique d'ingénierie front-end : compression Brotli, lazy-loading d'assets, Service Workers avec Workbox et synchronisation d'arrière-plan.",
+    content: `
+Offrir une expérience web fluide lorsque la connexion fluctue entre 3G et 4G exige une discipline d'ingénierie stricte à chaque étape du bundle de build.
+
+### 1. Stratégie de Cache avec Service Workers
+Grâce à Workbox, nous configurons des stratégies de cache intelligentes : Cache-First pour les assets statiques et Stale-While-Revalidate pour les flux d'actualités et tableaux de bord.
+
+### 2. Budgets de Performance Stricts (Core Web Vitals)
+- LCP (Largest Contentful Paint) maintenu sous 1.8s.
+- FID (First Input Delay) < 50ms.
+- CLS (Cumulative Layout Shift) = 0.
+- Compression d'images systématique au format WebP/AVIF avec dimensionnement responsive srcset.
+
+### 3. Mode PWA Installable
+L'application peut être installée sur l'écran d'accueil comme une application native sans passer par les stores, réduisant les frictions d'acquisition utilisateur.
+    `,
+    category: "Ingénierie Web & SaaS",
+    techCategory: "Web",
+    readTime: "5 min de lecture",
+    date: "11 Juillet 2026",
+    author: {
+      name: "Sarah Kouamé",
+      role: "Senior Mobile & Web Engineer @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
+    },
+    tags: ["Web", "PWA", "Performance", "React", "Service Workers", "Frontend"],
+    image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+    likes: 104,
+  },
+
+  // --- MOBILE CATEGORY ---
   {
     id: "offline-first-mobile-apps",
     title: "L'Ingénierie Mobile Offline-First : Pourquoi et Comment la Réussir",
@@ -345,7 +503,8 @@ En Afrique, penser une application mobile 'Online-Only' est souvent la cause pre
 2. **File d'attente des mutations locales** : Toutes les actions utilisateurs sont enregistrées dans une file locale 'pending_actions'.
 3. **Moteur de résolution de conflits** : Synchronisation différentielle basée sur des vecteurs d'horloge logique ou des CRDTs pour éviter l'écrasement de données concurrentes.
     `,
-    category: "Mobile Engineering",
+    category: "Ingénierie Mobile",
+    techCategory: "Mobile",
     readTime: "5 min de lecture",
     date: "02 Août 2026",
     author: {
@@ -353,34 +512,39 @@ En Afrique, penser une application mobile 'Online-Only' est souvent la cause pre
       role: "Senior Mobile Engineer @ Vitech",
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
     },
-    tags: ["Flutter", "Offline-First", "Mobile", "SQLite"],
+    tags: ["Mobile", "Flutter", "Offline-First", "SQLite", "Dart", "iOS", "Android"],
     image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80",
     likes: 98,
   },
   {
-    id: "ai-llm-enterprise-integration",
-    title: "Déployer des Agents IA et Systèmes RAG en Entreprise sans Faille de Sécurité",
-    slug: "ai-llm-enterprise-integration",
-    excerpt: "Comment connecter les modèles de fondation comme Gemini à vos bases de données internes en garantissant la confidentialité absolue des données.",
+    id: "mobile-money-unified-sdk-architecture",
+    title: "Intégration Unifiée des SDKs Mobile Money (Orange, MTN, Wave, M-Pesa) sur iOS & Android",
+    slug: "mobile-money-unified-sdk-architecture",
+    excerpt: "Comment concevoir une couche d'abstraction logicielle unique pour gérer les paiements mobiles instantanés, les push USSD et le fallback QR Code.",
     content: `
-L'adoption de l'IA générative dans les entreprises africaines s'accélère. Cependant, envoyer des documents confidentiels sans contrôle de gouvernance expose à des risques majeurs.
+L'intégration des différents opérateurs de paiement mobile en Afrique représente un défi d'interopérabilité majeur en raison de l'hétérogénéité des protocoles API et des parcours utilisateurs.
 
-### Architecture RAG Sécurisée (Retrieval-Augmented Generation) :
-- **Filtrage des données personnelles (DLP)** en amont avant toute vectorisation.
-- **Stockage vectoriel chiffré** avec cloisonnement strict par utilisateur (Row-Level Security).
-- **Audit de prompt injection** pour empêcher l'extraction non autorisée de données système.
+### 1. Couche d'abstraction unifiée (Adapter Pattern)
+Nous créons un SDK client unifié exposant une interface commune \`executePayment(amount, recipient, provider)\`. Le SDK abstrait les spécificités des webhooks Wave, des push STK M-Pesa et des OTPs Orange Money.
+
+### 2. Gestion des échecs et Fallback USSD / QR Code
+Si la notification push de validation échoue en raison d'une baisse de signal 3G, l'application bascule automatiquement sur l'affichage d'un Deep Link ou d'un QR Code dynamique lisible par l'application bancaire de l'utilisateur.
+
+### 3. Conformité de sécurité PCI-DSS & Chiffrement Asymétrique
+Toutes les communications vers les passerelles de paiement transitent par un tunnel TLS 1.3 avec certificat pinning pour prévenir toute attaque de type Man-in-the-Middle.
     `,
-    category: "Intelligence Artificielle",
-    readTime: "7 min de lecture",
-    date: "22 Juillet 2026",
+    category: "Ingénierie Mobile",
+    techCategory: "Mobile",
+    readTime: "6 min de lecture",
+    date: "25 Juin 2026",
     author: {
-      name: "Dr. Ousmane Sow",
-      role: "Head of AI & Data @ Vitech",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      name: "Ibrahima Diallo",
+      role: "Lead Software Architect @ Vitech",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
     },
-    tags: ["AI", "Gemini", "RAG", "Cybersécurité", "Python"],
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
-    likes: 187,
+    tags: ["Mobile", "Mobile Money", "React Native", "Flutter", "Fintech", "Sécurité", "iOS", "Android"],
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80",
+    likes: 153,
   },
 ];
 

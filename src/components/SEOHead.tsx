@@ -142,6 +142,18 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedProduct })
           { name: 'Grille Tarifaire', item: `${baseUrl}/#pricing` },
         ],
       },
+      faq: {
+        title: 'Foire Aux Questions (FAQ) & Architecture des Services — V&I TECH AFRICA LTD',
+        description: 'Centre d’aide technique : tout savoir sur la cession 100% du code source, les modalités de paiement par Sprints en devises panafricaines, les garanties SLA 99.99% et notre méthodologie Agile.',
+        keywords: 'FAQ vitech, questions frequentes ingenierie logicielle, propriete code source, garantie SLA 99.99, paiement mobile money sprint afrique',
+        ogType: 'website',
+        canonicalPath: '#faq',
+        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Foire Aux Questions (FAQ)', item: `${baseUrl}/#faq` },
+        ],
+      },
       scripts: {
         title: selectedProduct 
           ? `${selectedProduct.title} — Code Source & Licence | Vitech Scripts`
@@ -206,6 +218,18 @@ export const SEOHead: React.FC<SEOHeadProps> = ({ activeView, selectedProduct })
         breadcrumbs: [
           { name: 'Accueil', item: `${baseUrl}/#home` },
           { name: 'Notre Équipe', item: `${baseUrl}/#team` },
+        ],
+      },
+      'tech-lab': {
+        title: 'Laboratoire R&D, Stack Technique & Démonstrations — V&I TECH AFRICA LTD',
+        description: 'Explorez nos démonstrations technologiques en direct, la matrice de compétences d’ingénierie, les hubs d’innovation panafricains et la grille tarifaire Banque Mondiale 2026.',
+        keywords: 'laboratoire R&D vitech, démonstrations logiciels, matrice compétences ingénierie, benchmarks tech afrique',
+        ogType: 'website',
+        canonicalPath: '#tech-lab',
+        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=630&q=80',
+        breadcrumbs: [
+          { name: 'Accueil', item: `${baseUrl}/#home` },
+          { name: 'Lab R&D & Écosystème', item: `${baseUrl}/#tech-lab` },
         ],
       },
     };

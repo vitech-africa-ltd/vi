@@ -37,6 +37,7 @@ import { ScriptProductDetailModal } from './ScriptProductDetailModal';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useTranslation } from '../../context/LanguageContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useSiteData } from '../../context/SiteDataContext';
 
 interface ScriptsMarketplaceProps {
   onNavigateMemberSpace: () => void;
@@ -54,8 +55,8 @@ export const ScriptsMarketplace: React.FC<ScriptsMarketplaceProps> = ({
   const { currency, currencyOption } = useCurrency();
   const { t } = useTranslation();
   const { wishlistIds, isInWishlist, toggleWishlist, wishlistCount } = useWishlist();
+  const { scriptProducts: products } = useSiteData();
 
-  const [products] = useState<ScriptProduct[]>(INITIAL_SCRIPTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   
@@ -1006,7 +1007,7 @@ export const ScriptsMarketplace: React.FC<ScriptsMarketplaceProps> = ({
 
       {/* ================= MOBILE FILTER DRAWER ================= */}
       {isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/80 backdrop-blur-sm lg:hidden">
+        <div className="fixed inset-0 z-[200] flex justify-end bg-slate-950/80 backdrop-blur-sm lg:hidden">
           <div className="w-full max-w-sm bg-slate-900 border-l border-slate-800 h-full overflow-y-auto p-6 space-y-6 flex flex-col justify-between">
             <div className="space-y-6">
               

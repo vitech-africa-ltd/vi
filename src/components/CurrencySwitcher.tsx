@@ -101,7 +101,7 @@ export const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-72 bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 text-white">
+          <div className="absolute right-0 mt-2 w-72 bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl p-2 z-[150] animate-in fade-in slide-in-from-top-2 text-white">
             <div className="px-3 py-2 border-b border-slate-800 mb-1.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
                 <Coins className="w-3.5 h-3.5 text-cyan-400" />
@@ -181,7 +181,7 @@ export const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
+        <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-[150] animate-in fade-in slide-in-from-top-2">
           <div className="px-3 py-2 border-b border-slate-100 mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-black text-slate-900">
               <Coins className="w-3.5 h-3.5 text-blue-600" />

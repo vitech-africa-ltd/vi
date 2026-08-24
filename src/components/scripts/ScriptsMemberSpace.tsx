@@ -24,6 +24,8 @@ import confetti from 'canvas-confetti';
 import { INITIAL_SCRIPTS, ScriptProduct } from '../../data/scriptsData';
 import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
+import { generateWatermarkedScriptZip, triggerScriptDownload } from '../../utils/scriptWatermarkService';
+import { downloadScriptInvoicePDF, ScriptInvoiceData } from '../../utils/scriptInvoiceGenerator';
 
 interface ScriptsMemberSpaceProps {
   onBackToMarketplace: () => void;
@@ -40,6 +42,7 @@ export const ScriptsMemberSpace: React.FC<ScriptsMemberSpaceProps> = ({
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [selectedDownloadItem, setSelectedDownloadItem] = useState<any | null>(null);
+  const [isGeneratingZip, setIsGeneratingZip] = useState(false);
 
   // Mock User Licenses & Purchased Items
   const [licenses, setLicenses] = useState([
@@ -74,21 +77,23 @@ export const ScriptsMemberSpace: React.FC<ScriptsMemberSpaceProps> = ({
       id: 'ORD-2026-8841',
       date: '2026-06-18',
       item: 'VitechPay - Pan-African Mobile Money Suite',
+      productId: 'vitech-pay-gateway',
       amountUSD: 49,
       amountRWF: 65000,
       paymentMethod: 'MTN Mobile Money (Rwanda)',
       status: 'Complété',
-      invoiceUrl: '#'
+      licenseKey: 'VITECH-PAY-94FA-88DC-4311-90AA'
     },
     {
       id: 'ORD-2026-8802',
       date: '2026-06-20',
       item: 'ProClean UI - Kit Admin Pro Max Bootstrap 5',
+      productId: 'proclean-admin-bootstrap-kit',
       amountUSD: 0,
       amountRWF: 0,
       paymentMethod: 'Gratuit',
       status: 'Complété',
-      invoiceUrl: '#'
+      licenseKey: 'VITECH-UI-FREE-8899-2211-0000'
     }
   ]);
 
@@ -120,52 +125,145 @@ export const ScriptsMemberSpace: React.FC<ScriptsMemberSpaceProps> = ({
     setDownloadModalOpen(true);
   };
 
-  const handleExecuteDownload = () => {
+  const handleExecuteDownload = async () => {
     if (!selectedDownloadItem) return;
 
-    // Simulate Protected Download Gateway + Automated Copyright injection
-    const archiveContent = 
-`================================================================================
-VITECH SCRIPTS PROTECTED ARCHIVE - COPYRIGHT & LICENSE WATERMARK
-================================================================================
-Product: ${selectedDownloadItem.productTitle}
-License Key: ${selectedDownloadItem.licenseKey}
-Assigned Domain: ${selectedDownloadItem.domain || 'Unrestricted'}
-Purchaser: client.member@vitechafrica.com
-Generated at: ${new Date().toISOString()}
+    setIsGeneratingZip(true);
+    try {
+      const productMatch = INITIAL_SCRIPTS.find(p => p.id === selectedDownloadItem.productId) || {
+        id: selectedDownloadItem.productId,
+        slug: selectedDownloadItem.productId,
+        title: selectedDownloadItem.productTitle,
+        category: 'php-laravel' as const,
+        categoryLabel: 'Script Vitech',
+        priceUSD: 49,
+        priceRWF: 65000,
+        isFree: false,
+        isPopular: true,
+        isNew: false,
+        isPremium: true,
+        previewImage: '',
+        screenshots: [],
+        analysis: {
+          language: 'PHP & TypeScript',
+          framework: 'Laravel / Node.js',
+          version: selectedDownloadItem.version,
+          fileSize: '18.4 MB',
+          filesCount: 160,
+          linesOfCode: 24000,
+          dependenciesCount: 8,
+          dependenciesList: ['guzzlehttp', 'stripe', 'momo-sdk'],
+          difficulty: 'Enterprise' as const,
+          securityScore: 98,
+          qualityScore: 97,
+          owaspCompliance: 'Certified A+' as const
+        },
+        tags: ['Vitech', 'Production'],
+        compatibility: ['Linux', 'Docker'],
+        changelog: [],
+        documentation: { quickStart: '', requirements: [], installationSteps: [], envVariables: [] },
+        rating: 5,
+        reviewsCount: 1,
+        reviews: [],
+        likes: 1,
+        dislikes: 0,
+        views: 10,
+        downloadsCount: 10,
+        author: { name: 'Vitech Team', badge: 'Verified', avatar: '', verified: true }
+      };
 
---- AUTOMATED COPYRIGHT INJECTION APPLIED TO ALL HTML/PHP/CSS FILES ---
-<footer style="text-align:center; padding:20px; font-family:sans-serif;">
-  Copyright © Vab & Idriss (Vitech Africa)
-</footer>
-================================================================================
+      const zipBlob = await generateWatermarkedScriptZip(productMatch as any, {
+        buyerId: user?.uid || 'usr_rw_member_982',
+        buyerEmail: user?.email || 'contact.vitechdev@gmail.com',
+        buyerName: user?.displayName || 'Alexandre Mugisha',
+        licenseKey: selectedDownloadItem.licenseKey,
+        orderId: `ORD-${Date.now().toString(36).toUpperCase()}`,
+        domain: selectedDownloadItem.domain || '*'
+      });
 
-[Source Code Files Extracted Cleanly]
-- /src/Controllers/
-- /src/Models/
-- /public/index.php
-- /config/database.php
-- /sql/schema.sql
-`;
+      triggerScriptDownload(
+        zipBlob, 
+        `${selectedDownloadItem.productId}_${selectedDownloadItem.version}_licensed.zip`
+      );
 
-    const blob = new Blob([archiveContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `vitech_${selectedDownloadItem.productId}_${selectedDownloadItem.version}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      // Update download count
+      setLicenses(prev => prev.map(l => l.id === selectedDownloadItem.id ? { ...l, downloadsUsed: l.downloadsUsed + 1 } : l));
+      setDownloadModalOpen(false);
 
-    // Update download count
-    setLicenses(prev => prev.map(l => l.id === selectedDownloadItem.id ? { ...l, downloadsUsed: l.downloadsUsed + 1 } : l));
-    setDownloadModalOpen(false);
+      confetti({
+        particleCount: 60,
+        spread: 65,
+        origin: { y: 0.7 }
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingZip(false);
+    }
+  };
 
-    confetti({
-      particleCount: 50,
-      spread: 60,
-      origin: { y: 0.7 }
-    });
+  const handleDownloadInvoice = (order: typeof orders[0]) => {
+    const productMatch = INITIAL_SCRIPTS.find(p => p.id === order.productId) || {
+      id: order.productId,
+      slug: order.productId,
+      title: order.item,
+      category: 'php-laravel' as const,
+      categoryLabel: 'Script',
+      priceUSD: order.amountUSD,
+      priceRWF: order.amountRWF,
+      isFree: order.amountUSD === 0,
+      isPopular: false,
+      isNew: false,
+      isPremium: true,
+      previewImage: '',
+      screenshots: [],
+      analysis: {
+        language: 'PHP',
+        framework: 'Laravel',
+        version: 'v3.2.0',
+        fileSize: '15MB',
+        filesCount: 120,
+        linesOfCode: 15000,
+        dependenciesCount: 5,
+        dependenciesList: [],
+        difficulty: 'Enterprise' as const,
+        securityScore: 98,
+        qualityScore: 98,
+        owaspCompliance: 'Certified A+' as const
+      },
+      tags: [],
+      compatibility: [],
+      changelog: [],
+      documentation: { quickStart: '', requirements: [], installationSteps: [], envVariables: [] },
+      rating: 5,
+      reviewsCount: 1,
+      reviews: [],
+      likes: 1,
+      dislikes: 0,
+      views: 1,
+      downloadsCount: 1,
+      author: { name: 'Vitech Team', badge: 'Verified', avatar: '', verified: true }
+    };
+
+    const invoiceData: ScriptInvoiceData = {
+      invoiceNumber: `INV-2026-${order.id.replace(/[^0-9]/g, '') || '99214'}`,
+      orderReference: order.id,
+      issueDate: order.date,
+      clientName: user?.displayName || 'Alexandre Mugisha',
+      clientEmail: user?.email || 'contact.vitechdev@gmail.com',
+      clientPhone: '+250 788 123 456',
+      paymentMethod: order.paymentMethod,
+      transactionRef: `TXN-RW-${order.id.slice(-4)}-MOMO`,
+      product: productMatch as any,
+      licenseKey: order.licenseKey,
+      licenseType: order.amountUSD === 0 ? 'Licence Gratuite Communautaire' : 'Commerciale Standard (1 Domaine)',
+      amountUSD: order.amountUSD,
+      amountRWF: order.amountRWF,
+      selectedCurrency: order.amountRWF > 0 ? 'RWF' : 'USD',
+      taxRatePercent: 0
+    };
+
+    downloadScriptInvoicePDF(invoiceData);
   };
 
   return (
@@ -486,25 +584,9 @@ Generated at: ${new Date().toISOString()}
                       </td>
                       <td className="p-4 text-right">
                         <button
-                          onClick={() => {
-                            const pdfBlob = new Blob([
-                              `=== FACTURE OFFICIELLE VITECH AFRICA LTD ===\n` +
-                              `Facture #: ${o.id}\n` +
-                              `Date: ${o.date}\n` +
-                              `Client: Alexandre Mugisha\n` +
-                              `Article: ${o.item}\n` +
-                              `Montant: $${o.amountUSD} USD / ${o.amountRWF} RWF\n` +
-                              `TVA (18%): Incluse\n` +
-                              `Statut: PAYÉ INTÉGRALEMENT\n` +
-                              `TIN Rwanda: 108934821\n` +
-                              `============================================`
-                            ], { type: 'text/plain' });
-                            const link = document.createElement('a');
-                            link.href = URL.createObjectURL(pdfBlob);
-                            link.download = `Facture_${o.id}.pdf`;
-                            link.click();
-                          }}
-                          className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold text-xs inline-flex items-center gap-1 cursor-pointer"
+                          onClick={() => handleDownloadInvoice(o)}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer border border-emerald-500/20 transition-colors shadow-sm"
+                          title="Télécharger la Facture Officielle PDF certifiée"
                         >
                           <FileText className="w-3.5 h-3.5" />
                           <span>PDF</span>
@@ -540,7 +622,7 @@ Generated at: ${new Date().toISOString()}
 
       {/* DOWNLOAD CONFIRMATION MODAL */}
       {downloadModalOpen && selectedDownloadItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold text-base text-white flex items-center gap-2">
@@ -573,10 +655,20 @@ Generated at: ${new Date().toISOString()}
               </button>
               <button
                 onClick={handleExecuteDownload}
-                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow"
+                disabled={isGeneratingZip}
+                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow disabled:opacity-50"
               >
-                <Download className="w-4 h-4" />
-                <span>Confirmer &amp; Télécharger</span>
+                {isGeneratingZip ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                    <span>Génération ZIP Sécurisé...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>Confirmer &amp; Télécharger</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
