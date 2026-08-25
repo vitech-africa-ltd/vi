@@ -55,39 +55,39 @@ export const ClientTestimonials: React.FC = () => {
 
   // Filtered testimonials
   const filteredList = useMemo(() => {
-    if (!testimonials || testimonials.length === 0) return [];
-    let list = [...testimonials];
+    if (!testimonials || !Array.isArray(testimonials) || testimonials.length === 0) return [];
+    let list = testimonials.filter(Boolean);
 
     // Country filter
     if (selectedCountry !== 'all') {
       list = list.filter(t => 
-        (t.countryCode && t.countryCode.toUpperCase() === selectedCountry) ||
-        (t.country && t.country.toLowerCase().includes(selectedCountry.toLowerCase()))
+        (t && t.countryCode && t.countryCode.toUpperCase() === selectedCountry) ||
+        (t && t.country && t.country.toLowerCase().includes(selectedCountry.toLowerCase()))
       );
     }
 
     // Category filter
     if (selectedCategory === 'fintech') {
       list = list.filter(t => 
-        t.projectDelivered?.toLowerCase().includes('banking') || 
-        t.projectDelivered?.toLowerCase().includes('momo') ||
-        t.projectDelivered?.toLowerCase().includes('paiement') ||
-        t.projectDelivered?.toLowerCase().includes('fintech')
+        t?.projectDelivered?.toLowerCase().includes('banking') || 
+        t?.projectDelivered?.toLowerCase().includes('momo') ||
+        t?.projectDelivered?.toLowerCase().includes('paiement') ||
+        t?.projectDelivered?.toLowerCase().includes('fintech')
       );
     } else if (selectedCategory === 'desktop') {
       list = list.filter(t => 
-        t.projectDelivered?.toLowerCase().includes('c#') || 
-        t.projectDelivered?.toLowerCase().includes('wpf') || 
-        t.projectDelivered?.toLowerCase().includes('desktop') ||
-        t.projectDelivered?.toLowerCase().includes('gestion')
+        t?.projectDelivered?.toLowerCase().includes('c#') || 
+        t?.projectDelivered?.toLowerCase().includes('wpf') || 
+        t?.projectDelivered?.toLowerCase().includes('desktop') ||
+        t?.projectDelivered?.toLowerCase().includes('gestion')
       );
     } else if (selectedCategory === 'mobile-cloud') {
       list = list.filter(t => 
-        t.projectDelivered?.toLowerCase().includes('mobile') || 
-        t.projectDelivered?.toLowerCase().includes('flutter') || 
-        t.projectDelivered?.toLowerCase().includes('kubernetes') || 
-        t.projectDelivered?.toLowerCase().includes('devops') || 
-        t.projectDelivered?.toLowerCase().includes('saas')
+        t?.projectDelivered?.toLowerCase().includes('mobile') || 
+        t?.projectDelivered?.toLowerCase().includes('flutter') || 
+        t?.projectDelivered?.toLowerCase().includes('kubernetes') || 
+        t?.projectDelivered?.toLowerCase().includes('devops') || 
+        t?.projectDelivered?.toLowerCase().includes('saas')
       );
     }
     return list;

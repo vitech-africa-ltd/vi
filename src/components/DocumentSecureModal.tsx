@@ -57,8 +57,9 @@ export const DocumentSecureModal: React.FC<DocumentSecureModalProps> = ({
     const unsub = subscribeToAuditLogs(
       initialDocument.projectId || 'proj-afripay-001',
       (allLogs) => {
-        const filtered = allLogs.filter(
-          l => l.documentId === initialDocument.id || l.docRef === initialDocument.docRef
+        const safeLogs = Array.isArray(allLogs) ? allLogs : [];
+        const filtered = safeLogs.filter(
+          l => l && (l.documentId === initialDocument.id || l.docRef === initialDocument.docRef)
         );
         setDocAuditLogs(filtered);
       }

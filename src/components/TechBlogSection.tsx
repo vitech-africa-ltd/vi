@@ -214,16 +214,19 @@ export const TechBlogSection: React.FC = () => {
 
   // Dynamic tags list filtered by selected technology
   const availableTags = useMemo(() => {
+    const safePosts = Array.isArray(blogPosts) ? blogPosts : [];
     const relevantPosts = selectedTech === 'all' 
-      ? blogPosts 
-      : blogPosts.filter(p => resolveTechCategory(p) === selectedTech);
+      ? safePosts 
+      : safePosts.filter(p => p && resolveTechCategory(p) === selectedTech);
 
     const tagSet = new Set<string>();
     relevantPosts.forEach(p => {
-      (p.tags || []).forEach(t => {
-        const trimmed = t.trim();
-        if (trimmed.length > 0) tagSet.add(trimmed);
-      });
+      if (p) {
+        (p.tags || []).forEach(t => {
+          const trimmed = (t || '').trim();
+          if (trimmed.length > 0) tagSet.add(trimmed);
+        });
+      }
     });
 
     return ['all', ...Array.from(tagSet)];
@@ -231,20 +234,22 @@ export const TechBlogSection: React.FC = () => {
 
   // Main filtered posts collection
   const filteredPosts = useMemo(() => {
+    const safePosts = Array.isArray(blogPosts) ? blogPosts : [];
     const q = searchQuery.toLowerCase().trim();
 
-    return blogPosts.filter((post) => {
+    return safePosts.filter((post) => {
+      if (!post) return false;
       const postTech = resolveTechCategory(post);
       const matchesTech = selectedTech === 'all' || postTech === selectedTech;
 
-      const matchesTag = selectedTag === 'all' || (post.tags && post.tags.some(t => t.toLowerCase() === selectedTag.toLowerCase()));
+      const matchesTag = selectedTag === 'all' || (post.tags && post.tags.some(t => (t || '').toLowerCase() === selectedTag.toLowerCase()));
 
       const matchesSearch = !q || 
-        post.title.toLowerCase().includes(q) ||
-        post.excerpt.toLowerCase().includes(q) ||
+        (post.title || '').toLowerCase().includes(q) ||
+        (post.excerpt || '').toLowerCase().includes(q) ||
         (post.category && post.category.toLowerCase().includes(q)) ||
         (post.author && typeof post.author === 'object' && post.author.name && post.author.name.toLowerCase().includes(q)) ||
-        (post.tags && post.tags.some(t => t.toLowerCase().includes(q)));
+        (post.tags && post.tags.some(t => (t || '').toLowerCase().includes(q)));
 
       return matchesTech && matchesTag && matchesSearch;
     });

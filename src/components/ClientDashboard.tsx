@@ -115,10 +115,13 @@ export const ClientDashboard: React.FC = () => {
     { week: 'Sem 6 (En cours)', commits: 124, apiCalls: 180000, testsPassed: 512 },
   ];
 
+  const safeSupportTickets = Array.isArray(supportTickets) ? supportTickets : [];
+  const safeDocuments = Array.isArray(documents) ? documents : [];
+
   const ticketStatusData = [
-    { name: 'Résolus', count: supportTickets.filter(t => t.status === 'resolved').length, fill: '#10b981' },
-    { name: 'En cours', count: supportTickets.filter(t => t.status === 'in_progress').length, fill: '#06b6d4' },
-    { name: 'Ouverts', count: supportTickets.filter(t => t.status === 'open').length, fill: '#f59e0b' },
+    { name: 'Résolus', count: safeSupportTickets.filter(t => t && t.status === 'resolved').length, fill: '#10b981' },
+    { name: 'En cours', count: safeSupportTickets.filter(t => t && t.status === 'in_progress').length, fill: '#06b6d4' },
+    { name: 'Ouverts', count: safeSupportTickets.filter(t => t && t.status === 'open').length, fill: '#f59e0b' },
   ];
 
   const milestonesVelocityData = [
@@ -373,7 +376,8 @@ export const ClientDashboard: React.FC = () => {
   };
 
   // Filter vault files & documents
-  const filteredDocuments = documents.filter((docItem) => {
+  const filteredDocuments = safeDocuments.filter((docItem) => {
+    if (!docItem) return false;
     const matchesCat = fileFilter === 'all' || 
       (fileFilter === 'contracts' && docItem.documentType === 'contract') ||
       (fileFilter === 'specs' && docItem.documentType === 'spec') ||
@@ -381,14 +385,16 @@ export const ClientDashboard: React.FC = () => {
       (fileFilter === 'security' && docItem.documentType === 'audit') ||
       (fileFilter === 'invoices' && docItem.documentType === 'invoice');
     
-    const matchesSearch = docItem.title.toLowerCase().includes(searchVault.toLowerCase()) ||
-                          docItem.fileName.toLowerCase().includes(searchVault.toLowerCase()) ||
+    const matchesSearch = (docItem.title || '').toLowerCase().includes(searchVault.toLowerCase()) ||
+                          (docItem.fileName || '').toLowerCase().includes(searchVault.toLowerCase()) ||
                           (docItem.docRef && docItem.docRef.toLowerCase().includes(searchVault.toLowerCase()));
     return matchesCat && matchesSearch;
   });
 
   // Filter milestones
-  const filteredMilestones = projectData.milestones.filter(m => {
+  const safeMilestones = Array.isArray(projectData?.milestones) ? projectData.milestones : [];
+  const filteredMilestones = safeMilestones.filter(m => {
+    if (!m) return false;
     if (milestoneFilter === 'completed') return m.status === 'completed';
     if (milestoneFilter === 'in_progress') return m.status === 'in_progress';
     if (milestoneFilter === 'upcoming') return m.status === 'upcoming';
@@ -701,7 +707,7 @@ export const ClientDashboard: React.FC = () => {
               <div className="space-y-3 sm:space-y-4">
                 {filteredMilestones.map((milestone, idx) => {
                   // Find documents attached to this milestone
-                  const attachedDocs = documents.filter(d => d.milestoneId === milestone.id);
+                  const attachedDocs = safeDocuments.filter(d => d && d.milestoneId === milestone.id);
 
                   return (
                     <div

@@ -33,7 +33,9 @@ import {
   Check,
   RefreshCw,
   Award,
-  Save
+  Save,
+  Receipt,
+  Bot
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { ScriptProduct } from '../../data/scriptsData';
@@ -43,6 +45,10 @@ import { LiveVisitorCounterPro } from './admin/LiveVisitorCounterPro';
 import { DailyDownloadTrendsChart } from './admin/DailyDownloadTrendsChart';
 import { CategoryPerformanceChart } from './admin/CategoryPerformanceChart';
 import { SecurityScanPassRateChart } from './admin/SecurityScanPassRateChart';
+import { MonthlyInvoicingRevenueChart } from './admin/MonthlyInvoicingRevenueChart';
+import { AiChatbotUsageStatsWidget } from './admin/AiChatbotUsageStatsWidget';
+import { AdminCurrencyBar } from './admin/AdminCurrencyBar';
+import { AdminInvoicingTab } from '../admin/AdminInvoicingTab';
 import { useSiteData } from '../../context/SiteDataContext';
 
 interface ScriptsAdminDashboardProps {
@@ -67,7 +73,7 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
     saveStatus
   } = useSiteData();
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'analyzer' | 'announcement' | 'momo' | 'newsletter' | 'team' | 'security'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'ai_stats' | 'products' | 'analyzer' | 'invoicing' | 'announcement' | 'momo' | 'newsletter' | 'team' | 'security'>('analytics');
 
   // Automated Script Analyzer State
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -486,8 +492,10 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Global Save Indicator */}
-        <div className="flex items-center gap-3">
+        {/* Currency Switcher & Global Save Indicator */}
+        <div className="flex flex-wrap items-center gap-3">
+          <AdminCurrencyBar variant="header" />
+          
           {saveStatus && (
             <span className="text-xs font-mono px-3 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 animate-pulse">
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -496,7 +504,7 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
           )}
           <button
             onClick={handleOpenNewProductModal}
-            className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>Nouveau Script</span>
@@ -517,6 +525,21 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
           >
             <BarChart3 className="w-4 h-4" />
             <span>Statistiques &amp; Visiteurs Live</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('ai_stats')}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
+              activeTab === 'ai_stats'
+                ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-slate-950 font-bold shadow-lg'
+                : 'bg-slate-900 text-cyan-400 hover:text-white hover:bg-slate-800 border border-cyan-500/20'
+            }`}
+          >
+            <Bot className="w-4 h-4 text-cyan-300" />
+            <span>Stats IA &amp; Économies Temps</span>
+            <span className="px-1.5 py-0.2 rounded text-[10px] bg-cyan-950 text-cyan-300 font-mono">
+              Live
+            </span>
           </button>
 
           <button
@@ -580,6 +603,18 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('invoicing')}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
+              activeTab === 'invoicing'
+                ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Receipt className="w-4 h-4" />
+            <span>Facturation &amp; Devis Clients</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('newsletter')}
             className={`px-4 py-2 rounded-xl transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
               activeTab === 'newsletter'
@@ -612,12 +647,22 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
         {activeTab === 'analytics' && (
           <div className="space-y-6">
             <LiveVisitorCounterPro />
+            <AiChatbotUsageStatsWidget />
+            <AdminCurrencyBar variant="full" />
+            <MonthlyInvoicingRevenueChart />
             <DailyDownloadTrendsChart />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CategoryPerformanceChart />
               <SecurityScanPassRateChart />
             </div>
+          </div>
+        )}
+
+        {/* TAB 1.5: AI STATS & SUPPORT SAVINGS (Dedicated View) */}
+        {activeTab === 'ai_stats' && (
+          <div className="space-y-6">
+            <AiChatbotUsageStatsWidget />
           </div>
         )}
 
@@ -1256,7 +1301,14 @@ export const ScriptsAdminDashboard: React.FC<ScriptsAdminDashboardProps> = ({
           </div>
         )}
 
-        {/* TAB 8: SECURITY */}
+        {/* TAB 8: INVOICING */}
+        {activeTab === 'invoicing' && (
+          <div className="space-y-6">
+            <AdminInvoicingTab />
+          </div>
+        )}
+
+        {/* TAB 9: SECURITY */}
         {activeTab === 'security' && (
           <div className="space-y-6">
             <SecurityScanPassRateChart />

@@ -103,10 +103,12 @@ const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined
 const getInitialCmsData = <T,>(key: string, fallback: T): T => {
   try {
     const saved = localStorage.getItem(`vitech_cms_${key}`);
-    if (saved) {
+    if (saved && saved !== 'undefined' && saved !== 'null') {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(fallback) ? Array.isArray(parsed) : typeof parsed === 'object') {
-        return parsed;
+      if (Array.isArray(fallback)) {
+        if (Array.isArray(parsed)) return parsed as unknown as T;
+      } else if (parsed && typeof parsed === 'object') {
+        return { ...fallback, ...parsed } as T;
       }
     }
   } catch (e) {
@@ -580,16 +582,16 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <SiteDataContext.Provider
       value={{
-        companyInfo,
-        services,
-        caseStudies,
-        blogPosts,
-        techHubs,
-        testimonials,
-        aiConfig,
-        teamMembers,
-        scriptProducts,
-        liveAnnouncement,
+        companyInfo: companyInfo || defaultCompanyInfo,
+        services: Array.isArray(services) && services.length > 0 ? services : defaultServices,
+        caseStudies: Array.isArray(caseStudies) && caseStudies.length > 0 ? caseStudies : defaultCaseStudies,
+        blogPosts: Array.isArray(blogPosts) && blogPosts.length > 0 ? blogPosts : defaultBlogPosts,
+        techHubs: Array.isArray(techHubs) && techHubs.length > 0 ? techHubs : defaultTechHubs,
+        testimonials: Array.isArray(testimonials) && testimonials.length > 0 ? testimonials : defaultTestimonials,
+        aiConfig: aiConfig || DEFAULT_AI_CONFIG,
+        teamMembers: Array.isArray(teamMembers) && teamMembers.length > 0 ? teamMembers : INITIAL_TEAM_MEMBERS,
+        scriptProducts: Array.isArray(scriptProducts) && scriptProducts.length > 0 ? scriptProducts : INITIAL_SCRIPTS,
+        liveAnnouncement: liveAnnouncement || DEFAULT_ANNOUNCEMENT,
         isLoading,
         isSaving,
         saveStatus,

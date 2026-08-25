@@ -225,3 +225,193 @@ export const LIVE_VISITOR_ACTIVITY_FEED = [
   { id: 'act-5', text: 'Nouvelle souscription Newsletter développeur', time: 'Il y a 1m', type: 'sub', flag: '🇨🇩' },
   { id: 'act-6', text: 'Paiement Airtel Money Rwanda confirmé (118,000 RWF)', time: 'Il y a 2m', type: 'purchase', flag: '🇷🇼' },
 ];
+
+export interface MonthlyInvoicingAnalyticsPoint {
+  monthKey: string; // e.g. "2025-03"
+  monthLabel: string; // e.g. "Mars 25"
+  fullMonthLabel: string; // e.g. "Mars 2025"
+  invoicedRevenueEUR: number; // Montant total facturé
+  collectedRevenueEUR: number; // Montant effectivement payé / encaissé
+  pendingRevenueEUR: number; // Montant en cours
+  invoicesCount: number; // Nombre total de factures émises
+  paidInvoicesCount: number;
+  pendingInvoicesCount: number;
+  overdueInvoicesCount: number;
+  averageInvoiceValueEUR: number;
+  collectionRate: number; // Pourcentage de recouvrement e.g. 94.5%
+}
+
+// 12 Months of Invoicing Turnover & Volume History (March 2025 - February 2026)
+export const GENERATE_12_MONTHS_INVOICING_DATA = (): MonthlyInvoicingAnalyticsPoint[] => {
+  return [
+    {
+      monthKey: '2025-03',
+      monthLabel: 'Mar 25',
+      fullMonthLabel: 'Mars 2025',
+      invoicedRevenueEUR: 28500,
+      collectedRevenueEUR: 28500,
+      pendingRevenueEUR: 0,
+      invoicesCount: 4,
+      paidInvoicesCount: 4,
+      pendingInvoicesCount: 0,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 7125,
+      collectionRate: 100.0
+    },
+    {
+      monthKey: '2025-04',
+      monthLabel: 'Avr 25',
+      fullMonthLabel: 'Avril 2025',
+      invoicedRevenueEUR: 34200,
+      collectedRevenueEUR: 34200,
+      pendingRevenueEUR: 0,
+      invoicesCount: 5,
+      paidInvoicesCount: 5,
+      pendingInvoicesCount: 0,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6840,
+      collectionRate: 100.0
+    },
+    {
+      monthKey: '2025-05',
+      monthLabel: 'Mai 25',
+      fullMonthLabel: 'Mai 2025',
+      invoicedRevenueEUR: 39800,
+      collectedRevenueEUR: 38200,
+      pendingRevenueEUR: 1600,
+      invoicesCount: 6,
+      paidInvoicesCount: 5,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6633,
+      collectionRate: 96.0
+    },
+    {
+      monthKey: '2025-06',
+      monthLabel: 'Juin 25',
+      fullMonthLabel: 'Juin 2025',
+      invoicedRevenueEUR: 45000,
+      collectedRevenueEUR: 45000,
+      pendingRevenueEUR: 0,
+      invoicesCount: 7,
+      paidInvoicesCount: 7,
+      pendingInvoicesCount: 0,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6428,
+      collectionRate: 100.0
+    },
+    {
+      monthKey: '2025-07',
+      monthLabel: 'Juil 25',
+      fullMonthLabel: 'Juillet 2025',
+      invoicedRevenueEUR: 41200,
+      collectedRevenueEUR: 39500,
+      pendingRevenueEUR: 1700,
+      invoicesCount: 6,
+      paidInvoicesCount: 5,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6866,
+      collectionRate: 95.8
+    },
+    {
+      monthKey: '2025-08',
+      monthLabel: 'Août 25',
+      fullMonthLabel: 'Août 2025',
+      invoicedRevenueEUR: 48600,
+      collectedRevenueEUR: 48600,
+      pendingRevenueEUR: 0,
+      invoicesCount: 8,
+      paidInvoicesCount: 8,
+      pendingInvoicesCount: 0,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6075,
+      collectionRate: 100.0
+    },
+    {
+      monthKey: '2025-09',
+      monthLabel: 'Sept 25',
+      fullMonthLabel: 'Septembre 2025',
+      invoicedRevenueEUR: 52400,
+      collectedRevenueEUR: 50800,
+      pendingRevenueEUR: 1600,
+      invoicesCount: 8,
+      paidInvoicesCount: 7,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6550,
+      collectionRate: 96.9
+    },
+    {
+      monthKey: '2025-10',
+      monthLabel: 'Oct 25',
+      fullMonthLabel: 'Octobre 2025',
+      invoicedRevenueEUR: 59800,
+      collectedRevenueEUR: 59800,
+      pendingRevenueEUR: 0,
+      invoicesCount: 9,
+      paidInvoicesCount: 9,
+      pendingInvoicesCount: 0,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6644,
+      collectionRate: 100.0
+    },
+    {
+      monthKey: '2025-11',
+      monthLabel: 'Nov 25',
+      fullMonthLabel: 'Novembre 2025',
+      invoicedRevenueEUR: 64200,
+      collectedRevenueEUR: 61500,
+      pendingRevenueEUR: 2700,
+      invoicesCount: 10,
+      paidInvoicesCount: 9,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6420,
+      collectionRate: 95.8
+    },
+    {
+      monthKey: '2025-12',
+      monthLabel: 'Déc 25',
+      fullMonthLabel: 'Décembre 2025',
+      invoicedRevenueEUR: 71500,
+      collectedRevenueEUR: 68900,
+      pendingRevenueEUR: 2600,
+      invoicesCount: 11,
+      paidInvoicesCount: 10,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6500,
+      collectionRate: 96.4
+    },
+    {
+      monthKey: '2026-01',
+      monthLabel: 'Jan 26',
+      fullMonthLabel: 'Janvier 2026',
+      invoicedRevenueEUR: 68400,
+      collectedRevenueEUR: 52000,
+      pendingRevenueEUR: 16400,
+      invoicesCount: 10,
+      paidInvoicesCount: 8,
+      pendingInvoicesCount: 1,
+      overdueInvoicesCount: 1,
+      averageInvoiceValueEUR: 6840,
+      collectionRate: 76.0
+    },
+    {
+      monthKey: '2026-02',
+      monthLabel: 'Fév 26',
+      fullMonthLabel: 'Février 2026 (En cours)',
+      invoicedRevenueEUR: 78500,
+      collectedRevenueEUR: 48500,
+      pendingRevenueEUR: 30000,
+      invoicesCount: 12,
+      paidInvoicesCount: 7,
+      pendingInvoicesCount: 5,
+      overdueInvoicesCount: 0,
+      averageInvoiceValueEUR: 6541,
+      collectionRate: 61.8
+    }
+  ];
+};
+

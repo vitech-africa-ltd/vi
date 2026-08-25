@@ -651,7 +651,7 @@ export function generateProjectSynthesisPdf(
 
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(71, 85, 105);
-    doc.text(m.sprint || `Sprint ${m.id}`, margin + 62, y + 4.2);
+    doc.text((m as any).sprint || `Sprint ${m.id}`, margin + 62, y + 4.2);
     doc.text(m.dueDate || 'Livré', margin + 92, y + 4.2);
 
     if (m.status === 'completed') {

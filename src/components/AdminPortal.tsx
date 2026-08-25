@@ -49,7 +49,9 @@ import {
   Layers3,
   Cpu,
   Bot,
-  Megaphone
+  Megaphone,
+  Receipt,
+  History
 } from 'lucide-react';
 import { 
   collection, 
@@ -66,6 +68,9 @@ import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { VitechLogo } from './VitechLogo';
 import { AiPromptConfigTab } from './admin/AiPromptConfigTab';
+import { AdminInvoicingTab } from './admin/AdminInvoicingTab';
+import { DomainHostingAuditTab } from './admin/DomainHostingAuditTab';
+import { AdminSecurityTokenModal } from './admin/AdminSecurityTokenModal';
 import { AuditLogView } from './AuditLogView';
 import { PdfViewerModal } from './PdfViewerModal';
 import { sendClientNotification } from '../services/notificationService';
@@ -143,6 +148,7 @@ type AdminTab =
   | 'blog' 
   | 'hubs' 
   | 'testimonials'
+  | 'domain-hosting'
   | 'inquiries' 
   | 'bookings' 
   | 'estimates' 
@@ -193,8 +199,11 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [pinCode, setPinCode] = useState('');
-  const [isPinAuthenticated, setIsPinAuthenticated] = useState(false);
+  const [isPinAuthenticated, setIsPinAuthenticated] = useState(() => {
+    return !!sessionStorage.getItem('vitech_admin_auth_token');
+  });
   const [pinError, setPinError] = useState(false);
+  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
 
   // Firestore real-time streams
   const [inquiries, setInquiries] = useState<ContactInquiryDoc[]>([]);
@@ -583,13 +592,32 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-3 my-4">
+          {/* Method 2: Dynamic Token-Based OTP Authentication */}
+          <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 space-y-2.5">
+            <div className="flex items-center gap-2 text-cyan-400">
+              <ShieldCheck className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Sécurité Zéro-Trust par Token</span>
+            </div>
+            <p className="text-[11px] text-slate-300">
+              Recevez un code OTP à usage unique par email pour une connexion cryptée et certifiée.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsTokenModalOpen(true)}
+              className="w-full py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-cyan-600/20"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Demander un Token de Connexion</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 my-2">
             <div className="flex-1 h-px bg-slate-800" />
-            <span className="text-[10px] uppercase font-bold text-slate-500">ou Clé de Sécurité Directeur</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500">ou Clé Maître / PIN</span>
             <div className="flex-1 h-px bg-slate-800" />
           </div>
 
-          {/* Method 2: Director Security PIN */}
+          {/* Method 3: Director Security PIN */}
           <form onSubmit={handlePinSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
@@ -628,6 +656,16 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Audit de sécurité actif • Toutes les modifications sont historisées.
             </p>
           </div>
+
+          <AdminSecurityTokenModal
+            isOpen={isTokenModalOpen}
+            onClose={() => setIsTokenModalOpen(false)}
+            directorEmail={companyInfo.email || 'contact.vitechdev@gmail.com'}
+            onAuthenticated={(token) => {
+              setIsPinAuthenticated(true);
+              setIsTokenModalOpen(false);
+            }}
+          />
 
         </div>
       </div>
@@ -722,9 +760,9 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <MessageSquare className="w-4 h-4" />
                   <span>Demandes &amp; Devis CRM</span>
                 </div>
-                {inquiries.filter((i) => i.status === 'new').length > 0 && (
+                {(inquiries || []).filter((i) => i && i.status === 'new').length > 0 && (
                   <span className="text-[10px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold">
-                    {inquiries.filter((i) => i.status === 'new').length}
+                    {(inquiries || []).filter((i) => i && i.status === 'new').length}
                   </span>
                 )}
               </button>
@@ -922,6 +960,23 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <span>Avis Clients ({testimonials.length})</span>
                 </div>
               </button>
+
+              <button
+                onClick={() => setActiveTab('domain-hosting')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'domain-hosting'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                    : 'text-blue-300 hover:text-white hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Globe className="w-4 h-4 text-blue-400" />
+                  <span>Nom de Domaine &amp; DNS</span>
+                </div>
+                <span className="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-1.5 py-0.5 rounded font-mono font-bold">
+                  PROD
+                </span>
+              </button>
             </div>
           </div>
 
@@ -946,6 +1001,23 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
                 <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-950 px-1.5 py-0.2 rounded border border-cyan-500/30">
                   {projectDocs.length}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('invoicing')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'invoicing'
+                    ? 'bg-amber-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Receipt className="w-4 h-4 text-amber-400" />
+                  <span>Facturier &amp; Devis Clients</span>
+                </div>
+                <span className="text-[10px] font-mono text-amber-300 font-bold bg-amber-950 px-1.5 py-0.2 rounded border border-amber-500/30">
+                  OHADA/PDF
                 </span>
               </button>
 
@@ -1037,9 +1109,9 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <span className="text-xs font-bold uppercase tracking-wider">Demandes de Projets</span>
                     <MessageSquare className="w-5 h-5 text-blue-400" />
                   </div>
-                  <div className="text-3xl font-black text-white">{inquiries.length}</div>
+                  <div className="text-3xl font-black text-white">{(inquiries || []).length}</div>
                   <div className="text-[11px] text-emerald-400 font-medium">
-                    {inquiries.filter((i) => i.status === 'new').length} nouveau(x) lead(s) à traiter
+                    {(inquiries || []).filter((i) => i && i.status === 'new').length} nouveau(x) lead(s) à traiter
                   </div>
                 </div>
 
@@ -1048,9 +1120,9 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <span className="text-xs font-bold uppercase tracking-wider">Rendez-vous 30 min</span>
                     <Calendar className="w-5 h-5 text-amber-400" />
                   </div>
-                  <div className="text-3xl font-black text-white">{bookings.length}</div>
+                  <div className="text-3xl font-black text-white">{(bookings || []).length}</div>
                   <div className="text-[11px] text-amber-300 font-medium">
-                    {bookings.filter((b) => b.status === 'scheduled').length} session(s) planifiée(s)
+                    {(bookings || []).filter((b) => b && b.status === 'scheduled').length} session(s) planifiée(s)
                   </div>
                 </div>
 
@@ -2219,15 +2291,16 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60">
-                      {inquiries
+                      {(inquiries || [])
                         .filter((i) => {
+                          if (!i) return false;
                           if (statusFilter !== 'all' && i.status !== statusFilter) return false;
                           if (searchTerm) {
                             const term = searchTerm.toLowerCase();
                             return (
-                              i.fullName?.toLowerCase().includes(term) ||
-                              i.email?.toLowerCase().includes(term) ||
-                              i.company?.toLowerCase().includes(term)
+                              (i.fullName || '').toLowerCase().includes(term) ||
+                              (i.email || '').toLowerCase().includes(term) ||
+                              (i.company || '').toLowerCase().includes(term)
                             );
                           }
                           return true;
@@ -3428,6 +3501,16 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* TAB: DOMAIN & HOSTING AUDIT */}
+          {activeTab === 'domain-hosting' && (
+            <DomainHostingAuditTab companyDomain={companyInfo.email ? companyInfo.email.split('@')[1] : 'vitechafrica.com'} />
+          )}
+
+          {/* TAB: INVOICING / FACTURIER */}
+          {activeTab === 'invoicing' && (
+            <AdminInvoicingTab />
           )}
 
         </main>

@@ -130,6 +130,32 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           escalatedToHuman: data.escalatedToHuman,
         };
         setMessages((prev) => [...prev, assistantMsg]);
+
+        // Record interaction for Admin AI statistics
+        try {
+          const logItem = {
+            id: `chat-live-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            timeAgo: "À l'instant",
+            userMessage: textToSend,
+            botReply: assistantMsg.text,
+            category: data.sources?.[0] || 'Conseil Général RAG',
+            clientInfo: {
+              location: 'Visiteur En Ligne',
+              flag: '🌐',
+              device: window.innerWidth < 640 ? 'Mobile' : 'Desktop'
+            },
+            durationMs: 1100,
+            timeSavedMin: 10,
+            status: data.escalatedToHuman ? 'escalated_human' : 'resolved_ai',
+            modelUsed: aiConfig.model || 'Google Gemini 3.7 Flash RAG',
+            sourcesUsed: data.sources || ['Base de Connaissances V&I TECH']
+          };
+          const existingRaw = localStorage.getItem('vitech_ai_chat_logs');
+          const existing = existingRaw ? JSON.parse(existingRaw) : [];
+          localStorage.setItem('vitech_ai_chat_logs', JSON.stringify([logItem, ...existing].slice(0, 50)));
+          window.dispatchEvent(new CustomEvent('vitech_ai_chat_updated'));
+        } catch (e) {}
       } else {
         // Direct human connection response
         setTimeout(() => {

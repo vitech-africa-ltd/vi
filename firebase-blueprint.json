@@ -161,6 +161,61 @@
         "actorName": { "type": "string", "maxLength": 150 }
       },
       "required": ["title", "message", "type"]
+    },
+    "Invoice": {
+      "title": "Invoice and Estimate Record",
+      "description": "Financial invoices, quotes, deposits, and payment tracking compliant with OHADA standards",
+      "type": "object",
+      "properties": {
+        "invoiceNumber": { "type": "string", "maxLength": 100 },
+        "type": { "type": "string", "enum": ["invoice", "estimate", "deposit"] },
+        "clientCompany": { "type": "string", "maxLength": 150 },
+        "clientName": { "type": "string", "maxLength": 150 },
+        "clientEmail": { "type": "string", "format": "email", "maxLength": 150 },
+        "clientAddress": { "type": "string", "maxLength": 300 },
+        "clientTaxId": { "type": "string", "maxLength": 100 },
+        "currency": { "type": "string", "maxLength": 20 },
+        "currencySymbol": { "type": "string", "maxLength": 10 },
+        "issueDate": { "type": "string", "maxLength": 50 },
+        "dueDate": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["draft", "pending", "paid", "overdue", "cancelled"] },
+        "paymentMethod": { "type": "string", "maxLength": 50 },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "taxRate": { "type": "number" },
+        "taxAmount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "paidAt": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "maxLength": 100 },
+        "updatedAt": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["invoiceNumber", "type", "clientCompany", "totalAmount", "status"]
+    },
+    "InvoiceEmailLog": {
+      "title": "Invoice Email Notification Log",
+      "description": "Traceability log of automated and manual emails dispatched to clients upon invoice status changes",
+      "type": "object",
+      "properties": {
+        "invoiceId": { "type": "string", "maxLength": 128 },
+        "invoiceNumber": { "type": "string", "maxLength": 100 },
+        "recipientEmail": { "type": "string", "format": "email", "maxLength": 150 },
+        "recipientName": { "type": "string", "maxLength": 150 },
+        "recipientCompany": { "type": "string", "maxLength": 150 },
+        "status": { "type": "string", "maxLength": 50 },
+        "subject": { "type": "string", "maxLength": 300 },
+        "htmlBody": { "type": "string" },
+        "plainTextBody": { "type": "string" },
+        "amountFormatted": { "type": "string", "maxLength": 100 },
+        "currency": { "type": "string", "maxLength": 20 },
+        "sentAt": { "type": "string", "maxLength": 100 },
+        "deliveryStatus": { "type": "string", "maxLength": 50 },
+        "dispatchedBy": { "type": "string", "maxLength": 150 },
+        "trackingCode": { "type": "string", "maxLength": 100 },
+        "customNote": { "type": "string", "maxLength": 1000 }
+      },
+      "required": ["invoiceNumber", "recipientEmail", "status", "subject", "sentAt"]
     }
   },
   "firestore": {
@@ -199,6 +254,14 @@
     "/client_notifications/{notificationId}": {
       "schema": "ClientNotification",
       "description": "Real-time client alerts, document release notices, and audit completion events"
+    },
+    "/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Commercial invoices, proforma estimates, and payment reconciliations"
+    },
+    "/invoice_email_logs/{logId}": {
+      "schema": "InvoiceEmailLog",
+      "description": "Cryptographic delivery receipts and logs for invoice emails sent to clients"
     }
   }
 }

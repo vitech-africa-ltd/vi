@@ -192,9 +192,9 @@ export const ClientFeedbackReportForm: React.FC<ClientFeedbackReportFormProps> =
         documentTitle: newReport.title,
         docRef: `REP-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
         actionType: 'document_uploaded',
-        actorName,
+        actorName: authorName,
         actorRole: currentRole === 'super_admin' ? 'Super Administrateur Client' : 'Direction Technique Client',
-        actorEmail,
+        actorEmail: authorEmail,
         actorCompany: project.clientName,
         hashSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         verificationStatus: 'tamper_proof',
@@ -212,7 +212,7 @@ export const ClientFeedbackReportForm: React.FC<ClientFeedbackReportFormProps> =
         title: 'Nouveau Rapport / Commentaire Transmis',
         message: `Le client ${authorName} a transmis le rapport "${title}" avec priorité ${priority}.`,
         type: 'document_uploaded',
-        actorName
+        actorName: authorName
       });
 
       // Prepend to history

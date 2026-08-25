@@ -55,7 +55,10 @@ export const ScriptsMarketplace: React.FC<ScriptsMarketplaceProps> = ({
   const { currency, currencyOption } = useCurrency();
   const { t } = useTranslation();
   const { wishlistIds, isInWishlist, toggleWishlist, wishlistCount } = useWishlist();
-  const { scriptProducts: products } = useSiteData();
+  const { scriptProducts } = useSiteData();
+  const products: ScriptProduct[] = useMemo(() => {
+    return Array.isArray(scriptProducts) && scriptProducts.length > 0 ? scriptProducts : INITIAL_SCRIPTS;
+  }, [scriptProducts]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -109,15 +112,15 @@ export const ScriptsMarketplace: React.FC<ScriptsMarketplaceProps> = ({
     return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
   }, [products]);
 
-  const categories = [
-    { id: 'all', label: 'Tous les Scripts & Apps', count: products.length },
-    { id: 'php-laravel', label: 'PHP & Laravel Fintech', count: products.filter(p => p.category === 'php-laravel').length },
-    { id: 'mobile-flutter', label: 'Mobile Flutter & Dart', count: products.filter(p => p.category === 'mobile-flutter').length },
-    { id: 'fullstack-saas', label: 'Full-Stack SaaS Cloud', count: products.filter(p => p.category === 'fullstack-saas').length },
-    { id: 'python-django', label: 'Python IA & ML', count: products.filter(p => p.category === 'python-django').length },
-    { id: 'ui-templates', label: 'Templates UI / Bootstrap 5', count: products.filter(p => p.category === 'ui-templates').length },
-    { id: 'wordpress-plugins', label: 'Plugins WooCommerce', count: products.filter(p => p.category === 'wordpress-plugins').length },
-  ];
+  const categories = useMemo(() => [
+    { id: 'all', label: 'Tous les Scripts & Apps', count: (products || []).length },
+    { id: 'php-laravel', label: 'PHP & Laravel Fintech', count: (products || []).filter(p => p && p.category === 'php-laravel').length },
+    { id: 'mobile-flutter', label: 'Mobile Flutter & Dart', count: (products || []).filter(p => p && p.category === 'mobile-flutter').length },
+    { id: 'fullstack-saas', label: 'Full-Stack SaaS Cloud', count: (products || []).filter(p => p && p.category === 'fullstack-saas').length },
+    { id: 'python-django', label: 'Python IA & ML', count: (products || []).filter(p => p && p.category === 'python-django').length },
+    { id: 'ui-templates', label: 'Templates UI / Bootstrap 5', count: (products || []).filter(p => p && p.category === 'ui-templates').length },
+    { id: 'wordpress-plugins', label: 'Plugins WooCommerce', count: (products || []).filter(p => p && p.category === 'wordpress-plugins').length },
+  ], [products]);
 
   // Active filters count calculation
   const activeFiltersCount = useMemo(() => {

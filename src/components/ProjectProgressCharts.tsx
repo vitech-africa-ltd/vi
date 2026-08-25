@@ -78,9 +78,10 @@ export const ProjectProgressCharts: React.FC<ProjectProgressChartsProps> = ({
     { name: 'Jalon 6 : Mise en Prod Cloud AWS/GCP', budget: 5000, spent: 0, color: '#ec4899' },
   ];
 
-  const completedCount = milestones.filter(m => m.status === 'completed').length;
-  const inProgressCount = milestones.filter(m => m.status === 'in_progress').length;
-  const upcomingCount = milestones.filter(m => m.status === 'upcoming').length;
+  const safeMilestones = Array.isArray(milestones) ? milestones : [];
+  const completedCount = safeMilestones.filter(m => m && m.status === 'completed').length;
+  const inProgressCount = safeMilestones.filter(m => m && m.status === 'in_progress').length;
+  const upcomingCount = safeMilestones.filter(m => m && m.status === 'upcoming').length;
 
   const pieData = [
     { name: 'Validés (100%)', value: completedCount, color: '#10b981' },

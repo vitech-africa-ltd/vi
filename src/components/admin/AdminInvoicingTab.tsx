@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   DollarSign,
   Receipt,
@@ -27,12 +27,20 @@ import {
   Calendar,
   X,
   Check,
-  RotateCcw
+  RotateCcw,
+  BarChart3,
+  Coins,
+  ArrowRightLeft,
+  Calculator
 } from 'lucide-react';
 import { Invoice, InvoiceLineItem, InvoiceStatus, InvoiceType } from '../../types';
 import { downloadInvoicePdf } from '../../utils/pdfGenerator';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { MonthlyInvoicingRevenueChart } from '../scripts/admin/MonthlyInvoicingRevenueChart';
+import { InvoiceEmailModal } from './InvoiceEmailModal';
+import { sendAutomatedInvoiceEmail } from '../../services/emailNotificationService';
+import { useCurrency, CurrencyCode, CURRENCIES_DATA } from '../../context/CurrencyContext';
 
 const INITIAL_INVOICES: Invoice[] = [
   {
@@ -145,13 +153,35 @@ const INITIAL_INVOICES: Invoice[] = [
 ];
 
 export const AdminInvoicingTab: React.FC = () => {
+  const {
+    currency,
+    setCurrency,
+    currencyOption,
+    currenciesList,
+    convertBetween,
+    formatRawAmount,
+    openConverterModal
+  } = useCurrency();
+
   const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [currencyDisplayMode, setCurrencyDisplayMode] = useState<'active' | 'original'>('active');
   const [showModal, setShowModal] = useState<boolean>(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+  const [showChart, setShowChart] = useState<boolean>(true);
+  const [autoEmailEnabled, setAutoEmailEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('vitech_auto_email_invoice_enabled');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+  const [emailModalInvoice, setEmailModalInvoice] = useState<Invoice | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
 
   // Form State for creating / editing invoice
   const [formInvoiceNumber, setFormInvoiceNumber] = useState<string>('');
@@ -320,11 +350,19 @@ export const AdminInvoicingTab: React.FC = () => {
       taxAmount: formTaxAmount,
       totalAmount: formTotalAmount,
       notes: formNotes,
+      paidAmount: formStatus === 'paid' ? (editingInvoice?.paidAmount || formTotalAmount) : editingInvoice?.paidAmount,
+      paidAt: formStatus === 'paid' ? (editingInvoice?.paidAt || new Date().toLocaleDateString('fr-FR')) : editingInvoice?.paidAt,
       createdAt: editingInvoice ? editingInvoice.createdAt : new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
     try {
+      const prevStatus = editingInvoice ? editingInvoice.status : null;
+      const statusChangedToNotifiable =
+        (formStatus === 'paid' && prevStatus !== 'paid') ||
+        (formStatus === 'pending' && prevStatus !== 'pending') ||
+        (!editingInvoice && (formStatus === 'pending' || formStatus === 'paid'));
+
       // Save locally
       if (editingInvoice) {
         setInvoices(prev => prev.map(inv => inv.id === invoiceToSave.id ? invoiceToSave : inv));
@@ -340,7 +378,25 @@ export const AdminInvoicingTab: React.FC = () => {
       }
 
       setShowModal(false);
-      showNotification(`Facture ${invoiceToSave.invoiceNumber} enregistrée avec succès.`);
+
+      // Automated Email Notification dispatch
+      if (autoEmailEnabled && statusChangedToNotifiable && invoiceToSave.clientEmail) {
+        try {
+          await sendAutomatedInvoiceEmail({
+            invoice: invoiceToSave,
+            newStatus: formStatus as 'paid' | 'pending',
+            previousStatus: prevStatus || undefined,
+            actorName: 'Administrateur V&I Tech'
+          });
+          showNotification(
+            `Facture ${invoiceToSave.invoiceNumber} enregistrée. ✉️ Notification e-mail envoyée à ${invoiceToSave.clientEmail} (${formStatus === 'paid' ? 'Acquittée' : 'En attente'}).`
+          );
+        } catch (err) {
+          showNotification(`Facture ${invoiceToSave.invoiceNumber} enregistrée avec succès.`);
+        }
+      } else {
+        showNotification(`Facture ${invoiceToSave.invoiceNumber} enregistrée avec succès.`);
+      }
     } catch (error) {
       console.error(error);
       alert('Erreur lors de l\'enregistrement de la facture.');
@@ -370,7 +426,67 @@ export const AdminInvoicingTab: React.FC = () => {
       // Local fallback
     }
 
-    showNotification(`Facture ${inv.invoiceNumber} marquée comme PAYÉE.`);
+    if (autoEmailEnabled && inv.clientEmail) {
+      try {
+        await sendAutomatedInvoiceEmail({
+          invoice: updated,
+          newStatus: 'paid',
+          previousStatus: inv.status,
+          actorName: 'Administrateur V&I Tech'
+        });
+        showNotification(
+          `Facture ${inv.invoiceNumber} marquée comme PAYÉE. ✉️ Quittance e-mail envoyée à ${inv.clientEmail} !`
+        );
+      } catch (err) {
+        showNotification(`Facture ${inv.invoiceNumber} marquée comme PAYÉE.`);
+      }
+    } else {
+      showNotification(`Facture ${inv.invoiceNumber} marquée comme PAYÉE.`);
+    }
+  };
+
+  // Quick change status (e.g. pending, paid, overdue, draft)
+  const handleQuickStatusChange = async (inv: Invoice, newStatus: InvoiceStatus) => {
+    if (inv.status === newStatus) return;
+    const isPaid = newStatus === 'paid';
+    const updated: Invoice = {
+      ...inv,
+      status: newStatus,
+      paidAmount: isPaid ? inv.totalAmount : inv.paidAmount,
+      paidAt: isPaid ? (inv.paidAt || new Date().toLocaleDateString('fr-FR')) : inv.paidAt,
+      updatedAt: new Date().toISOString()
+    };
+
+    setInvoices(prev => prev.map(i => i.id === inv.id ? updated : i));
+
+    try {
+      await updateDoc(doc(db, 'invoices', inv.id), {
+        status: newStatus,
+        paidAmount: updated.paidAmount,
+        paidAt: updated.paidAt,
+        updatedAt: updated.updatedAt
+      });
+    } catch (e) {
+      // Local fallback
+    }
+
+    if (autoEmailEnabled && (newStatus === 'paid' || newStatus === 'pending') && inv.clientEmail) {
+      try {
+        await sendAutomatedInvoiceEmail({
+          invoice: updated,
+          newStatus: newStatus as 'paid' | 'pending',
+          previousStatus: inv.status,
+          actorName: 'Administrateur V&I Tech'
+        });
+        showNotification(
+          `Statut #${inv.invoiceNumber} passé à '${newStatus === 'paid' ? 'Payée' : 'En attente'}'. ✉️ Notification e-mail envoyée automatiquement à ${inv.clientEmail} !`
+        );
+      } catch (err) {
+        showNotification(`Statut de ${inv.invoiceNumber} mis à jour : ${newStatus}.`);
+      }
+    } else {
+      showNotification(`Statut de ${inv.invoiceNumber} mis à jour : ${newStatus}.`);
+    }
   };
 
   // Delete invoice
@@ -387,11 +503,14 @@ export const AdminInvoicingTab: React.FC = () => {
   };
 
   // Filtered invoices
-  const filteredInvoices = invoices.filter(inv => {
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+
+  const filteredInvoices = safeInvoices.filter(inv => {
+    if (!inv) return false;
     const matchesSearch =
-      inv.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inv.clientCompany.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inv.clientName.toLowerCase().includes(searchQuery.toLowerCase());
+      (inv.invoiceNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (inv.clientCompany || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (inv.clientName || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
     const matchesType = typeFilter === 'all' || inv.type === typeFilter;
@@ -399,16 +518,26 @@ export const AdminInvoicingTab: React.FC = () => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  // KPI Calculations (in EUR equivalent)
-  const totalPaidEUR = invoices
-    .filter(i => i.status === 'paid' && (i.currency === 'EUR' || i.currency === 'USD'))
-    .reduce((acc, i) => acc + i.totalAmount, 0);
+  // Dynamic Currency Calculations for Invoices
+  const totalPaidInActiveCurrency = useMemo(() => {
+    return safeInvoices
+      .filter(i => i && i.status === 'paid')
+      .reduce((acc, i) => acc + convertBetween(i.totalAmount || 0, (i.currency || 'EUR') as CurrencyCode, currency), 0);
+  }, [safeInvoices, currency, convertBetween]);
 
-  const totalPendingEUR = invoices
-    .filter(i => i.status === 'pending' && (i.currency === 'EUR' || i.currency === 'USD'))
-    .reduce((acc, i) => acc + i.totalAmount, 0);
+  const totalPendingInActiveCurrency = useMemo(() => {
+    return safeInvoices
+      .filter(i => i && i.status === 'pending')
+      .reduce((acc, i) => acc + convertBetween(i.totalAmount || 0, (i.currency || 'EUR') as CurrencyCode, currency), 0);
+  }, [safeInvoices, currency, convertBetween]);
 
-  const overdueCount = invoices.filter(i => i.status === 'overdue').length;
+  const totalInvoicedInActiveCurrency = useMemo(() => {
+    return safeInvoices
+      .filter(i => i && i.type === 'invoice')
+      .reduce((acc, i) => acc + convertBetween(i.totalAmount || 0, (i.currency || 'EUR') as CurrencyCode, currency), 0);
+  }, [safeInvoices, currency, convertBetween]);
+
+  const overdueCount = safeInvoices.filter(i => i && i.status === 'overdue').length;
 
   return (
     <div className="space-y-6">
@@ -441,21 +570,128 @@ export const AdminInvoicingTab: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Émission de factures, devis, acomptes, calcul de TVA et génération PDF certifié pour clients panafricains et internationaux.
+              Émission de factures, devis, acomptes, calcul de TVA et conversion en temps réel ({currencyOption.name}).
             </p>
           </div>
         </div>
 
-        <button
-          onClick={handleOpenNewModal}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black transition shadow-lg shadow-amber-950 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nouvelle Facture / Devis</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Auto-Email Toggle Button */}
+          <button
+            onClick={() => {
+              const next = !autoEmailEnabled;
+              setAutoEmailEnabled(next);
+              try {
+                localStorage.setItem('vitech_auto_email_invoice_enabled', String(next));
+              } catch (e) {}
+              showNotification(
+                next
+                  ? '✉️ Envoi automatique d\'e-mails activé (Payé & En attente).'
+                  : '⚠️ Envoi automatique d\'e-mails désactivé.'
+              );
+            }}
+            className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+              autoEmailEnabled
+                ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-750'
+            }`}
+            title="Activer ou désactiver l'envoi automatique d'e-mails au client lors du passage en Payé ou En attente"
+          >
+            <Mail className={`w-4 h-4 ${autoEmailEnabled ? 'text-emerald-400' : 'text-slate-400'}`} />
+            <span>Notification Client : {autoEmailEnabled ? 'Auto E-mail ON' : 'Auto E-mail OFF'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowChart(!showChart)}
+            className={`px-3.5 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2 cursor-pointer ${
+              showChart
+                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-750'
+            }`}
+            title="Afficher/Masquer les graphiques d'analyse financière"
+          >
+            <BarChart3 className="w-4 h-4 text-amber-400" />
+            <span>{showChart ? 'Masquer Graphiques' : 'Graphiques & Tendances'}</span>
+          </button>
+
+          <button
+            onClick={handleOpenNewModal}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black transition shadow-lg shadow-amber-950 flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nouvelle Facture / Devis</span>
+          </button>
+        </div>
       </div>
 
-      {/* FINANCIAL KPI SUMMARY CARDS */}
+      {/* DYNAMIC CURRENCY BAR & REAL-TIME EXCHANGE RATE STRIP */}
+      <div className="p-3.5 rounded-2xl bg-slate-900 border border-amber-500/30 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+            <Coins className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold text-white">Devise d'Affichage Dynamique :</span>
+          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+            {(['XOF', 'EUR', 'USD', 'RWF', 'XAF', 'MAD'] as CurrencyCode[]).map((currCode) => {
+              const opt = CURRENCIES_DATA[currCode];
+              const isSelected = currency === currCode;
+              return (
+                <button
+                  key={currCode}
+                  onClick={() => setCurrency(currCode)}
+                  className={`px-2.5 py-1 rounded-lg transition-all font-mono text-[11px] font-bold cursor-pointer flex items-center gap-1 ${
+                    isSelected ? 'bg-amber-500 text-slate-950 shadow font-black' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title={`${opt.name} (${opt.symbol})`}
+                >
+                  <span>{opt.flag}</span>
+                  <span>{currCode}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => openConverterModal(1000)}
+              className="px-2 py-1 text-slate-400 hover:text-amber-400 transition"
+              title="Calculateur de change"
+            >
+              <Calculator className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <div className="flex items-center gap-1.5 text-slate-300 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
+            <ArrowRightLeft className="w-3.5 h-3.5 text-amber-400" />
+            <span>1 € = <strong className="text-white">{currencyOption.rateToEUR}</strong> {currencyOption.symbol}</span>
+          </div>
+
+          <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+            <button
+              onClick={() => setCurrencyDisplayMode('active')}
+              className={`px-2 py-1 rounded text-[11px] font-semibold transition cursor-pointer ${
+                currencyDisplayMode === 'active' ? 'bg-slate-800 text-amber-400 font-bold' : 'text-slate-400'
+              }`}
+            >
+              Converti ({currency})
+            </button>
+            <button
+              onClick={() => setCurrencyDisplayMode('original')}
+              className={`px-2 py-1 rounded text-[11px] font-semibold transition cursor-pointer ${
+                currencyDisplayMode === 'original' ? 'bg-slate-800 text-amber-400 font-bold' : 'text-slate-400'
+              }`}
+            >
+              Devise d'origine
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* RECHARTS DATA VISUALIZATION WIDGET */}
+      {showChart && (
+        <MonthlyInvoicingRevenueChart />
+      )}
+
+      {/* FINANCIAL KPI SUMMARY CARDS (CONVERTED LIVE) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Encaissé */}
         <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/90 space-y-2">
@@ -465,12 +701,12 @@ export const AdminInvoicingTab: React.FC = () => {
               <CheckCircle2 className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {totalPaidEUR.toLocaleString('fr-FR')} €
+          <div className="text-2xl font-black text-white font-mono">
+            {formatRawAmount(totalPaidInActiveCurrency, currency)}
           </div>
           <div className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>100% sécurisé via virement / MoMo</span>
+            <span>Encaissé dans {invoices.filter(i => i.status === 'paid').length} règlements</span>
           </div>
         </div>
 
@@ -482,11 +718,11 @@ export const AdminInvoicingTab: React.FC = () => {
               <Clock className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-cyan-300">
-            {totalPendingEUR.toLocaleString('fr-FR')} €
+          <div className="text-2xl font-black text-cyan-300 font-mono">
+            {formatRawAmount(totalPendingInActiveCurrency, currency)}
           </div>
           <div className="text-[11px] text-slate-400">
-            Échéance nominale sous 30 jours
+            {invoices.filter(i => i.status === 'pending').length} factures sous échéance 30 jours
           </div>
         </div>
 
@@ -506,22 +742,23 @@ export const AdminInvoicingTab: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 4: Volume Total Émis */}
+        {/* Card 4: Volume Total Facturé */}
         <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/90 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Total Pièces Émises</span>
+            <span>Total Factures Émises</span>
             <span className="p-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
               <FileText className="w-4 h-4" />
             </span>
           </div>
-          <div className="text-2xl font-black text-white">
-            {invoices.length} Documents
+          <div className="text-2xl font-black text-white font-mono">
+            {formatRawAmount(totalInvoicedInActiveCurrency, currency)}
           </div>
           <div className="text-[11px] text-slate-400">
-            Factures, Devis et Acomptes
+            {invoices.length} Pièces au total (Factures, Devis, Acomptes)
           </div>
         </div>
       </div>
+
 
       {/* FILTER & SEARCH BAR */}
       <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/80 flex flex-col md:flex-row items-center justify-between gap-3">
@@ -614,45 +851,95 @@ export const AdminInvoicingTab: React.FC = () => {
                     </div>
                   </td>
 
-                  {/* Amount */}
+                  {/* Amount with Dynamic Real-Time Currency Conversion */}
                   <td className="p-4">
-                    <div className="text-sm font-black text-white">
-                      {inv.totalAmount.toLocaleString('fr-FR')} {inv.currencySymbol}
-                    </div>
-                    {inv.taxAmount > 0 && (
-                      <div className="text-[10px] text-slate-400">
-                        dont TVA {inv.taxRate}% : {inv.taxAmount.toLocaleString('fr-FR')} {inv.currencySymbol}
+                    {currencyDisplayMode === 'active' ? (
+                      <div>
+                        <div className="text-sm font-black text-amber-300 font-mono">
+                          {formatRawAmount(
+                            convertBetween(inv.totalAmount, (inv.currency || 'EUR') as CurrencyCode, currency),
+                            currency
+                          )}
+                        </div>
+                        {inv.currency !== currency && (
+                          <div className="text-[10px] text-slate-400 font-mono">
+                            Origine : {inv.totalAmount.toLocaleString('fr-FR')} {inv.currencySymbol}
+                          </div>
+                        )}
+                        {inv.taxAmount > 0 && (
+                          <div className="text-[10px] text-slate-500">
+                            dont TVA {inv.taxRate}%
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-sm font-black text-white font-mono">
+                          {inv.totalAmount.toLocaleString('fr-FR')} {inv.currencySymbol}
+                        </div>
+                        {inv.currency !== currency && (
+                          <div className="text-[10px] text-amber-400/80 font-mono">
+                            ≈ {formatRawAmount(
+                              convertBetween(inv.totalAmount, (inv.currency || 'EUR') as CurrencyCode, currency),
+                              currency
+                            )}
+                          </div>
+                        )}
+                        {inv.taxAmount > 0 && (
+                          <div className="text-[10px] text-slate-400">
+                            dont TVA {inv.taxRate}% : {inv.taxAmount.toLocaleString('fr-FR')} {inv.currencySymbol}
+                          </div>
+                        )}
                       </div>
                     )}
                   </td>
 
-                  {/* Status */}
+                  {/* Status with Quick Change Selector */}
                   <td className="p-4">
-                    {inv.status === 'paid' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold text-[11px]">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Payée</span>
-                      </span>
-                    ) : inv.status === 'pending' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-bold text-[11px]">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>En attente</span>
-                      </span>
-                    ) : inv.status === 'overdue' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30 font-bold text-[11px]">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        <span>En retard</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-bold text-[11px]">
-                        <span>Brouillon</span>
-                      </span>
-                    )}
+                    <div className="relative inline-block">
+                      <select
+                        value={inv.status}
+                        onChange={(e) => handleQuickStatusChange(inv, e.target.value as InvoiceStatus)}
+                        className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border outline-none cursor-pointer appearance-none pr-6 ${
+                          inv.status === 'paid'
+                            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/90'
+                            : inv.status === 'pending'
+                            ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40 hover:bg-cyan-900/90'
+                            : inv.status === 'overdue'
+                            ? 'bg-rose-950/80 text-rose-300 border-rose-500/40 hover:bg-rose-900/90'
+                            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                        }`}
+                        title="Changer le statut (déclenche un e-mail automatique pour 'Payée' ou 'En attente')"
+                      >
+                        <option value="draft">Brouillon</option>
+                        <option value="pending">⏳ En attente</option>
+                        <option value="paid">✓ Payée</option>
+                        <option value="overdue">⚠️ En retard</option>
+                        <option value="cancelled">Annulée</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-slate-400">
+                        <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                        </svg>
+                      </div>
+                    </div>
                   </td>
 
                   {/* Actions */}
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
+                      {/* Email Dispatch / Preview Center */}
+                      <button
+                        onClick={() => {
+                          setEmailModalInvoice(inv);
+                          setShowEmailModal(true);
+                        }}
+                        className="p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 transition cursor-pointer"
+                        title="Aperçu & Envoi d'E-mail au Client"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                      </button>
+
                       {/* Download PDF */}
                       <button
                         onClick={() => downloadInvoicePdf(inv)}
@@ -662,12 +949,12 @@ export const AdminInvoicingTab: React.FC = () => {
                         <Download className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Mark Paid */}
+                      {/* Mark Paid Quick Button */}
                       {inv.status !== 'paid' && (
                         <button
                           onClick={() => handleMarkAsPaid(inv)}
                           className="p-2 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-500/30 transition cursor-pointer"
-                          title="Marquer comme Payée"
+                          title="Marquer comme Payée & Notifier par E-mail"
                         >
                           <Check className="w-3.5 h-3.5" />
                         </button>
@@ -1012,6 +1299,18 @@ export const AdminInvoicingTab: React.FC = () => {
           </div>
         </div>
       )}
+      {/* INVOICE EMAIL NOTIFICATION MODAL */}
+      <InvoiceEmailModal
+        invoice={emailModalInvoice}
+        isOpen={showEmailModal}
+        onClose={() => {
+          setShowEmailModal(false);
+          setEmailModalInvoice(null);
+        }}
+        onEmailSent={(log) => {
+          showNotification(`E-mail envoyé avec succès à ${log.recipientEmail} (${log.trackingCode})`);
+        }}
+      />
     </div>
   );
 };

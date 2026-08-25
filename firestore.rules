@@ -252,5 +252,19 @@ service cloud.firestore {
       allow update: if isValidId(notificationId) && isValidClientNotification(incoming());
       allow delete: if isValidId(notificationId) && isAdmin();
     }
+
+    // 10. Invoices Collection
+    match /invoices/{invoiceId} {
+      allow get, list: if isValidId(invoiceId);
+      allow create, update: if isValidId(invoiceId);
+      allow delete: if isValidId(invoiceId) && (isAdmin() || isSignedIn());
+    }
+
+    // 11. Invoice Email Logs Collection
+    match /invoice_email_logs/{logId} {
+      allow get, list: if isValidId(logId);
+      allow create, update: if isValidId(logId);
+      allow delete: if isValidId(logId) && (isAdmin() || isSignedIn());
+    }
   }
 }

@@ -63,13 +63,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      unsub();
+      if (typeof unsub === 'function') unsub();
       window.removeEventListener('vitech_new_notification', handleNewNotif);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+  const unreadCount = safeNotifications.filter(n => n && !n.read).length;
 
   const handleNotificationClick = (notif: ClientNotification) => {
     markNotificationAsRead(notif.id);

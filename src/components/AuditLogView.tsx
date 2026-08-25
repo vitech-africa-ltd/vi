@@ -64,7 +64,9 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
 
   // Filter logs
   const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
+    const safeLogs = Array.isArray(logs) ? logs : [];
+    return safeLogs.filter((log) => {
+      if (!log) return false;
       // Action Type filter
       if (selectedActionType !== 'all' && log.actionType !== selectedActionType) {
         return false;
@@ -106,11 +108,12 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
 
   // Statistics calculation
   const stats = useMemo(() => {
-    const total = logs.length;
-    const signatures = logs.filter(l => l.actionType === 'signature_created').length;
-    const downloads = logs.filter(l => l.actionType === 'document_downloaded').length;
-    const validations = logs.filter(l => l.actionType === 'milestone_validated').length;
-    const hashChecks = logs.filter(l => l.actionType === 'hash_verified' || l.actionType === 'document_viewed').length;
+    const safeLogs = Array.isArray(logs) ? logs : [];
+    const total = safeLogs.length;
+    const signatures = safeLogs.filter(l => l && l.actionType === 'signature_created').length;
+    const downloads = safeLogs.filter(l => l && l.actionType === 'document_downloaded').length;
+    const validations = safeLogs.filter(l => l && l.actionType === 'milestone_validated').length;
+    const hashChecks = safeLogs.filter(l => l && (l.actionType === 'hash_verified' || l.actionType === 'document_viewed')).length;
     return { total, signatures, downloads, validations, hashChecks };
   }, [logs]);
 
