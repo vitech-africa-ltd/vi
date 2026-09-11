@@ -414,3 +414,26 @@ export interface ClientDraftReport {
   status: 'draft' | 'submitted' | 'archived';
 }
 
+export interface GoogleAdsConfig {
+  // Google Ads (SEA, Suivi des Conversions & Retargeting)
+  adsConversionEnabled: boolean;
+  googleAdsId: string; // ex: "AW-11482938102"
+  conversionLabelInquiry: string; // ex: "eK9jCN-33IsZEPaK7_Iq"
+  conversionLabelBooking: string; // ex: "mR2vCL_81IsZEPaK7_Iq"
+  conversionLabelPurchase: string; // ex: "wP7xCK_42IsZEPaK7_Iq"
+  conversionLabelEstimate: string; // ex: "qZ5yDK_19IsZEPaK7_Iq"
+
+  // Google AdSense (Réseau Display & Monétisation de Contenu)
+  adSenseEnabled: boolean;
+  adSensePublisherId: string; // ex: "ca-pub-9876543210987654"
+  autoAdsEnabled: boolean;
+  blogBannerSlotId: string;
+  scriptsMarketplaceSlotId: string;
+  testMode: boolean; // Mode prévisualisation sécurisé
+  adsTxtCustom?: string;
+  updatedAt?: string;
+}
+
+export type AdsConversionEventType = 'inquiry' | 'booking' | 'purchase' | 'estimate' | 'custom';
+
+

@@ -21,6 +21,8 @@ import {
 import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { BlogPost } from '../types';
+import { GoogleAdBanner } from './common/GoogleAdBanner';
+
 
 export type TechCategoryKey = 'all' | 'Cloud' | 'AI' | 'Web' | 'Mobile';
 
@@ -456,8 +458,16 @@ export const TechBlogSection: React.FC = () => {
           </div>
         </div>
 
+        {/* GOOGLE ADSENSE / ADS LEADERBOARD BANNER */}
+        <GoogleAdBanner 
+          format="horizontal-leaderboard" 
+          label="Partenaire Solutions Cloud & IA • VITECH Network" 
+          className="mb-8" 
+        />
+
         {/* EMPTY STATE */}
         {filteredPosts.length === 0 && (
+
           <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center max-w-xl mx-auto my-8 space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto">
               <BookOpen className="w-6 h-6" />
@@ -666,10 +676,19 @@ export const TechBlogSection: React.FC = () => {
                 <p className="text-base text-slate-200 font-medium italic border-l-2 border-cyan-400 pl-4 py-1">
                   {selectedPost.excerpt}
                 </p>
-                <div className="pt-4 text-slate-300 space-y-4 whitespace-pre-line leading-relaxed">
+
+                {/* In-Article Google AdSense Banner */}
+                <GoogleAdBanner 
+                  format="in-article" 
+                  label="Contenu Sponsoring &amp; Partenaires Technologiques" 
+                  className="my-4" 
+                />
+
+                <div className="pt-2 text-slate-300 space-y-4 whitespace-pre-line leading-relaxed">
                   {selectedPost.content || selectedPost.excerpt}
                 </div>
               </div>
+
 
               {/* Tags in reader */}
               {selectedPost.tags && selectedPost.tags.length > 0 && (

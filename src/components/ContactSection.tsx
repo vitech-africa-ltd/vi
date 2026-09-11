@@ -18,6 +18,8 @@ import { useSiteData } from '../context/SiteDataContext';
 import { useTranslation } from '../context/LanguageContext';
 import { ContactFormData } from '../types';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { trackGoogleAdsConversion } from '../services/googleAdsService';
+
 import { useAuth } from '../context/AuthContext';
 
 interface ContactSectionProps {
@@ -131,6 +133,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ initialData }) =
         spread: 70,
         origin: { y: 0.7 },
       });
+
+      // Track Google Ads SEA Conversion
+      trackGoogleAdsConversion('inquiry', {
+        currency: 'EUR',
+        transactionId: `INQ-${Date.now()}`,
+      });
+
     } catch (err: any) {
       console.error('Submission error:', err);
       handleFirestoreError(err, OperationType.CREATE, 'inquiries');

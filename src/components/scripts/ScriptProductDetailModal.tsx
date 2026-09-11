@@ -50,6 +50,8 @@ import {
   downloadScriptInvoicePDF, 
   ScriptInvoiceData 
 } from '../../utils/scriptInvoiceGenerator';
+import { trackGoogleAdsConversion } from '../../services/googleAdsService';
+
 
 interface ScriptProductDetailModalProps {
   product: ScriptProduct | null;
@@ -177,7 +179,15 @@ export const ScriptProductDetailModal: React.FC<ScriptProductDetailModalProps> =
         spread: 75,
         origin: { y: 0.6 }
       });
+
+      // Track Google Ads SEA Purchase Conversion
+      trackGoogleAdsConversion('purchase', {
+        value: product.priceUSD,
+        currency: 'USD',
+        transactionId: result.orderReference || `ORD-${Date.now()}`,
+      });
     } catch (err) {
+
       console.error(err);
       setIsProcessingPayment(false);
       setPaymentStep('idle');

@@ -38,6 +38,8 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { useTranslation } from '../../context/LanguageContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useSiteData } from '../../context/SiteDataContext';
+import { GoogleAdBanner } from '../common/GoogleAdBanner';
+
 
 interface ScriptsMarketplaceProps {
   onNavigateMemberSpace: () => void;
@@ -800,7 +802,15 @@ export const ScriptsMarketplace: React.FC<ScriptsMarketplaceProps> = ({
           {/* ================= PRODUCT DISPLAY AREA ================= */}
           <main className="lg:col-span-9 space-y-6">
 
+            {/* Google Ads / AdSense Marketplace Banner */}
+            <GoogleAdBanner 
+              format="horizontal-leaderboard" 
+              label="Partenaire Solutions Développeurs &amp; Hébergement Cloud" 
+              className="mb-4" 
+            />
+
             {filteredProducts.length === 0 ? (
+
               <div className="py-20 text-center space-y-4 bg-slate-900/40 rounded-3xl border border-slate-800 p-8">
                 <Code2 className="w-12 h-12 text-slate-600 mx-auto" />
                 <div className="space-y-1">

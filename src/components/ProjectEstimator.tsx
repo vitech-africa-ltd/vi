@@ -31,6 +31,8 @@ import { useCurrency } from '../context/CurrencyContext';
 import { useTranslation } from '../context/LanguageContext';
 import { useCountry } from '../context/CountryContext';
 import { CountryQuoteModal } from './CountryQuoteModal';
+import { trackGoogleAdsConversion } from '../services/googleAdsService';
+
 
 interface ProjectEstimatorProps {
   initialServiceId?: string;
@@ -226,7 +228,17 @@ Donne une recommandation d'architecture senior concise (en 3 points clés clairs
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: 'smooth' });
     }
+
+    // Track Google Ads SEA Conversion (Estimate configured)
+    const convertedAverage = Math.round(convertFromEUR(averagePriceEUR));
+    trackGoogleAdsConversion('estimate', {
+      value: convertedAverage,
+      currency: currency || 'EUR',
+      transactionId: `EST-${Date.now()}`,
+    });
   };
+
+
 
   return (
     <section id="estimator" className="py-20 bg-slate-950 relative overflow-hidden text-white">

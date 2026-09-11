@@ -17,10 +17,12 @@ import {
   Testimonial, 
   OfficeHub, 
   AIAssistantConfig,
-  LiveAnnouncementConfig
+  LiveAnnouncementConfig,
+  GoogleAdsConfig
 } from '../types';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { DEFAULT_GOOGLE_ADS_CONFIG, initGoogleAdsScripts } from '../services/googleAdsService';
 
 export const DEFAULT_ANNOUNCEMENT: LiveAnnouncementConfig = {
   enabled: true,
@@ -44,6 +46,7 @@ interface SiteDataContextType {
   teamMembers: TeamMember[];
   scriptProducts: ScriptProduct[];
   liveAnnouncement: LiveAnnouncementConfig;
+  googleAdsConfig: GoogleAdsConfig;
   isLoading: boolean;
   isSaving: boolean;
   saveStatus: string | null;
@@ -54,6 +57,10 @@ interface SiteDataContextType {
   // AI Assistant CMS Config
   updateAiConfig: (data: Partial<AIAssistantConfig>) => Promise<boolean>;
   resetAiConfigToDefault: () => Promise<boolean>;
+
+  // Google Ads & AdSense Config
+  updateGoogleAdsConfig: (data: Partial<GoogleAdsConfig>) => Promise<boolean>;
+
 
   // Services
   addService: (service: ServiceItem) => Promise<boolean>;
@@ -148,6 +155,15 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [liveAnnouncement, setLiveAnnouncement] = useState<LiveAnnouncementConfig>(() =>
     getInitialCmsData('live_announcement', DEFAULT_ANNOUNCEMENT)
   );
+  const [googleAdsConfig, setGoogleAdsConfig] = useState<GoogleAdsConfig>(() =>
+    getInitialCmsData('google_ads_config', DEFAULT_GOOGLE_ADS_CONFIG)
+  );
+
+  // Initialize and inject scripts when googleAdsConfig changes
+  useEffect(() => {
+    initGoogleAdsScripts(googleAdsConfig);
+  }, [googleAdsConfig]);
+
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -174,6 +190,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (documentId === 'team_members' && Array.isArray(data)) setTeamMembers(data);
       if (documentId === 'script_products' && Array.isArray(data)) setScriptProducts(data);
       if (documentId === 'live_announcement') setLiveAnnouncement((prev) => ({ ...prev, ...data }));
+      if (documentId === 'google_ads_config') setGoogleAdsConfig((prev) => ({ ...prev, ...data }));
     };
 
     const handleStorageEvent = (e: StorageEvent) => {
@@ -190,7 +207,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (e.key === 'vitech_cms_team_members' && Array.isArray(parsed)) setTeamMembers(parsed);
         if (e.key === 'vitech_cms_script_products' && Array.isArray(parsed)) setScriptProducts(parsed);
         if (e.key === 'vitech_cms_live_announcement') setLiveAnnouncement((prev) => ({ ...prev, ...parsed }));
+        if (e.key === 'vitech_cms_google_ads_config') setGoogleAdsConfig((prev) => ({ ...prev, ...parsed }));
       } catch (err) {
+
         console.warn('Error syncing storage event:', err);
       }
     };
@@ -334,6 +353,20 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }
         }, (err) => console.warn('Live announcement listener:', err));
         unsubscribes.push(unsubAnn);
+
+        // Load Google Ads & AdSense Config
+        const adsRef = doc(db, 'site_content', 'google_ads_config');
+        const unsubAds = onSnapshot(adsRef, (snap) => {
+          if (snap.exists() && snap.data()?.data) {
+            const data = snap.data()?.data;
+            setGoogleAdsConfig((prev) => ({ ...prev, ...data }));
+            try { localStorage.setItem('vitech_cms_google_ads_config', JSON.stringify(data)); } catch (e) {}
+          } else if (!snap.exists()) {
+            setDoc(adsRef, { data: DEFAULT_GOOGLE_ADS_CONFIG, updatedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+          }
+        }, (err) => console.warn('Google ads listener:', err));
+        unsubscribes.push(unsubAds);
+
 
         setIsLoading(false);
       } catch (err) {
@@ -563,6 +596,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setTeamMembers(INITIAL_TEAM_MEMBERS);
     setScriptProducts(INITIAL_SCRIPTS);
     setLiveAnnouncement(DEFAULT_ANNOUNCEMENT);
+    setGoogleAdsConfig(DEFAULT_GOOGLE_ADS_CONFIG);
 
     await Promise.all([
       saveToFirestore('company_info', defaultCompanyInfo),
@@ -575,8 +609,21 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       saveToFirestore('team_members', INITIAL_TEAM_MEMBERS),
       saveToFirestore('script_products', INITIAL_SCRIPTS),
       saveToFirestore('live_announcement', DEFAULT_ANNOUNCEMENT),
+      saveToFirestore('google_ads_config', DEFAULT_GOOGLE_ADS_CONFIG),
     ]);
     return true;
+  };
+
+  // Google Ads & AdSense Config Actions
+  const updateGoogleAdsConfig = async (data: Partial<GoogleAdsConfig>) => {
+    const updated: GoogleAdsConfig = {
+      ...googleAdsConfig,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    setGoogleAdsConfig(updated);
+    initGoogleAdsScripts(updated);
+    return await saveToFirestore('google_ads_config', updated);
   };
 
   return (
@@ -592,13 +639,16 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         teamMembers: Array.isArray(teamMembers) && teamMembers.length > 0 ? teamMembers : INITIAL_TEAM_MEMBERS,
         scriptProducts: Array.isArray(scriptProducts) && scriptProducts.length > 0 ? scriptProducts : INITIAL_SCRIPTS,
         liveAnnouncement: liveAnnouncement || DEFAULT_ANNOUNCEMENT,
+        googleAdsConfig: googleAdsConfig || DEFAULT_GOOGLE_ADS_CONFIG,
         isLoading,
         isSaving,
         saveStatus,
         updateCompanyInfo,
         updateAiConfig,
         resetAiConfigToDefault,
+        updateGoogleAdsConfig,
         addService,
+
         updateService,
         deleteService,
         addCaseStudy,

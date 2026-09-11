@@ -69,6 +69,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { VitechLogo } from './VitechLogo';
 import { AiPromptConfigTab } from './admin/AiPromptConfigTab';
 import { AdminInvoicingTab } from './admin/AdminInvoicingTab';
+import { AdminGoogleAdsTab } from './admin/AdminGoogleAdsTab';
 import { DomainHostingAuditTab } from './admin/DomainHostingAuditTab';
 import { AdminSecurityTokenModal } from './admin/AdminSecurityTokenModal';
 import { AuditLogView } from './AuditLogView';
@@ -156,8 +157,10 @@ type AdminTab =
   | 'vault'
   | 'audit'
   | 'invoicing'
+  | 'google-ads'
   | 'notifications' 
   | 'security';
+
 
 export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { user, signInWithGoogle, signOut, isAuthenticated } = useAuth();
@@ -862,6 +865,24 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   </span>
                 )}
               </button>
+
+              <button
+                onClick={() => setActiveTab('google-ads')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === 'google-ads'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Megaphone className="w-4 h-4 text-blue-400" />
+                  <span>Google Ads &amp; AdSense</span>
+                </div>
+                <span className="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-1.5 py-0.5 rounded font-mono font-bold">
+                  SEA
+                </span>
+              </button>
+
 
               <button
                 onClick={() => setActiveTab('company')}
@@ -3512,6 +3533,12 @@ export const AdminPortal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {activeTab === 'invoicing' && (
             <AdminInvoicingTab />
           )}
+
+          {/* TAB: GOOGLE ADS & ADSENSE */}
+          {activeTab === 'google-ads' && (
+            <AdminGoogleAdsTab />
+          )}
+
 
         </main>
       </div>
